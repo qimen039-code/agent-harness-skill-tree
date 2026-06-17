@@ -1,6 +1,8 @@
-# Agent Harness Skill Tree
+# Agent Memory Lane Harness
 
-Agent Harness Skill Tree is a whiteboard framework for routing agent work through lightweight guardrails, project memory boundaries, claim checks, and paired improvement records.
+Agent Memory Lane Harness is a meta-first whiteboard framework for routing coding-agent work through project-scoped memory lanes, lightweight guardrails, claim checks, and paired improvement records.
+
+Formerly: Agent Harness Skill Tree.
 
 It is not tied to one agent runtime. It is a neutral starting point that can be mapped into any agent that can read workspace instructions, run local scripts, use command or skill folders, or call hooks before tools.
 

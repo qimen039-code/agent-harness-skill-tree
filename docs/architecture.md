@@ -1,6 +1,6 @@
 # Architecture
 
-Agent Harness Skill Tree has four layers.
+Agent Memory Lane Harness has four layers.
 
 ## 1. Root Microkernel
 
