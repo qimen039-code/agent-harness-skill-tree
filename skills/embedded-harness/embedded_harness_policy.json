@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "default_language": "user_preferred",
+  "ordinary_chat_default": ["microkernel_only"],
+  "risk_levels": {
+    "R0": "ordinary chat or stable knowledge answer",
+    "R1": "read-only local inspection",
+    "R2": "write durable notes, handoff docs, or artifacts",
+    "R3": "code, config, or governance change",
+    "R4": "experiment, build, performance, runtime, external research, or current factual claim",
+    "R5": "delete, commit, install, login, payment, permission, network/firewall/proxy edit, sensitive transfer, or long-term memory write"
+  },
+  "risk_order_high_to_low": ["R5", "R4", "R3", "R2", "R1"],
+  "risk_trigger_rules": {
+    "R5": ["delete", "remove", "Remove-Item", "git commit", "install", "login", "permission", "firewall", "proxy", "private value", "sensitive value", "long-term memory", "write memory", "payment"],
+    "R4": ["experiment", "benchmark", "performance", "GPU", "runtime", "network", "search the web", "latest", "current", "GitHub", "open source", "official", "price", "policy", "law", "release"],
+    "R3": ["modify", "update", "implement", "fix", "code", "config", "AGENTS", "harness", "script", "apply_patch", "patch", "edit"],
+    "R2": ["report", "handoff", "ledger", "archive", "document", "write file", "create file", "generate file"],
+    "R1": ["inspect", "check", "read", "local search", "read-only", "locate", "rg", "Get-Content"]
+  },
+  "risk_gate_rules": {
+    "R1": ["read_only_context_gate"],
+    "R2": ["artifact_boundary_gate", "claim_gate"],
+    "R3": ["project_context_gate", "change_contract_gate", "claim_gate"],
+    "R4": ["project_context_gate", "change_contract_gate", "external_research_gate", "verification_gate", "claim_gate"],
+    "R5": ["human_confirmation"]
+  },
+  "risk_approval_rules": {
+    "R5": ["high_risk_action"]
+  },
+  "fallback_boundary_triggers": ["task", "handle", "organize", "analyze", "project", "file", "problem", "issue", "bug", "error", "failure", "repo", "repository"],
+  "project_lanes": {
+    "EXAMPLE_PROJECT": ["C:\\path\\to\\project"]
+  },
+  "memory_roots": {
+    "EXAMPLE_PROJECT": ["C:\\path\\to\\project\\.agent-memory", "C:\\path\\to\\project\\memory-bank"],
+    "GLOBAL": ["C:\\path\\to\\agent-home\\memories"]
+  },
+  "global_memory_lane": {
+    "lane": "GLOBAL",
+    "auto_detect_from_cwd": false,
+    "rule": "GLOBAL memory is manual-only; do not infer it from cwd unless the user explicitly requests global memory work."
+  },
+  "approval_required_actions": ["delete_files", "git_commit", "install_package", "login", "payment", "permission_change", "network_firewall_proxy_edit", "sensitive_data_transfer", "long_term_memory_write"],
+  "external_research_triggers": ["today", "latest", "current", "version", "release", "GitHub", "repo", "open source", "official", "price", "law", "policy", "CEO", "president"],
+  "skill_matrix_triggers": ["skill matrix", "semantic anchor", "reflection", "self-improvement", "Computer Use", "Chrome", "network failure", "plugin"],
+  "blocked_claim_phrases_without_schema": ["validated", "verified successfully", "stable pass", "complete proof", "proven effective"],
+  "gate_enforcement_boundary": "These gates are advisory runtime checks. They return JSON status and nonzero exit codes for blocked states, but they do not enforce sandbox-level hard stops unless the caller honors them."
+}
+
+
