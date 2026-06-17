@@ -2,6 +2,8 @@
 
 Agent Memory Lane Harness is a meta-first whiteboard framework for routing coding-agent work through project-scoped memory lanes, lightweight guardrails, claim checks, and paired improvement records.
 
+Current version: `v0.2.0`
+
 Formerly: Agent Harness Skill Tree.
 
 It is not tied to one agent runtime. It is a neutral starting point that can be mapped into any agent that can read workspace instructions, run local scripts, use command or skill folders, or call hooks before tools.
@@ -10,6 +12,7 @@ It is not tied to one agent runtime. It is a neutral starting point that can be 
 
 - **Codex field use:** this framework has been used smoothly in a Codex-based workflow. After the root instruction file, harness policy, project registry, and skill tree are installed, new conversations can keep following the same routing chain instead of rediscovering the workflow from scratch.
 - **Independent project lanes:** separate projects can run separate local chains. With clear global routing boundaries, each project keeps its own instructions, memory roots, and progress records, which reduces silent memory bleed and cross-project contamination.
+- **Mandatory dynamic evaluation governance:** nontrivial tasks must run pre-evaluation, runtime re-evaluation on trigger events, and a final claim/memory/version boundary check.
 - **Meta-first memory retrieval:** memory lookup is not a direct file dive. The required chain is meta summary or `_META_INDEX`, then category or point index, then only the matching capsule or paired record.
 - **No continuous skill generation by default:** the framework does not keep creating new skills automatically. Too many self-generated skills can pollute project boundaries, weaken routing discipline, and make it unclear which rule owns a task. Reusable knowledge should instead be added to a clearly registered skill knowledge library, reference pack, or tool content pack, then routed explicitly.
 - **Sanitized whiteboard examples:** This public repository was sanitized before publication. Private records, local project details, machine paths, and real incident history from the original working setup are not included. The included examples are synthetic records used only to help agents and adopters understand how to adapt the framework: routing, layered memory indexes, project memory capsules, paired error/solution records, claim boundaries, and client-update drift handling.
@@ -34,6 +37,7 @@ This project gives those pieces a simple shared structure.
 user request
 -> root microkernel
 -> intake router R0-R5
+-> mandatory dynamic evaluation governance
 -> only needed gates
 -> project instructions and memory boundary
 -> execution
@@ -45,6 +49,7 @@ user request
 
 - **Root microkernel**: the small always-on rule set for language, evidence, risk, memory boundaries, and high-risk stops.
 - **Intake router**: deterministic R0-R5 task classification.
+- **Dynamic evaluation governance**: mandatory pre-evaluation, runtime re-evaluation, and final boundary check for skill/tool/plugin/search/memory/claim-gate decisions.
 - **Additive routing**: if a task matches more than one risk type, it keeps the highest risk label and returns the union of needed gates.
 - **Memory isolation gate**: prevents accidental cross-project memory use unless the user clearly asks for it.
 - **External research gate**: detects currentness signals such as latest, current, version, release, GitHub, and official sources.
@@ -59,7 +64,9 @@ user request
 ```text
 .
 ├── AGENTS.md
+├── CHANGELOG.md
 ├── PROJECT_SKILL_MATRIX_REGISTRY.md
+├── VERSION
 ├── docs/
 │   ├── adoption.md
 │   ├── architecture.md
@@ -107,6 +114,28 @@ small root rules
 ```
 
 New skills should be created only when they remove real repeated work and have a clear scope, owner, retrieval surface, and non-applicable boundary. Routine facts, solved incidents, examples, and reference notes can live in memory capsules or knowledge packs without becoming new active skills.
+
+## Mandatory Dynamic Evaluation Governance
+
+For nontrivial tasks, the framework requires three checkpoints:
+
+```text
+pre-evaluation
+-> execute the cheapest sufficient route
+-> runtime re-evaluation when trigger events appear
+-> final claim, memory, version, and verification boundary check
+```
+
+At each checkpoint, the agent must decide whether the task needs:
+
+- project instructions or project router;
+- memory retrieval and memory isolation;
+- an existing skill, tool, plugin, or adapter;
+- external research for current or drift-prone facts;
+- claim-schema or evidence-boundary checks;
+- human confirmation for high-risk actions.
+
+Runtime re-evaluation is required after new evidence, missing files, tool errors, scope changes, user corrections, cross-project terminology, version/currentness claims, cost escalation, or risk escalation. The governance layer is not a reason to load every skill or every memory file; it must choose the cheapest sufficient route. If the dynamic layer is skipped or cannot be completed, the final answer must say so and must not present the result as fully verified.
 
 ## Mandatory Meta-First Memory Lookup
 
@@ -179,6 +208,20 @@ See [docs/reproduction.md](docs/reproduction.md) for commands and expected resul
 - Keep the error and solution memory files empty until a real solved incident exists.
 - Add only user-confirmed semantic anchors.
 - Add wrapper or hook integration only after the basic scripts run in your environment.
+
+## Versioning
+
+Every public repository update should update:
+
+- `VERSION`
+- `CHANGELOG.md`
+- the `Current version` line in this README
+
+Use `vMAJOR.MINOR.PATCH` labels:
+
+- `PATCH`: wording, docs, examples, or small trigger-rule updates.
+- `MINOR`: new reusable templates, gates, adapters, or framework behaviors.
+- `MAJOR`: breaking changes to the framework layout, rule contract, or adoption surface.
 
 ## Limitations
 

@@ -26,6 +26,17 @@ The microkernel should stay short. Put project details elsewhere.
 
 The intake router classifies work into R0-R5 and returns required gates.
 
+Dynamic evaluation governance is mandatory around the router:
+
+```text
+pre-evaluation
+-> intake route and cheapest sufficient gate selection
+-> runtime re-evaluation when trigger events appear
+-> final claim, memory, version, and verification boundary check
+```
+
+The dynamic layer decides whether to use project instructions, a project router, memory retrieval, existing skills/tools/plugins, external research, claim checks, or human confirmation. It should not expand into every memory or every skill by default.
+
 ## 3. Skill Tree
 
 The skill tree has a router and three ledgers:

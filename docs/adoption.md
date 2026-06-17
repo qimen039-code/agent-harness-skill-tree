@@ -62,11 +62,29 @@ Stronger setups can run:
 - claim schema verifier before final strong claims;
 - high-risk checks before tool calls.
 
+Also make dynamic evaluation governance mandatory:
+
+1. Pre-evaluate task type, lane, risk, evidence, memory, skill/tool/plugin, external research, claim gate, and confirmation needs.
+2. Re-evaluate after new evidence, missing files, tool errors, scope changes, user corrections, cross-project terminology, currentness/version claims, or risk/cost escalation.
+3. Final-check claim scope, memory scope, version metadata, and unresolved verification debt.
+
+Do not make this expensive by default. The dynamic layer should choose the cheapest sufficient route.
+
 ## Step 5: Keep The Core Clean
 
 The whiteboard core should not contain private project content. Add project rules, real memory capsules, and solved incident records inside the adopting project only.
 
 Use the public demo records as shape examples only. They are synthetic and are not claims about your environment.
+
+## Step 6: Keep Versions In Sync
+
+When publishing changes to an adopted copy or fork, update the version metadata in the same change:
+
+- `VERSION`;
+- `CHANGELOG.md`;
+- any README line that displays the current version.
+
+Use `vMAJOR.MINOR.PATCH` labels. For early framework work, keep `MAJOR` at `0` until the layout and adoption contract are stable.
 
 ## Project Lane Isolation
 

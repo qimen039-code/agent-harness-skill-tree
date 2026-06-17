@@ -7,6 +7,7 @@ A compact index that routes the agent to project-specific skill matrix routers. 
 ```text
 root AGENTS.md
 -> embedded harness intake router
+-> mandatory dynamic evaluation governance
 -> this registry
 -> project router or project AGENTS
 -> memory meta summary, category index, and matching capsule only when needed
@@ -24,6 +25,20 @@ meta summary / _META_INDEX / router manifest
 ```
 
 Do not open deep memory files, all project notes, or all incident payloads before the meta/index layer has routed the request. If a project is still flat, treat its top-level index as the temporary meta layer and record that the project memory layout should be upgraded.
+
+## Mandatory Dynamic Evaluation Governance
+
+Nontrivial tasks must run dynamic evaluation before loading project-specific context, during execution when trigger events appear, and before final output.
+
+Required decisions:
+
+- task type and active lane;
+- current risk level and escalation triggers;
+- whether project instructions, a project router, memory retrieval, existing skills/tools/plugins, external research, claim gates, or human confirmation are needed.
+
+Runtime trigger events include new evidence, missing files, tool errors, scope changes, user corrections, cross-project terminology, currentness/version claims, cost escalation, and risk escalation.
+
+Use the cheapest sufficient route. Do not load all project memory, all skills, or all history just because this governance layer is active.
 
 ## Registered Routers
 

@@ -50,11 +50,43 @@
     ],
     "missing_meta_rule": "If no meta summary exists, use the smallest available top-level index or manifest as a temporary meta layer, mark the missing meta layer as an adaptation gap, and avoid broad memory/history scans."
   },
+  "dynamic_evaluation_governance": {
+    "mandatory": true,
+    "checkpoints": [
+      "pre_evaluation_before_work",
+      "runtime_re_evaluation_on_trigger",
+      "final_boundary_check_before_response"
+    ],
+    "must_decide": [
+      "task_type",
+      "project_lane",
+      "risk_level",
+      "evidence_need",
+      "skill_or_tool_need",
+      "plugin_need",
+      "external_research_need",
+      "memory_retrieval_need",
+      "claim_gate_need",
+      "human_confirmation_need"
+    ],
+    "runtime_triggers": [
+      "new_evidence",
+      "missing_file",
+      "tool_error",
+      "scope_change",
+      "user_correction",
+      "cross_project_term",
+      "currentness_or_version_claim",
+      "cost_or_risk_escalation",
+      "high_confidence_claim"
+    ],
+    "cost_rule": "Use the cheapest sufficient route; do not load all memory, all skills, or all history because the dynamic layer is active.",
+    "failure_rule": "If dynamic evaluation cannot be completed, mark the final answer as dynamically incomplete or unverified."
+  },
   "approval_required_actions": ["delete_files", "git_commit", "install_package", "login", "payment", "permission_change", "network_firewall_proxy_edit", "sensitive_data_transfer", "long_term_memory_write"],
   "external_research_triggers": ["today", "latest", "current", "version", "release", "GitHub", "repo", "open source", "official", "price", "law", "policy", "CEO", "president"],
   "skill_matrix_triggers": ["skill matrix", "semantic anchor", "reflection", "self-improvement", "Computer Use", "Chrome", "network failure", "plugin"],
   "blocked_claim_phrases_without_schema": ["validated", "verified successfully", "stable pass", "complete proof", "proven effective"],
   "gate_enforcement_boundary": "These gates are advisory runtime checks. They return JSON status and nonzero exit codes for blocked states, but they do not enforce sandbox-level hard stops unless the caller honors them."
 }
-
 

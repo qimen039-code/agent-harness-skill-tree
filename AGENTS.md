@@ -12,6 +12,25 @@ This is a generic foundation file. It does not contain project-specific policy, 
 4. Keep memory isolated by project. Cross-project memory use must be explicit.
 5. Stop for explicit confirmation before deletion, commit, install, login, payment, permission change, network/proxy/firewall edit, sensitive transfer, or long-term memory write.
 
+## Mandatory Dynamic Evaluation Governance
+
+For every nontrivial task, run this governance layer as a required chain:
+
+```text
+pre-evaluation
+-> execution with the cheapest sufficient route
+-> runtime re-evaluation on trigger events
+-> final claim/memory/version boundary check
+```
+
+Pre-evaluation must decide task type, active lane, risk level, evidence need, memory need, skill/tool/plugin need, external research need, claim-gate need, and human-confirmation need.
+
+Runtime re-evaluation is required after new evidence, missing files, tool errors, scope changes, user corrections, cross-project terminology, currentness/version claims, or risk/cost escalation.
+
+Final boundary check must verify claim scope, memory scope, unresolved verification debt, and whether version metadata or paired ERR/SOL records need updates.
+
+Do not load all skills, all memory, or all history just because this layer is active. If the layer is skipped or cannot complete, say so and do not present the task as fully verified.
+
 ## Mandatory Memory Retrieval Chain
 
 For any nontrivial memory lookup, read the meta layer first. Do not jump directly into deep memory files.
@@ -41,3 +60,13 @@ Mark uncertainty directly. Do not convert prep artifacts, mocks, weak signals, t
 ## Execution Standard
 
 Read actual files and current state before editing. Before modifying files, state the files you will touch. Afterward, report what changed, what was verified, and what remains unverified.
+
+## Versioning Standard
+
+For public repository updates, keep version metadata in sync:
+
+- update `VERSION`;
+- update `CHANGELOG.md`;
+- update any README line that displays the current version.
+
+Use `vMAJOR.MINOR.PATCH`. Patch releases cover wording, docs, examples, and small trigger-rule updates. Minor releases cover new reusable templates, gates, adapters, or framework behavior. Major releases cover breaking layout or rule-contract changes.

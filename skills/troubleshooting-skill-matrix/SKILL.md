@@ -37,6 +37,21 @@ request
 
 If no meta layer exists yet, use this router manifest and the compact point index as the temporary meta layer. Do not scan every point payload before choosing by retrieval surface.
 
+## Mandatory Dynamic Evaluation Governance
+
+Use this router under the required dynamic governance layer:
+
+```text
+pre-evaluation
+-> select the smallest needed router/skill/memory surface
+-> runtime re-evaluation after trigger events
+-> final claim/memory/version boundary check
+```
+
+Trigger events include new evidence, missing files, tool errors, scope changes, user corrections, cross-project terminology, currentness/version claims, and risk or cost escalation.
+
+Do not load every skill or memory record because this layer is active. If the layer is skipped or incomplete, the final result must say so.
+
 ## Recording Workflow
 
 ```text

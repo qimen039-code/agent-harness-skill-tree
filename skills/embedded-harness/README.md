@@ -7,6 +7,7 @@ Default chain:
 ```text
 root AGENTS.md microkernel
 -> deterministic intake router
+-> mandatory dynamic evaluation governance
 -> optional project router / project AGENTS / project memory
 -> memory meta summary / category index / matching capsule, if memory is needed
 -> optional executable project harness gates
@@ -19,8 +20,20 @@ Design boundaries:
 - `R4` includes `R3` change and claim gates, plus external research and verification gates.
 - If no deterministic risk rule matches but the text looks like a nontrivial task, the router sets `fallback_model_judgment_recommended=true` rather than silently treating it as high-confidence `R0`.
 - `GLOBAL` memory is manual-only by default.
+- Dynamic evaluation governance is mandatory for nontrivial tasks: pre-evaluate at intake, re-evaluate on trigger events during execution, and re-check claim/memory/version boundaries before final output.
 - Memory retrieval is meta-first: read `_META_INDEX.md`, a memory summary, or a router manifest before opening category indexes or capsule payloads.
 - These scripts are advisory runtime checks, not sandbox-level hard enforcement.
+
+Mandatory dynamic evaluation governance:
+
+```text
+pre-evaluation
+-> execute the cheapest sufficient route
+-> re-evaluate after new evidence, missing files, tool errors, scope changes, currentness/version claims, or cross-project signals
+-> final claim/memory/version boundary check
+```
+
+If this governance layer cannot be completed, the final response must say so and must not present the result as fully verified.
 
 Mandatory memory retrieval chain:
 
