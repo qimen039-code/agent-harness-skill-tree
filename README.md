@@ -2,7 +2,7 @@
 
 Stop your coding agent from calling weak evidence "validated." Agent Memory Lane Harness adds deterministic routing, memory isolation, and claim checks to coding-agent workflows.
 
-Current version: `v0.13.1`
+Current version: `v0.14.0`
 
 Formerly: Agent Harness Skill Tree.
 
@@ -34,6 +34,8 @@ flowchart TD
 - **Mandatory advisory control plane:** nontrivial tasks must create a lightweight routing receipt, re-evaluate only on trigger events, and final-check claim/memory/search boundaries without wrapping every tool call.
 - **Receipt profiles:** the router computes the full decision internally but can expose a compact runtime receipt by default, expanding only for governance, public/private, projectization, memory-write, or debug cases.
 - **Router decision contract:** the router and dynamic decision layer use a compact receipt to decide target surface, audience, ambiguity, module need, memory need, external need, and claim risk before opening deeper context.
+- **Declarative governance contract:** adapters can declare the minimum stages, receipt fields, denial semantics, payload safety boundary, and cost profile they must honor without adding a heavy runtime framework.
+- **Version compatibility manifest:** adapters can record the exact runtime version, hook schema, wrapper paths, denial behavior, payload-safety checks, bypass surfaces, and drift policy that were actually checked.
 - **Memory routing contract:** the router decides whether memory should be skipped, read, written, or updated; it also decides the lane before opening memory payloads.
 - **Conversation memory lane:** long-running projectless conversations can get their own isolated memory lane when explicitly requested or when checkpoint signals accumulate. This prevents context-compression loss without mixing the conversation into project or global memory.
 - **Cost control contract:** complete governance stays available internally, but the default path emits the smallest action-relevant receipt and uses delta receipts after trigger events.
@@ -46,6 +48,7 @@ flowchart TD
 - **Meta-first memory retrieval:** memory lookup is not a direct file dive. The required chain is meta summary or `_META_INDEX`, then category or point index, then only the matching capsule or paired record.
 - **Multi-axis memory meta index:** memory libraries should expose lane, scope, category, record type, status, retrieval terms, applicability, linked modules, linked records, and staleness markers so agents can select one payload instead of scanning history.
 - **No continuous skill generation by default:** the framework does not keep creating new skills automatically. Too many self-generated skills can pollute project boundaries, weaken routing discipline, and make it unclear which rule owns a task. Reusable knowledge should instead be added to a clearly registered skill knowledge library, reference pack, or tool content pack, then routed explicitly.
+- **Leverage-first improvement rule:** external mechanisms are absorbed only when they reduce ambiguity, improve adapter verification, or close a real deployment gap. They must not increase ordinary-task cost, load all skills or memory by default, or turn the whiteboard core into a large runtime.
 - **External optimizer boundary:** SkillOpt-style mechanisms are treated as adapted rules unless executable adoption is explicitly approved. Public benchmark claims remain source-prior until locally validated.
 - **Sanitized whiteboard examples:** This public repository was sanitized before publication. Private records, local project details, machine paths, and real incident history from the original working setup are not included. The included examples are synthetic records used only to help agents and adopters understand how to adapt the framework: routing, layered memory indexes, project memory capsules, paired error/solution records, claim boundaries, and client-update drift handling.
 - **Reference adapters are early:** the main scripts are PowerShell, and the four core gates also have Bash counterparts under `skills/embedded-harness/bash`. Bash scripts require `jq`. The repository also includes an experimental WorkBuddy-oriented Python runtime adapter under `integrations/workbuddy-python-runtime`. These adapters have not been fully tested across devices, operating systems, client versions, or real production loops; they are reference starting points.
@@ -90,6 +93,9 @@ user request
 - **Mandatory advisory control plane**: routing receipt, event-triggered dynamic review, and final boundary checks for skill/tool/plugin/search/memory/claim-gate decisions.
 - **Receipt profile selector**: `compact_runtime` for low-cost single-agent operation, `extended_governance` for public/framework/project-boundary work, and `debug_receipt` for router diagnosis.
 - **Router decision contract**: a stable low-cost receipt for target surface, audience, semantic ambiguity, module selection, memory route, external route, claim risk, and gates.
+- **Declarative governance contract**: a compact adapter contract for stages, decision vocabulary, denial semantics, payload safety, and cost boundaries.
+- **Version compatibility manifest**: a compact record of runtime/client version, hook schema, wrapper paths, tested denial behavior, bypass surfaces, and drift response.
+- **Lightweight CI smoke workflow**: a single GitHub Actions workflow for representative reproduction checks and WorkBuddy Python adapter tests, not a full compatibility matrix.
 - **Governance/routing update handling**: framework-rule, trigger-term, routing-rule, decision-matrix, and dynamic-evaluation edits are treated as R3 changes even when they are documentation-only.
 - **Selective runtime enforcer scripts**: hook, wrapper, and tool-proxy entry points that return nonzero only at configured hard-stop boundaries when called by the adopting runtime. They are truly mandatory only when they are the sole execution path for the relevant agent action. The WorkBuddy Python adapter includes a hook runner for `UserPromptSubmit` and `PreToolUse`.
 - **Search and learning decision matrix**: routes public facts, GitHub repository evidence, general web cross-checks, external mechanism intake, and local validation boundaries.
@@ -115,10 +121,15 @@ user request
 +-- CHANGELOG.md
 +-- PROJECT_SKILL_MATRIX_REGISTRY.md
 +-- VERSION
++-- .github/
+|   +-- workflows/
+|       +-- smoke.yml
 +-- docs/
 |   +-- adoption.md
 |   +-- architecture.md
 |   +-- examples.md
+|   +-- declarative-governance-contract.md
+|   +-- version-compatibility-management.md
 |   +-- integrations/
 |   +-- memory-meta-index-contract.md
 |   +-- memory-routing-contract.md
@@ -149,6 +160,7 @@ user request
 |   +-- skillopt-training-layer/
 |   +-- troubleshooting-skill-matrix/
 +-- templates/
+    +-- adapter-contract/
     +-- common-error-corpus/
     +-- conversation-memory/
     +-- global-memory-archive/
@@ -274,6 +286,8 @@ The package includes synthetic examples that show the intended record shapes wit
 - [examples/memory-capsule-examples.md](examples/memory-capsule-examples.md): project memory capsule, paired error/solution records, claim boundary record, and client-update drift record.
 - [examples/memory-library-demo/_META_INDEX.md](examples/memory-library-demo/_META_INDEX.md): layered memory library demo using meta index, category indexes, capsule status, and supersession.
 - [docs/router-decision-contract.md](docs/router-decision-contract.md): router and dynamic decision receipt contract.
+- [docs/declarative-governance-contract.md](docs/declarative-governance-contract.md): small adapter governance contract for stages, denial semantics, payload safety, and cost boundaries.
+- [docs/version-compatibility-management.md](docs/version-compatibility-management.md): runtime/client compatibility manifest and drift response rules.
 - [docs/memory-routing-contract.md](docs/memory-routing-contract.md): memory mode, memory lane, record intent, and projectization drift contract.
 - [docs/memory-meta-index-contract.md](docs/memory-meta-index-contract.md): multi-axis meta index contract for memory libraries.
 - [docs/common-error-corpus.md](docs/common-error-corpus.md): lightweight common-error sample format.

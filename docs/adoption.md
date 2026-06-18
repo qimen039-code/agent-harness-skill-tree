@@ -84,6 +84,17 @@ Do not make this expensive by default. The control plane should choose the cheap
 
 Use [router-decision-contract.md](router-decision-contract.md) as the field contract for router and dynamic-decision adapters. The contract can be implicit for obvious low-risk work, but should be explicit for R3 or higher work, public-facing changes, memory writes, high-risk actions, and audited decisions.
 
+When adapting the harness into a concrete runtime, use [declarative-governance-contract.md](declarative-governance-contract.md) and `templates/adapter-contract/governance.contract.json` to declare the minimum adapter promises:
+
+- which stages exist;
+- which stage provides active routing before planning;
+- which stage can block protected tool execution;
+- which denial schema and exit code the host must honor;
+- which payload-safety guarantees exist;
+- which receipt profile is the default.
+
+Keep this contract small. It should not cause ordinary R0/R1 work to load all memory, all skill files, all tool schemas, or all external sources.
+
 Use [memory-routing-contract.md](memory-routing-contract.md) when wiring memory writes. Start with common error corpus records for small reusable mistakes, including the applied solution and validation, and upgrade to paired ERR/SOL records only when the issue is explicit, high-impact, or repeated.
 
 For selective runtime hard stops, route only critical boundaries through these entry points:
@@ -116,6 +127,8 @@ For Bash environments, use the scripts under `skills/embedded-harness/bash`. The
 For hosts that own an in-process Python agent loop, `integrations/workbuddy-python-runtime` is a small reference adapter. It reuses the same policy file and exposes Python functions for routing, memory isolation, claim checks, and runtime enforcement decisions. It is not automatically wired into WorkBuddy or any other client. Hard enforcement requires the host to call the function before action execution and to stop on `status: blocked`.
 
 Adapter validation is local by default. Do not claim PowerShell, Bash/macOS/Linux, or WorkBuddy Python compatibility until you have run the relevant smoke checks on the target device and client version.
+
+For runtime/client compatibility, maintain a small manifest using [version-compatibility-management.md](version-compatibility-management.md) and `templates/adapter-contract/compatibility.manifest.json`. Refresh it only after adapter install, client update, hook or wrapper edits, failed smoke tests, or explicit user request.
 
 Before calling a deployment "hard enforced", check the broader deployment failure modes in [deployment-risk-patterns.md](deployment-risk-patterns.md). The most important rule is simple: a gate blocks only the execution path that actually invokes it and honors its blocked result.
 

@@ -4,6 +4,15 @@ All notable public changes should be recorded here.
 
 This project uses `vMAJOR.MINOR.PATCH` version labels while the framework is still early-stage.
 
+## v0.14.0 - 2026-06-18
+
+- Added a lightweight declarative governance contract for adapter stage support, decision vocabulary, denial semantics, payload safety, and cost boundaries.
+- Added a version compatibility management guide for runtime/client version drift, hook schema drift, wrapper-path drift, tested denial behavior, bypass surfaces, and opt-in repair boundaries.
+- Added compact JSON templates for `governance.contract.json` and `compatibility.manifest.json` under `templates/adapter-contract/`.
+- Added a lightweight GitHub Actions smoke workflow that runs representative reproduction checks and the WorkBuddy Python adapter tests on push, pull request, or manual dispatch.
+- Documented the leverage-first improvement rule: absorb external mechanisms only when they reduce ambiguity, improve adapter verification, or close a real deployment gap without increasing ordinary-task cost.
+- Linked the new contract and manifest into the architecture, adoption guide, deployment risk guide, and README.
+
 ## v0.13.1 - 2026-06-18
 
 - Fixed the WorkBuddy Python hook runner so stdin JSON containing lone UTF-16 surrogate escapes is sanitized before routing, state writes, log writes, or hook output.

@@ -4,6 +4,15 @@ Run these commands from the repository root.
 
 These checks are smoke tests for the reference package, not a full compatibility matrix. The current public package was adapted and checked from one local device environment. Re-run the relevant commands on the exact Windows, macOS/Linux, WorkBuddy, Codex, Claude Code, or other agent runtime you plan to use.
 
+## GitHub Actions Smoke Workflow
+
+`.github/workflows/smoke.yml` runs a lightweight subset of these checks on push, pull request, and manual dispatch:
+
+- PowerShell policy, router, memory isolation, external research, runtime, tool-proxy, conversation-memory, and claim-gate smoke checks;
+- WorkBuddy Python adapter unit tests.
+
+The workflow is intentionally not a full OS/runtime compatibility matrix. It is a low-cost guard that checks the reference package still runs and returns expected gate decisions.
+
 ## 0. Policy Validator
 
 ```powershell

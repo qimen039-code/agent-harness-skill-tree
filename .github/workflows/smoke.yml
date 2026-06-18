@@ -1,0 +1,182 @@
+name: Smoke checks
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Reference smoke checks
+    runs-on: windows-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run PowerShell harness smoke checks
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          if (Get-Variable PSNativeCommandUseErrorActionPreference -ErrorAction SilentlyContinue) {
+            $PSNativeCommandUseErrorActionPreference = $false
+          }
+
+          function Invoke-HarnessJson {
+            param(
+              [Parameter(Mandatory = $true)][string] $ScriptPath,
+              [string[]] $Arguments = @(),
+              [int[]] $AllowedExitCodes = @(0)
+            )
+
+            $output = & powershell -NoProfile -ExecutionPolicy Bypass -File $ScriptPath @Arguments 2>&1
+            $code = if ($null -eq $LASTEXITCODE) { 0 } else { $LASTEXITCODE }
+            $text = ($output | Out-String).Trim()
+
+            if ($AllowedExitCodes -notcontains $code) {
+              throw "Unexpected exit code $code from $ScriptPath. Output: $text"
+            }
+            if (-not $text) {
+              throw "No JSON output from $ScriptPath"
+            }
+
+            try {
+              $json = $text | ConvertFrom-Json -ErrorAction Stop
+            } catch {
+              throw "Invalid JSON from $ScriptPath. Output: $text"
+            }
+
+            [pscustomobject]@{
+              ExitCode = $code
+              Json = $json
+            }
+          }
+
+          function Assert-Equal {
+            param($Actual, $Expected, [string] $Label)
+            if ($Actual -ne $Expected) {
+              throw "$Label expected '$Expected' but got '$Actual'"
+            }
+          }
+
+          function Assert-True {
+            param([bool] $Condition, [string] $Label)
+            if (-not $Condition) {
+              throw "Assertion failed: $Label"
+            }
+          }
+
+          function Assert-Contains {
+            param($Collection, $Expected, [string] $Label)
+            if (@($Collection) -notcontains $Expected) {
+              throw "$Label expected to contain '$Expected' but got '$(@($Collection) -join ', ')'"
+            }
+          }
+
+          $policy = Invoke-HarnessJson -ScriptPath ".\skills\embedded-harness\validate_policy.ps1"
+          Assert-Equal $policy.Json.status "pass" "policy validator status"
+
+          $route = Invoke-HarnessJson `
+            -ScriptPath ".\skills\embedded-harness\harness_intake_router.ps1" `
+            -Arguments @("-TaskText", "fix the script and run benchmark", "-Cwd", "C:\path\to\project")
+          Assert-Equal $route.Json.project_lane "EXAMPLE_PROJECT" "router project lane"
+          Assert-Equal $route.Json.risk_level "R4" "router risk level"
+          Assert-Contains $route.Json.triggered_risks "R4" "router triggered risks"
+          Assert-Contains $route.Json.triggered_risks "R3" "router triggered risks"
+          Assert-Contains $route.Json.required_gates "verification_gate" "router required gates"
+          Assert-Contains $route.Json.required_gates "claim_gate" "router required gates"
+
+          $fallback = Invoke-HarnessJson `
+            -ScriptPath ".\skills\embedded-harness\harness_intake_router.ps1" `
+            -Arguments @("-TaskText", "handle this project issue", "-Cwd", "C:\path\to\other")
+          Assert-Equal $fallback.Json.classification_confidence "low" "fallback confidence"
+          Assert-True ([bool]$fallback.Json.fallback_model_judgment_recommended) "fallback judgment recommendation"
+
+          $memoryPass = Invoke-HarnessJson `
+            -ScriptPath ".\skills\embedded-harness\harness_memory_isolation_gate.ps1" `
+            -Arguments @("-ProjectLane", "EXAMPLE_PROJECT", "-RequestedPath", "C:\path\to\project\.agent-memory\note.md")
+          Assert-Equal $memoryPass.Json.status "pass" "memory isolation pass"
+
+          $memoryBlock = Invoke-HarnessJson `
+            -ScriptPath ".\skills\embedded-harness\harness_memory_isolation_gate.ps1" `
+            -Arguments @("-ProjectLane", "EXAMPLE_PROJECT", "-RequestedPath", "C:\path\to\project-evil\.agent-memory\note.md") `
+            -AllowedExitCodes @(2)
+          Assert-Equal $memoryBlock.Json.status "blocked" "memory prefix block"
+
+          $negatedDelete = Invoke-HarnessJson `
+            -ScriptPath ".\skills\embedded-harness\harness_intake_router.ps1" `
+            -Arguments @("-TaskText", "do not delete anything", "-Cwd", "C:\path\to\other")
+          Assert-True ($negatedDelete.Json.risk_level -ne "R5") "negated delete should not route as R5"
+          Assert-Contains $negatedDelete.Json.negated_risk_triggers.R5 "delete" "negated R5 triggers"
+
+          $research = Invoke-HarnessJson `
+            -ScriptPath ".\skills\embedded-harness\harness_external_research_gate.ps1" `
+            -Arguments @("-TaskText", "check latest package version 1.2.3 on GitHub")
+          Assert-True ([bool]$research.Json.needs_external_research) "external research should trigger"
+          Assert-Contains $research.Json.recommended_search_modes "github_open_source_repository_search" "external search modes"
+          Assert-Contains $research.Json.recommended_search_modes "official_authority_source_search" "external search modes"
+
+          $researchNegated = Invoke-HarnessJson `
+            -ScriptPath ".\skills\embedded-harness\harness_external_research_gate.ps1" `
+            -Arguments @("-TaskText", "do not search GitHub")
+          Assert-True (-not [bool]$researchNegated.Json.needs_external_research) "negated external research should not trigger"
+          Assert-Contains $researchNegated.Json.negated_triggers "GitHub" "negated external triggers"
+
+          $learning = Invoke-HarnessJson `
+            -ScriptPath ".\skills\embedded-harness\harness_external_research_gate.ps1" `
+            -Arguments @("-TaskText", "learn from an open source mechanism and avoid closed-door invention")
+          Assert-True ([bool]$learning.Json.needs_external_research) "source-grounded learning should trigger"
+          Assert-Contains $learning.Json.recommended_search_modes "source_grounded_learning_intake" "learning search modes"
+
+          $localArchitecture = Invoke-HarnessJson `
+            -ScriptPath ".\skills\embedded-harness\harness_intake_router.ps1" `
+            -Arguments @("-TaskText", "update the local architecture chain and optimize routing logic", "-Cwd", (Get-Location).Path)
+          Assert-Equal $localArchitecture.Json.risk_level "R3" "local architecture route risk"
+          Assert-True (-not [bool]$localArchitecture.Json.needs_external_research) "local architecture maintenance should not force external research"
+
+          $runtimePass = Invoke-HarnessJson `
+            -ScriptPath ".\skills\embedded-harness\harness_runtime_enforcer.ps1" `
+            -Arguments @("-Stage", "pre_task", "-TaskText", "inspect project files", "-Cwd", (Get-Location).Path)
+          Assert-Equal $runtimePass.Json.status "pass" "runtime enforcer pass"
+
+          $toolInputJson = @{ command = "git commit -am update" } | ConvertTo-Json -Compress
+          $toolBlock = Invoke-HarnessJson `
+            -ScriptPath ".\skills\embedded-harness\harness_tool_proxy.ps1" `
+            -Arguments @("-Stage", "pre_tool", "-TaskText", "commit changes", "-ToolName", "shell_command", "-ToolInputJson", $toolInputJson, "-Cwd", (Get-Location).Path) `
+            -AllowedExitCodes @(2)
+          Assert-Equal $toolBlock.Json.status "blocked" "tool proxy block"
+
+          $conversationMemory = Invoke-HarnessJson `
+            -ScriptPath ".\skills\embedded-harness\harness_intake_router.ps1" `
+            -Arguments @("-TaskText", "checkpoint this conversation so we can continue this conversation later", "-Cwd", "C:\path\to\other")
+          Assert-Equal $conversationMemory.Json.conversation_memory_decision "create_or_update_current_conversation" "conversation memory decision"
+          Assert-Equal $conversationMemory.Json.memory_lane "current_conversation" "conversation memory lane"
+
+          $claimJson = @{
+            claim_type = "architecture_decision"
+            source_type = "local_file"
+            evidence_boundary = "whiteboard smoke"
+          } | ConvertTo-Json -Compress
+          $tempRoot = if ($env:RUNNER_TEMP) { $env:RUNNER_TEMP } else { [System.IO.Path]::GetTempPath() }
+          $claimFile = Join-Path $tempRoot "agent-memory-lane-claim-smoke.json"
+          Set-Content -LiteralPath $claimFile -Value $claimJson -Encoding UTF8
+          $claim = Invoke-HarnessJson `
+            -ScriptPath ".\skills\embedded-harness\harness_claim_schema_verifier.ps1" `
+            -Arguments @("-ClaimFile", $claimFile)
+          Assert-Equal $claim.Json.status "pass" "claim verifier pass"
+
+      - name: Run WorkBuddy Python adapter tests
+        run: python -m unittest discover -s integrations/workbuddy-python-runtime/tests

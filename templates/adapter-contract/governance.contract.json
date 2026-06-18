@@ -1,0 +1,97 @@
+{
+  "schema_version": "0.1",
+  "contract_type": "agent_memory_lane_governance_contract",
+  "contract_name": "example-runtime-governance",
+  "cost_boundary": {
+    "default_profile": "compact_runtime",
+    "expand_only_for": [
+      "R5",
+      "public_or_framework_change",
+      "memory_write",
+      "low_confidence_route",
+      "external_current_fact",
+      "final_strong_claim",
+      "debug_request"
+    ],
+    "do_not_load_by_default": [
+      "full_memory_history",
+      "all_skills",
+      "all_tool_schemas",
+      "all_external_sources"
+    ]
+  },
+  "stages": {
+    "prompt_stage": {
+      "purpose": "active routing before planning",
+      "required_for": [
+        "nontrivial_task",
+        "memory_search_claim_decision",
+        "adapter_route_context"
+      ],
+      "expected_outputs": [
+        "compact_receipt"
+      ],
+      "minimum_fields": [
+        "task_type",
+        "project_lane",
+        "risk_level",
+        "required_gates",
+        "external_search_need",
+        "memory_need",
+        "claim_gate_need",
+        "human_confirmation_need"
+      ]
+    },
+    "pre_tool": {
+      "purpose": "selective hard gate before protected tool execution",
+      "required_for": [
+        "R5",
+        "high_risk_tool",
+        "memory_write",
+        "installation_or_permission_change"
+      ],
+      "decisions": [
+        "allow",
+        "warn",
+        "require_approval",
+        "deny"
+      ]
+    },
+    "final_claim": {
+      "purpose": "strong claim boundary before final answer",
+      "required_for": [
+        "validated_or_verified_claim",
+        "external_fact_claim",
+        "performance_or_experiment_claim"
+      ],
+      "decisions": [
+        "allow",
+        "warn",
+        "deny"
+      ]
+    }
+  },
+  "denial_semantics": {
+    "denial_payload_schema": "adapter_specific",
+    "blocked_exit_code": 2,
+    "host_honors_denial": "unverified",
+    "bypass_surfaces": []
+  },
+  "payload_safety": {
+    "sanitize_lone_utf16_surrogates": true,
+    "ascii_safe_hook_output": true,
+    "publish_raw_payloads": false
+  },
+  "source_prior_references": [
+    {
+      "name": "LanNguyenSi/harness",
+      "url": "https://github.com/LanNguyenSi/harness",
+      "used_for": "declarative control plane and action-aware risk gate vocabulary"
+    },
+    {
+      "name": "ChatBotKit template-node-agent-cli-js",
+      "url": "https://github.com/chatbotkit/template-node-agent-cli-js",
+      "used_for": "tool schema and structured CLI output inspiration"
+    }
+  ]
+}

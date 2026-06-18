@@ -1,0 +1,77 @@
+{
+  "schema_version": "0.1",
+  "manifest_type": "agent_memory_lane_compatibility_manifest",
+  "harness_version": "v0.14.0",
+  "adapter": {
+    "name": "example-adapter",
+    "version": "unverified",
+    "checked_at": "YYYY-MM-DDTHH:MM:SSZ"
+  },
+  "runtime": {
+    "name": "example-agent-runtime",
+    "version": "unverified",
+    "platform": "unverified",
+    "client_update_sensitive": true
+  },
+  "instruction_entry": {
+    "path_or_setting": "unverified",
+    "loaded_by_runtime": "unverified",
+    "last_checked": "unverified"
+  },
+  "hook_schema": {
+    "prompt_stage": {
+      "event_name": "unverified",
+      "supported": "unverified",
+      "injects_route_context": "unverified"
+    },
+    "pre_tool": {
+      "event_name": "unverified",
+      "supported": "unverified",
+      "denial_payload_schema": "unverified",
+      "blocked_exit_code": 2,
+      "host_honors_denial": "unverified"
+    },
+    "final_claim": {
+      "event_name": "unverified",
+      "supported": "unverified"
+    }
+  },
+  "wrappers": {
+    "python": {
+      "path": "unverified",
+      "available": "unverified"
+    },
+    "powershell": {
+      "path": "unverified",
+      "available": "unverified"
+    },
+    "bash": {
+      "path": "unverified",
+      "available": "unverified"
+    },
+    "cmd": {
+      "path": "unverified",
+      "available": "unverified"
+    }
+  },
+  "payload_safety": {
+    "surrogate_payload_replay": "unverified",
+    "ascii_safe_hook_output": "unverified",
+    "log_write_sanitizes_payload": "unverified"
+  },
+  "minimum_acceptance": {
+    "active_routing_before_planning": "unverified",
+    "allowed_action_passes": "unverified",
+    "blocked_action_stops_before_execution": "unverified",
+    "surrogate_payload_safe": "unverified",
+    "decision_log_written": "unverified",
+    "version_drift_check": "unverified"
+  },
+  "bypass_surfaces": [],
+  "drift_policy": {
+    "refresh_on_client_update": true,
+    "refresh_on_hook_or_wrapper_edit": true,
+    "refresh_on_failed_smoke_test": true,
+    "automatic_repair_requires_user_confirmation": true
+  }
+}

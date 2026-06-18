@@ -78,6 +78,51 @@ This mirrors a common systems pattern: keep the policy decision point complete, 
 
 See [router-decision-contract.md](router-decision-contract.md).
 
+## Declarative Governance Contract
+
+Adapters can publish a small governance contract that declares which stages they support and what each stage must honor:
+
+```text
+prompt_stage
+pre_tool
+memory_access
+external_research
+final_claim
+```
+
+The contract is not a new runtime layer. It is a leverage point that lets adopters check the minimum adapter promises without loading every skill, memory file, or tool schema.
+
+The contract should cover:
+
+- stage support;
+- decision vocabulary: `allow`, `warn`, `require_approval`, `deny`;
+- minimum receipt fields;
+- denial payload and blocked exit code;
+- payload safety;
+- cost profile.
+
+See [declarative-governance-contract.md](declarative-governance-contract.md) and `templates/adapter-contract/governance.contract.json`.
+
+## Version Compatibility Manifest
+
+Adapters can also publish a compact compatibility manifest for the target runtime/client version. It records what was checked, not what is assumed.
+
+The manifest should cover:
+
+- runtime and adapter versions;
+- instruction entry;
+- hook schema;
+- wrapper paths and language availability;
+- denial behavior;
+- payload safety checks;
+- minimum acceptance results;
+- bypass surfaces;
+- drift policy.
+
+Do not refresh this manifest every turn. Refresh it on adapter install, client update, hook/wrapper edits, failed smoke tests, or explicit user request.
+
+See [version-compatibility-management.md](version-compatibility-management.md) and `templates/adapter-contract/compatibility.manifest.json`.
+
 ## Memory Routing Contract
 
 Memory use has its own routed decision:

@@ -1,0 +1,99 @@
+# Version Compatibility Management
+
+Agent clients change. A working harness adapter can stop working after a client update because the hook name, payload schema, executable path, bundled runtime, or settings file moved.
+
+The compatibility manifest records the current adapter/runtime relationship so adopters can re-check it cheaply.
+
+It should stay compact. The manifest records the minimum facts needed to decide whether the adapter is still safe to trust after drift. It is not a full runtime inventory and should not trigger broad memory, source, or tool scans by default.
+
+## Purpose
+
+Use the compatibility manifest to answer:
+
+- which agent/runtime version was checked;
+- which instruction entry is loaded;
+- which hook events exist;
+- which wrapper paths and language runtimes are available;
+- which denial schema and exit code are expected;
+- which smoke tests were last run;
+- which surfaces are known bypasses.
+
+The public template is:
+
+```text
+templates/adapter-contract/compatibility.manifest.json
+```
+
+## Compatibility Is Evidence, Not Assertion
+
+Do not write:
+
+```text
+WorkBuddy supported
+Claude Code supported
+Codex supported
+```
+
+Write:
+
+```text
+runtime name
+runtime version checked
+adapter version checked
+hook schema observed
+wrapper path observed
+last smoke test result
+known untested surfaces
+```
+
+If a field is not checked, mark it `unverified`. Do not infer compatibility from another runtime.
+
+## Manifest Sections
+
+| Section | Meaning |
+| --- | --- |
+| `runtime` | Product/client name, version, platform, and checked date. |
+| `instruction_entry` | File or setting the agent actually reads for root rules. |
+| `hook_schema` | Event names, payload fields, denial payload, and blocked exit code. |
+| `wrappers` | Python, PowerShell, Bash, cmd, or other wrapper entry points and their verification status. |
+| `payload_safety` | Encoding, sanitation, and logging assumptions. |
+| `acceptance_tests` | Last result for active routing, denial, payload safety, log writing, and version drift. |
+| `bypass_surfaces` | Tool paths or background actions that are not covered by the adapter. |
+| `drift_policy` | What to do after client updates or adapter changes. |
+
+## Update Triggers
+
+Refresh the manifest when any of these change:
+
+- agent client version;
+- adapter version;
+- hook settings path;
+- hook event name or payload schema;
+- Python, PowerShell, Bash, Node, or shell path;
+- instruction entry filename;
+- denial payload or exit code behavior;
+- memory root or project-lane root;
+- operating system or shell.
+
+Do not refresh the manifest on every turn. Refresh it only on adapter install, agent client update, wrapper/hook edits, failed smoke tests, or explicit user request.
+
+## Drift Response
+
+Use this response order:
+
+1. Re-read the manifest.
+2. Run adapter tests outside the agent.
+3. Run the exact hook or wrapper command.
+4. Run one active routing test.
+5. Run one blocked-action test in a disposable workspace.
+6. Mark bypass or unknown surfaces explicitly.
+7. Only then claim the adapter is compatible with that runtime version.
+
+Automatic repair should be opt-in. Compatibility checks may read local config and version metadata, but they should not rewrite client settings unless the user confirms that repair action.
+
+## Source-Prior Influences
+
+- LanNguyenSi/harness is a source-prior influence for manifest-style declarative control planes and validation vocabulary: https://github.com/LanNguyenSi/harness
+- Epic Harness is a source-prior influence for hook health and pipeline state ideas, but its self-evolving skill behavior is not part of this default contract: https://github.com/epicsagas/epic-harness
+
+Treat those as design references. Local compatibility remains unverified until the target runtime passes its acceptance matrix.

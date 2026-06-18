@@ -6,6 +6,13 @@ The WorkBuddy case shows the core deployment risk: copying the harness files is 
 
 This document is intentionally version-neutral. Agent clients change hook names, config locations, environment variables, and tool schemas. Treat every product-specific integration as unverified until it passes the local acceptance tests below.
 
+For a concrete adapter, keep two compact records near the adapter layer:
+
+- a declarative governance contract describing stages, denial semantics, payload safety, and cost boundaries;
+- a compatibility manifest describing the runtime version, hook schema, wrapper paths, last smoke tests, and bypass surfaces.
+
+These records are not meant to expand every turn. Use them during adapter setup, client updates, hook/wrapper changes, failed smoke tests, or explicit audits.
+
 ## Deployment Levels
 
 | Level | What is wired | What it can enforce |
