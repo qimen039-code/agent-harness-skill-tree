@@ -2,7 +2,7 @@
 
 Agent Memory Lane Harness is a meta-first whiteboard framework for routing coding-agent work through project-scoped memory lanes, lightweight guardrails, claim checks, and paired improvement records.
 
-Current version: `v0.9.0`
+Current version: `v0.9.2`
 
 Formerly: Agent Harness Skill Tree.
 
@@ -70,7 +70,7 @@ user request
 - **Paired improvement records**: one error record plus one solution record for each solved recurring incident.
 - **Layered project memory library**: a meta index points to category indexes, and category indexes point to individual capsules.
 - **Memory meta index contract**: a multi-axis index shape for project memory libraries and skill point sets.
-- **Common error corpus template**: lightweight CE records for small recurring field/schema, tool-call, semantic-routing, patch-context, PowerShell/path, and Git-boundary mistakes before they become full paired incidents.
+- **Common error corpus template**: lightweight CE records for small recurring field/schema, tool-call, semantic-routing, patch-context, PowerShell/path, and Git-boundary mistakes, including the applied solution and validation, before they become full paired incidents.
 - **Whiteboard templates**: empty project memory categories, project instructions, semantic anchors, and error/solution ledgers.
 
 ## Repository Layout
@@ -211,7 +211,7 @@ This rule is important because direct deep reads recreate the same context-bloat
 
 See [docs/memory-meta-index-contract.md](docs/memory-meta-index-contract.md) for the recommended meta index fields, category index shape, and default retrieval budget.
 
-For lightweight recurring execution mistakes, use [docs/common-error-corpus.md](docs/common-error-corpus.md) and the template under [templates/common-error-corpus](templates/common-error-corpus) before upgrading the issue into paired ERR/SOL records.
+For lightweight recurring execution mistakes, use [docs/common-error-corpus.md](docs/common-error-corpus.md) and the template under [templates/common-error-corpus](templates/common-error-corpus). A CE record should preserve both the error and the solution: symptom, cause, applied fix, prevention, validation, and evidence before upgrading the issue into paired ERR/SOL records.
 
 ## Field Use Note
 

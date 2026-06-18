@@ -28,7 +28,7 @@ Meanings:
 
 Explicit user phrases such as "record this error", "remember this issue", or equivalent local-language wording should route to memory writing after lane and sensitivity checks.
 
-Small but reusable mistakes should go to a common error corpus first. Full paired `ERR-*` / `SOL-*` records are reserved for high-impact incidents, repeated failures, or explicit self-reflection requests.
+Small but reusable mistakes should go to a common error corpus first as compact error-and-solution records. Full paired `ERR-*` / `SOL-*` records are reserved for high-impact incidents, repeated failures, or explicit self-reflection requests.
 
 Ordinary chat and small corrected mistakes should not create memory records by default.
 
@@ -53,7 +53,7 @@ This marker does not automatically create a project. It tells the agent to ask, 
 | Ordinary chat | `none` | `none` | `no_record` |
 | Read prior context | `read` | `current_project` or `global_inbox` | `no_record` |
 | User says to record an error | `write` | `self_reflection_matrix` or `common_error_corpus` | `explicit_user_request` |
-| Reusable small execution mistake | `write` | `common_error_corpus` | `inferred_reusable_error` |
+| Reusable small execution mistake | `write` | `common_error_corpus` | `inferred_reusable_error`; include applied solution and validation |
 | Projectless work becomes durable | `none` or `read` | `emergent_project_candidate` | `projectization_review` |
 
 ## Boundary

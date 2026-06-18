@@ -14,9 +14,17 @@ Short description of the recurring small mistake.
 
 Why the mistake happened.
 
+## Solution Applied
+
+What fixed the issue this time. Include the smallest repeatable fix path, not just a general recommendation.
+
 ## Prevention
 
 Small reusable rule that prevents the mistake.
+
+## Validation
+
+How the fix was checked. Include command output, file inspection, test result, or another bounded verification signal.
 
 ## Upgrade To ERR/SOL When
 

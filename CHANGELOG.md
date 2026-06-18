@@ -4,6 +4,19 @@ All notable public changes should be recorded here.
 
 This project uses `vMAJOR.MINOR.PATCH` version labels while the framework is still early-stage.
 
+## v0.9.2 - 2026-06-18
+
+- Restored stricter R5 English trigger coverage for ordinary `delete`, `remove`, `commit`, `push`, and related high-risk wording.
+- Added `-FinalText` support to the PowerShell runtime enforcer so final-answer hard gates can scan the actual response text for strong claim phrases.
+- Fixed PowerShell routing receipt array handling so a single semantic ambiguity term does not merge with `governance_or_change_surface`.
+- Re-verified that active and public policies still retain mandatory advisory control-plane, selective hard runtime gates, external research gate, claim gate, and meta-first memory retrieval rules.
+
+## v0.9.1 - 2026-06-18
+
+- Clarified that common error corpus records are error-and-solution samples, not error-only notes.
+- Added `solution_applied` and `validation` to the CE record shape in docs, templates, and harness policy.
+- Updated public templates so lightweight CE records preserve the applied fix before escalation to paired ERR/SOL records.
+
 ## v0.9.0 - 2026-06-18
 
 - Added a memory routing contract for `memory_mode`, `memory_lane`, `record_intent`, and `projectization_decision`.

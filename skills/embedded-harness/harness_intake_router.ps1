@@ -257,12 +257,12 @@ $semanticTriggers = $policy.router_decision_contract.semantic_ambiguity_triggers
 if ($null -eq $semanticTriggers) {
   $semanticTriggers = @("update", "record", "publish", "call", "use", "memory", "skill", "route", "harness", "public", "internal", "whiteboard")
 }
-$semanticAmbiguity = Get-MatchedTriggers $semanticTriggers
+$semanticAmbiguity = @(Get-MatchedTriggers $semanticTriggers)
 if ($triggeredRisks -contains "R3") {
-  $semanticAmbiguity += "governance_or_change_surface"
+  $semanticAmbiguity += @("governance_or_change_surface")
 }
 if ((Test-TaskContainsAny @("public", "whiteboard", "GitHub", "repo", "repository")) -and (Test-TaskContainsAny @("internal", "private", "local-only"))) {
-  $semanticAmbiguity += "public_internal_boundary"
+  $semanticAmbiguity += @("public_internal_boundary")
 }
 $semanticAmbiguity = @($semanticAmbiguity | Select-Object -Unique)
 

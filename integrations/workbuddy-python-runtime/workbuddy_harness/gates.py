@@ -470,6 +470,7 @@ def runtime_enforcer(
     tool_name: str = "",
     tool_input: Any = None,
     claim_json: str | list[dict[str, Any]] | dict[str, Any] | None = None,
+    final_text: str = "",
     human_confirmed: bool = False,
     boundary_reviewed: bool = False,
     constitution_reviewed: bool = False,
@@ -504,7 +505,8 @@ def runtime_enforcer(
         blocked.append("constitution_entry_missing_or_unreviewed")
 
     if stage == "final":
-        claim_result = claim_schema_verifier(claim_json=claim_json, final_text=task_text, policy=policy)
+        text_to_scan = final_text or task_text
+        claim_result = claim_schema_verifier(claim_json=claim_json, final_text=text_to_scan, policy=policy)
         if claim_result["status"] != "pass":
             blocked.append("claim_schema_verifier_blocked")
 
@@ -524,5 +526,6 @@ def runtime_enforcer(
         "constitution_path": resolved_constitution,
         "blocked_reasons": sorted(set(blocked)),
         "warnings": sorted(set(warnings)),
+        "final_text_scanned": bool(stage == "final" and final_text),
         "enforcement": "hard only when host treats this in-process function as the sole pre-execution gate",
     }

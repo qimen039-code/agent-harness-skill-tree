@@ -14,7 +14,7 @@
   "risk_trigger_rules": {
     "R0": { "en": [], "zh": [] },
     "R5": {
-      "en": ["delete", "remove", "Remove-Item", "git commit", "install", "login", "permission", "firewall", "proxy", "private value", "sensitive value", "long-term memory", "write memory", "payment"],
+      "en": ["delete", "remove", "Remove-Item", "commit", "push", "git commit", "git push", "install", "uninstall", "login", "permission", "firewall", "proxy", "private value", "sensitive value", "secret", "token", "API key", "long-term memory", "write memory", "payment"],
       "zh": ["\u5220\u9664", "\u79fb\u9664", "\u63d0\u4ea4", "\u5b89\u88c5", "\u767b\u5f55", "\u6743\u9650", "\u9632\u706b\u5899", "\u4ee3\u7406", "\u654f\u611f", "\u957f\u671f\u8bb0\u5fc6", "\u5199\u5165\u8bb0\u5fc6", "\u4ed8\u6b3e"]
     },
     "R4": {
@@ -115,9 +115,9 @@
     "purpose": "decide whether memory should be read, written, updated, or skipped before opening memory payloads",
     "default_rule": "Ordinary chat and projectless small fixes do not write memory unless the user explicitly asks, an error is recurring/reusable, or projectization drift is detected.",
     "explicit_record_rule": "If the user says to record this error/problem/mistake or asks for self-reflection matrix recording, route to the self-reflection matrix or common error corpus according to severity.",
-    "common_error_rule": "Small but recurring execution mistakes should enter common_error_corpus as lightweight CE records; only high-impact, repeated, or user-explicit incidents upgrade to paired ERR/SOL records.",
+    "common_error_rule": "Small but recurring execution mistakes should enter common_error_corpus as lightweight CE error-and-solution records. A CE record must include the mistake, cause, applied solution, prevention rule, validation, and evidence; only high-impact, repeated, or user-explicit incidents upgrade to paired ERR/SOL records.",
     "projectization_rule": "If projectless work accumulates durable files, versioning, repository/docs, tests, adapters, releases, or repeated architecture decisions, mark emergent_project_candidate and ask or state the lane assumption before durable memory writes.",
-    "common_error_record_shape": ["ce_id", "class", "status", "surface", "symptom", "cause", "prevention", "upgrade_to_err_sol_when", "evidence", "last_reviewed"]
+    "common_error_record_shape": ["ce_id", "class", "status", "surface", "symptom", "cause", "solution_applied", "prevention", "validation", "upgrade_to_err_sol_when", "evidence", "last_reviewed"]
   },
   "memory_retrieval_chain": {
     "mandatory": true,

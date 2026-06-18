@@ -6,6 +6,7 @@ param(
   [string]$ToolName = "",
   [string]$ToolInputJson = "",
   [string]$ClaimJson = "",
+  [string]$FinalText = "",
   [string]$ConstitutionPath = "",
   [string]$OutputPath = "",
   [switch]$HumanConfirmed,
@@ -135,8 +136,12 @@ if ($Stage -eq "final") {
       $blocked += "claim_schema_verifier_blocked"
     }
   } else {
+    $textToScan = $TaskText
+    if (-not [string]::IsNullOrWhiteSpace($FinalText)) {
+      $textToScan = $FinalText
+    }
     foreach ($phrase in (ConvertTo-Array $policy.blocked_claim_phrases_without_schema)) {
-      if ($TaskText -match [regex]::Escape([string]$phrase)) {
+      if ($textToScan -match [regex]::Escape([string]$phrase)) {
         $blocked += "claim_schema_required_for_strong_phrase"
         break
       }
@@ -166,6 +171,7 @@ $result = [ordered]@{
   constitution_path = $resolvedConstitution
   blocked_reasons = @($blocked | Select-Object -Unique)
   warnings = @($warnings | Select-Object -Unique)
+  final_text_scanned = ($Stage -eq "final" -and (-not [string]::IsNullOrWhiteSpace($FinalText)))
   enforcement = "hard_exit_when_called_by_hook_wrapper_or_tool_proxy"
 }
 

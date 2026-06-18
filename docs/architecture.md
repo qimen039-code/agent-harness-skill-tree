@@ -80,7 +80,7 @@ record_intent
 projectization_decision
 ```
 
-This prevents the framework from treating every mistake as permanent memory or every memory mention as a full history read. Common small mistakes can be stored as lightweight CE records. Full ERR/SOL pairs are reserved for explicit self-reflection requests, high-impact incidents, or repeated failures.
+This prevents the framework from treating every mistake as permanent memory or every memory mention as a full history read. Common small mistakes can be stored as lightweight CE error-and-solution records. Full ERR/SOL pairs are reserved for explicit self-reflection requests, high-impact incidents, or repeated failures.
 
 See [memory-routing-contract.md](memory-routing-contract.md) and [common-error-corpus.md](common-error-corpus.md).
 
@@ -103,7 +103,7 @@ command wrapper
 
 final-answer gate
 -> harness_runtime_enforcer.ps1 -Stage final
--> claim schema check for strong claims
+-> claim schema check for strong claims; PowerShell callers may pass actual response text with -FinalText
 ```
 
 Hard-stop conditions:

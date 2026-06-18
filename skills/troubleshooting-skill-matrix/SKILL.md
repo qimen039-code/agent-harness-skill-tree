@@ -77,7 +77,7 @@ Use this contract to decide whether to open this router, semantic anchors, ERR/S
 Memory routing contract:
 
 - Explicit record requests route to the self-reflection matrix or common error corpus.
-- Small reusable mistakes route to common error corpus first.
+- Small reusable mistakes route to common error corpus first as compact error-and-solution samples with symptom, cause, applied solution, prevention, validation, and evidence.
 - Full paired ERR/SOL records are reserved for high-impact, repeated, or explicit incidents.
 - Projectless work with durable repository/docs/tests/adapter/versioning signals should be marked as an emergent project candidate before memory writes.
 

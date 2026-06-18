@@ -74,7 +74,7 @@ Do not make this expensive by default. The control plane should choose the cheap
 
 Use [router-decision-contract.md](router-decision-contract.md) as the field contract for router and dynamic-decision adapters. The contract can be implicit for obvious low-risk work, but should be explicit for R3 or higher work, public-facing changes, memory writes, high-risk actions, and audited decisions.
 
-Use [memory-routing-contract.md](memory-routing-contract.md) when wiring memory writes. Start with common error corpus records for small reusable mistakes and upgrade to paired ERR/SOL records only when the issue is explicit, high-impact, or repeated.
+Use [memory-routing-contract.md](memory-routing-contract.md) when wiring memory writes. Start with common error corpus records for small reusable mistakes, including the applied solution and validation, and upgrade to paired ERR/SOL records only when the issue is explicit, high-impact, or repeated.
 
 For selective runtime hard stops, route only critical boundaries through these entry points:
 
@@ -84,6 +84,8 @@ tool-call proxy -> skills/embedded-harness/harness_tool_proxy.ps1
 command wrapper -> skills/embedded-harness/harness_task_wrapper.ps1
 final-answer gate -> skills/embedded-harness/harness_runtime_enforcer.ps1 -Stage final
 ```
+
+For PowerShell final-answer checks, pass the actual response body through `-FinalText` when available. If `-FinalText` is omitted, the final gate falls back to scanning `-TaskText`.
 
 Do not replace your normal agent launcher until the scripts pass local smoke checks. Start with high-risk blocking, final-claim checks, and memory-write checks. Keep ordinary tool calls on the advisory control plane unless you have a reason to harden them. Keep a fallback path so a bad adapter can be disabled without losing workspace access.
 

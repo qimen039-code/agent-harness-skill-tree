@@ -26,6 +26,12 @@ class HarnessGateTests(unittest.TestCase):
         self.assertEqual(route["risk_level"], "R5")
         self.assertIn("R5", route["triggered_risks"])
 
+    def test_router_detects_plain_commit_and_push_as_r5(self) -> None:
+        route = intake_router("commit and push the current repository update", policy=self.policy)
+        self.assertEqual(route["risk_level"], "R5")
+        self.assertIn("commit", route["matched_risk_triggers"].get("R5", []))
+        self.assertIn("push", route["matched_risk_triggers"].get("R5", []))
+
     def test_router_honors_simple_negation(self) -> None:
         route = intake_router("do not delete anything, only inspect files", policy=self.policy)
         self.assertNotEqual(route["risk_level"], "R5")
@@ -100,6 +106,17 @@ class HarnessGateTests(unittest.TestCase):
             policy=self.policy,
         )
         self.assertEqual(decision["status"], "pass")
+
+    def test_runtime_blocks_final_strong_claim_text(self) -> None:
+        decision = runtime_enforcer(
+            stage="final",
+            task_text="report result",
+            final_text="This is validated and verified successfully.",
+            constitution_reviewed=True,
+            policy=self.policy,
+        )
+        self.assertEqual(decision["status"], "blocked")
+        self.assertIn("claim_schema_verifier_blocked", decision["blocked_reasons"])
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 # Common Error Corpus
 
-The common error corpus stores lightweight execution-error samples. It is for useful recurring mistakes that are worth preserving as agent training material, but not severe enough for a full paired `ERR-*` / `SOL-*` incident.
+The common error corpus stores lightweight execution error-and-solution samples. It is for useful recurring mistakes that are worth preserving as agent training material, including the applied solution and validation, but not severe enough for a full paired `ERR-*` / `SOL-*` incident.
 
 ## When To Use
 
@@ -9,7 +9,7 @@ Use a `CE-*` common error record when:
 - the mistake is small but likely to recur;
 - it helps future routing or tool-call preflight;
 - the user calls it a common error or useful sample;
-- the issue is fixed immediately and does not need a full incident pair.
+- the issue is fixed immediately and the solution can be recorded without needing a full incident pair.
 
 Do not use it for:
 
@@ -29,7 +29,9 @@ status:
 surface:
 symptom:
 cause:
+solution_applied:
 prevention:
+validation:
 upgrade_to_err_sol_when:
 evidence:
 last_reviewed:

@@ -66,7 +66,7 @@ meta summary / _META_INDEX / router manifest
 
 Recommended meta index fields: lane, scope, category, record type, status, retrieval terms, applies-when, does-not-apply-when, linked modules, linked records, and last-reviewed marker. Default lookup should open at most one meta index, one category index, and two payload records unless the task explicitly asks for a full audit or migration.
 
-Memory recording is routed separately from memory reading. Use `common_error_corpus` for lightweight recurring execution samples and paired `ERR-*` / `SOL-*` records for explicit, repeated, or high-impact self-reflection incidents.
+Memory recording is routed separately from memory reading. Use `common_error_corpus` for lightweight recurring error-and-solution samples with symptom, cause, applied solution, prevention, validation, and evidence. Use paired `ERR-*` / `SOL-*` records for explicit, repeated, or high-impact self-reflection incidents.
 
 Scripts:
 
