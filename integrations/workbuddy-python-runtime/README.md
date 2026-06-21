@@ -42,12 +42,12 @@ The runner reads hook JSON from stdin. On `UserPromptSubmit`, it stores the orig
 Wire prompt, command-tool, and final-answer stages when you want the strongest hook-only deployment:
 
 ```text
-UserPromptSubmit -> active route injection and original-task state
+UserPromptSubmit -> original-task state, with silent route classification by default
 PreToolUse(Bash|PowerShell) -> command-tool hard gate before execution
 Stop -> final strong-claim gate before display
 ```
 
-`UserPromptSubmit` gives the agent the compact route, memory/search/claim decision, and original-task state before planning. `PreToolUse` enforces the protected command-tool path before execution. `Stop` can block or downgrade final answers that contain strong validation claims without claim-schema evidence.
+`UserPromptSubmit` stores the original task before planning. It keeps ordinary low-risk classification silent and injects only minimal boundary context when memory, search, claim, confirmation, low-confidence, governance, conversation-linking, or debug behavior changes the next action. `PreToolUse` enforces the protected command-tool path before execution. It also blocks continuation, merge, archive, or cross-conversation memory tasks until the adapter marks the conversation-link decision as resolved. `Stop` can block or downgrade final answers that contain strong validation claims without claim-schema evidence.
 
 Prefer a command-tool matcher such as `Bash|PowerShell` for the first hard `PreToolUse` deployment. A broad `*` matcher can route Write/Edit file content through the command-risk gate and create false positives when a document merely mentions high-risk words. Gate file tools with a separate schema-aware file policy if you need hard file-write enforcement.
 
@@ -78,6 +78,7 @@ decision = runtime_enforcer(
     tool_input=tool_input,
     human_confirmed=user_confirmed,
     boundary_reviewed=boundary_reviewed,
+    conversation_link_resolved=conversation_link_resolved,
     constitution_reviewed=constitution_reviewed,
     constitution_path=project_agents_path,
     policy=policy,
@@ -101,6 +102,8 @@ decision = runtime_enforcer(
 ```
 
 The adapter also accepts `risk_level="R5"` as an explicit override when the host already classified the task. Do not pass only `"R5"` as a replacement for the original task text unless you intentionally want a risk-level-only fallback.
+
+For conversation-memory continuation or merge tasks, run meta-first lookup and link selection before the first protected tool call. Then pass `conversation_link_resolved=True` to the in-process adapter or `--conversation-link-resolved` to the hook runner. Without that flag, `PreToolUse` blocks with `conversation_link_decision_required`.
 
 Optional JSONL event logging can write to a specific file with `log_path` or to a directory with `log_dir`. In `log_dir` mode the adapter writes `workbuddy_harness_events.jsonl` inside that directory.
 

@@ -23,7 +23,8 @@ Design boundaries:
 - If no deterministic risk rule matches but the text looks like a nontrivial task, the router sets `fallback_model_judgment_recommended=true` rather than silently treating it as high-confidence `R0`.
 - `GLOBAL` memory is manual-only by default.
 - The mandatory advisory control plane is required for nontrivial tasks: create a lightweight routing receipt, re-evaluate only on trigger events, and re-check claim/memory/version boundaries before final output.
-- Receipt profiles keep runtime cost low: `compact_runtime` is the default local-agent surface, `extended_governance` expands for public/framework/project-boundary work, and `debug_receipt` is only for route diagnosis or explicit full-receipt requests.
+- R0-R5 classification always runs internally but stays silent by default in user-facing surfaces. Expose only action-changing boundaries; `debug_receipt` is for route diagnosis or explicit full-receipt requests.
+- Receipt profiles keep runtime cost low: `compact_runtime` is used only when fields change the next action, `extended_governance` expands for public/framework/project-boundary work, and `debug_receipt` is only for route diagnosis or explicit full-receipt requests.
 - Do not wrap every tool call by default; use runtime hard gates only for R5, high-risk tool calls, strong final claims, long-term memory writes, and low-confidence boundaries.
 - Memory retrieval is meta-first: read `_META_INDEX.md`, a memory summary, or a router manifest before opening category indexes or capsule payloads.
 - Runtime enforcement is available through hook/wrapper/tool proxy scripts. A `blocked` JSON result exits nonzero and should stop the caller when these scripts are placed before task or tool execution.
@@ -41,7 +42,7 @@ routing receipt
 -> selective runtime hard gate when a critical risk appears
 ```
 
-Receipt fields: task type, target surface, audience, project lane, risk level, semantic ambiguity, module need, memory need, memory mode, memory lane, record intent, external need, claim risk, projectization decision, receipt profile, and required gates. Runtime adapters can expose `compact_runtime` by default and expand only for governance or debug cases.
+Receipt fields: task type, target surface, audience, project lane, risk level, semantic ambiguity, module need, memory need, memory mode, memory lane, record intent, external need, claim risk, projectization decision, conversation memory decision, link intent, receipt profile, and required gates. Runtime adapters can expose `compact_runtime` by default and expand only for governance or debug cases.
 
 If this control plane cannot be completed, the final response must say so and must not present the result as fully verified.
 
@@ -115,6 +116,7 @@ Gate statuses:
 Runtime hard-stop conditions:
 
 - R5 route without explicit human confirmation.
+- Conversation continuation, merge, archive, or cross-conversation update before the link decision is resolved, when the host has a pre-action hook/wrapper/tool proxy.
 - Low-confidence route without boundary review.
 - Nontrivial task with no available constitution entry.
 - High-risk tool call without explicit human confirmation.

@@ -22,6 +22,7 @@ external_need
 claim_risk
 projectization_decision
 conversation_memory_decision
+link_intent
 receipt_profile
 required_gates
 ```
@@ -45,6 +46,7 @@ Field meanings:
 | `claim_risk` | Decide whether the final answer contains an operational note, a weak claim, or a strong factual claim needing schema evidence. |
 | `projectization_decision` | Decide whether projectless work is still not a project, belongs to a current project, or should be treated as an emergent project candidate. |
 | `conversation_memory_decision` | Decide whether projectless long-chat state should skip memory, create/update current conversation memory, become a checkpoint candidate, read a referenced conversation, or perform an explicit cross-conversation update. |
+| `link_intent` | Decide whether to continue from latest memory, continue from a referenced memory, explicitly merge memories, archive/seal a memory, or create no link. |
 | `receipt_profile` | Decide whether to expose a compact runtime receipt, expanded governance receipt, or debug receipt. |
 | `required_gates` | List the concrete gates to run or honor. |
 
@@ -54,13 +56,13 @@ The router should compute the full decision internally, then expose the smallest
 
 | Profile | Use when | Expose |
 | --- | --- | --- |
-| `compact_runtime` | Default local runtime, single-user agents, ordinary R1-R5 checks where no public/private or governance ambiguity exists. | Risk, gates, memory mode/lane, external need, claim risk, human confirmation need. |
+| `compact_runtime` | Internal default for local runtime and single-user agents. | Expose only action-changing fields: gates, memory mode/lane, external need, claim risk, or human confirmation need. |
 | `extended_governance` | Public docs, local harness, adapters, project memory, conversation memory, semantic ambiguity, memory writes, projectization drift, or audience-boundary work. | Full governance receipt fields. |
 | `debug_receipt` | Router debugging, misroute analysis, or user asks for full receipt. | Full receipt plus matched/negated triggers, confidence, and profile reasons. |
 
-This keeps WorkBuddy-like local adapters cheap while preserving the full whiteboard schema for migration, audits, and public framework work.
+This keeps Codex-style, Claude-style, WorkBuddy-style, and custom local adapters cheap while preserving the full whiteboard schema for migration, audits, and public framework work.
 
-For field-budget and delta-receipt rules, see [cost-control-contract.md](cost-control-contract.md). The short rule is: emit a field by default only when it can change the next action.
+For field-budget, silent classification, and delta-receipt rules, see [cost-control-contract.md](cost-control-contract.md). The short rule is: classify every task internally, but emit a field by default only when it can change the next action.
 
 ## Low-Cost Rule
 
@@ -75,7 +77,7 @@ L0 microkernel
 -> only matching payload
 ```
 
-If the receipt is obvious from the current request, it can stay implicit. If the task is R3 or higher, boundary-sensitive, or likely to be audited later, keep the receipt explicit in logs or a task note.
+If the receipt is obvious from the current request, it can stay implicit. Keep R0-R5 labels internal by default. If the classification changes execution path, cost, permission, memory, external search, or claim wording, expose only that minimal boundary. If the user asks for debug or audit, expose the complete debug receipt.
 
 ## Dynamic Re-Evaluation Triggers
 
@@ -96,6 +98,7 @@ before a strong factual claim
 before R5 action
 before long-term memory write
 before conversation checkpoint or cross-conversation memory update
+before memory continuation, merge, archive, or link creation
 ```
 
 ## Source-Grounded Influences

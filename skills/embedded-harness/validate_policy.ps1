@@ -21,7 +21,7 @@ try {
   if (-not (Test-Path -LiteralPath $PolicyPath)) {
     Add-Issue "policy_file_missing"
   } else {
-    $policy = Get-Content -LiteralPath $PolicyPath -Raw | ConvertFrom-Json
+    $policy = Get-Content -LiteralPath $PolicyPath -Raw -Encoding UTF8 | ConvertFrom-Json
   }
 } catch {
   Add-Issue "json_parse_failed"

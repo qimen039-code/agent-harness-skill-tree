@@ -4,6 +4,27 @@ All notable public changes should be recorded here.
 
 This project uses `vMAJOR.MINOR.PATCH` version labels while the framework is still early-stage.
 
+## v0.14.4 - 2026-06-21
+
+- Added concrete deployment problem examples and solution playbooks for instruction loading, hook denial, prompt-state transfer, file-tool false positives, external search, conversation linking, final-claim gating, encoding/recording payloads, PowerShell policy parsing, and client-update drift.
+- Updated the README deployment docs pointer to highlight the new agent-facing solution playbooks.
+
+## v0.14.3 - 2026-06-21
+
+- Added `link_intent` to router receipts and adapter contracts for continuation, referenced-conversation lookup, explicit merge, archive, and cross-conversation memory updates.
+- Added a conversation-link gate: pre-action runtimes can block with `conversation_link_decision_required` until meta-first lookup and link selection are resolved.
+- Updated PowerShell wrapper/proxy/runtime scripts and the WorkBuddy Python adapter so unresolved conversation-link decisions are enforceable on covered execution paths.
+- Updated PowerShell policy readers to use explicit UTF-8 decoding so Chinese trigger/config text does not break `ConvertFrom-Json` in Windows PowerShell.
+- Clarified that these changes apply to Codex-style local harness installs and other agent runtimes, not only WorkBuddy-style deployments.
+- Tightened memory-linking docs with lane-scoped latest lookup, link-depth threshold, append-only link ledger schema, merge redirect semantics, and advisory fallback when no pre-action hook exists.
+
+## v0.14.2 - 2026-06-21
+
+- Added the silent-by-default R0-R5 visibility rule: classification always runs internally, but user-facing replies and prompt-stage hook context expose only action-changing boundaries unless debug/audit is requested.
+- Updated the WorkBuddy Python prompt hook to suppress ordinary low-risk route context, emit minimal boundary context only when needed, and expose full route data only for debug receipts.
+- Added a memory linking contract for stable memory IDs, `updated_at` timestamps, link-only conversation continuation, explicit merged memories, append-only link ledgers, and index-first fuzzy retrieval.
+- Updated conversation memory and global archive templates with `memory_id`, `updated_at`, retrieval terms, semantic anchors, `memory_links.jsonl`, and cold `conversation_index.jsonl` shapes.
+- Extended memory routing and meta-index contracts with `link_intent`, continuation/merge/archive edges, timestamp lookup, and path-light registry boundaries.
 ## v0.14.1 - 2026-06-21
 
 - Hardened the WorkBuddy Python hook runner with bounded nested text extraction so host-provided recording transcripts can be routed while raw media blobs, bytes, base64 strings, and arbitrary recording files remain ignored.

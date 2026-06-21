@@ -5,19 +5,38 @@ This is the first file an agent must read before using this conversation memory 
 ## Lane
 
 ```text
+memory_id: CONVERSATION_TEMPLATE
+memory_type: conversation
 lane: CONVERSATION_TEMPLATE
 scope: one isolated long-running conversation or thread
 status: TEMPLATE
 owner: adopting workspace
+created_at: YYYY-MM-DDTHH:MM:SS+00:00
+updated_at: YYYY-MM-DDTHH:MM:SS+00:00
 last_reviewed: YYYY-MM-DD
+link_policy: link_only_by_default
+max_continuation_depth: 5
+active_successor_memory_id: null
+redirect_read_to: null
 ```
 
 ## Retrieval Rule
 
 ```text
 read this _META_INDEX.md
--> choose conversation_state.md, index.json, or one JSONL record family
+-> choose conversation_state.md, index.json, memory_links.jsonl, or one JSONL record family
 -> open only matching records
+```
+
+## Latest And Fuzzy Lookup
+
+Use `updated_at` as the cheap shortcut for "continue the previous conversation". If the user remembers only keywords, search index-level fields first:
+
+```text
+title / summary / retrieval_terms / semantic_anchors / open_loops
+-> candidate summaries
+-> user choice when ambiguous
+-> matching payload records only
 ```
 
 ## Record Families
@@ -25,16 +44,19 @@ read this _META_INDEX.md
 | File | Type | Use When | Not For |
 | --- | --- | --- | --- |
 | `conversation_state.md` | summary | Need current state, scope, assumptions, and continuation note | Raw transcript storage |
-| `index.json` | machine index | Need stable fields for routing or scripts | Human narrative |
+| `index.json` | machine index | Need stable fields, timestamps, retrieval terms, link policy, or script routing | Human narrative |
+| `memory_links.jsonl` | append-only links | Continuing from, referencing, merging, archiving, or superseding another memory | Copying another lane's payload |
 | `decisions.jsonl` | append-only decisions | User accepted a durable decision | Ordinary assistant wording |
 | `open_loops.jsonl` | append-only open loops | Something remains unresolved or unverified | Completed tasks |
-| `errors_and_solutions.jsonl` | append-only paired fixes | A reusable mistake was solved in this conversation | Unsovled speculation |
+| `errors_and_solutions.jsonl` | append-only paired fixes | A reusable mistake was solved in this conversation | Unsolved speculation |
 | `references.jsonl` | append-only references | This conversation points to a file, repo, source, project memory, or another conversation memory | Copying another lane's private payload |
 | `persona_state.md` | conversation-only tone state | User explicitly wants a local companion/persona style in this conversation | Facts, risk, verification, project boundaries, memory boundaries, search, or claim decisions |
 
 ## Isolation Boundary
 
 - Write only this conversation's durable state here.
+- New conversations that continue this memory should create their own memory and append a `continues` link.
 - Do not write another conversation's content unless the user explicitly asks to update this lane.
 - Do not copy project memory payloads here. Link by reference and evidence boundary.
 - Do not write credentials, personal values, or sensitive payloads.
+- Merges require explicit user instruction and should create a new merged memory rather than silently rewriting old payloads.

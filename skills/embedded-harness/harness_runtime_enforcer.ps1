@@ -11,6 +11,7 @@ param(
   [string]$OutputPath = "",
   [switch]$HumanConfirmed,
   [switch]$BoundaryReviewed,
+  [switch]$ConversationLinkResolved,
   [switch]$ConstitutionReviewed
 )
 
@@ -60,7 +61,7 @@ function Get-PatternHits([string]$text, [string[]]$patterns) {
 }
 
 $policyPath = Join-Path $PSScriptRoot "embedded_harness_policy.json"
-$policy = Get-Content -LiteralPath $policyPath -Raw | ConvertFrom-Json
+$policy = Get-Content -LiteralPath $policyPath -Raw -Encoding UTF8 | ConvertFrom-Json
 $routeText = (($TaskText, $ToolName, $ToolInputJson) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }) -join "`n"
 $routeJson = & (Join-Path $PSScriptRoot "harness_intake_router.ps1") -TaskText $routeText -Cwd $Cwd
 $route = $routeJson | ConvertFrom-Json
@@ -124,6 +125,14 @@ if ($route.fallback_model_judgment_recommended -and -not $BoundaryReviewed) {
   $blocked += "boundary_review_required_for_low_confidence_route"
 }
 
+$linkRequiredIntents = ConvertTo-Array $policy.conversation_linking_contract.link_required_intents
+$linkIntent = [string]$route.link_intent
+if ((($Stage -eq "pre_task") -or ($Stage -eq "pre_tool")) -and ($linkRequiredIntents -contains $linkIntent) -and -not $ConversationLinkResolved) {
+  $reason = [string]$policy.conversation_linking_contract.unresolved_block_reason
+  if ([string]::IsNullOrWhiteSpace($reason)) { $reason = "conversation_link_decision_required" }
+  $blocked += $reason
+}
+
 if (($route.risk_level -ne "R0") -and [string]::IsNullOrWhiteSpace($resolvedConstitution) -and -not $ConstitutionReviewed) {
   $blocked += "constitution_entry_missing_or_unreviewed"
 }
@@ -168,6 +177,8 @@ $result = [ordered]@{
   tool_name = $ToolName
   tool_hard_hits = @($hardHits)
   tool_change_hits = @($changeHits)
+  conversation_link_required = ($linkRequiredIntents -contains $linkIntent)
+  conversation_link_resolved = [bool]$ConversationLinkResolved
   constitution_path = $resolvedConstitution
   blocked_reasons = @($blocked | Select-Object -Unique)
   warnings = @($warnings | Select-Object -Unique)

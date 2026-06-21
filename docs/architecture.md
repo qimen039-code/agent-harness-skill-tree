@@ -24,7 +24,7 @@ The microkernel should stay short. Put project details elsewhere.
 - `harness_claim_schema_verifier.ps1`;
 - `embedded_harness_policy.json`.
 
-The intake router classifies work into R0-R5 and returns required gates.
+The intake router classifies work into R0-R5 internally and returns required gates. User-facing surfaces stay silent by default unless the classification changes execution path, cost, permission, memory, search, or claim boundaries.
 
 The repository also includes adapter examples outside the core skill folder, such as `integrations/workbuddy-python-runtime`. These adapters should be treated as host-specific references. They can reuse the same `embedded_harness_policy.json`, but they do not change the core framework contract unless the adopting runtime actually calls them at the right execution boundary.
 
@@ -74,7 +74,7 @@ The full receipt schema remains the canonical governance model, but runtime adap
 - `extended_governance`: public repository, local harness, adapter, project memory, semantic ambiguity, memory write, or projectization work.
 - `debug_receipt`: full route diagnostics and trigger evidence.
 
-This mirrors a common systems pattern: keep the policy decision point complete, but sample or expand emitted context only when the execution boundary needs it.
+This mirrors a common systems pattern: keep the policy decision point complete, but keep risk labels silent by default and expand emitted context only when the execution boundary needs it.
 
 See [router-decision-contract.md](router-decision-contract.md).
 
@@ -151,7 +151,9 @@ conversation-memory/_META_INDEX.md
 
 This lane is isolated by conversation or thread id. It can be read by later conversations only through explicit reference, and cross-conversation writes require explicit user instruction. If the work becomes a real project, the router should mark `projectization_decision: emergent_project_candidate` instead of silently mixing conversation memory into project memory.
 
-See [conversation-memory-lane.md](conversation-memory-lane.md).
+Conversation memories use stable `memory_id`, `updated_at`, index-level retrieval terms, and append-only links. A later conversation can continue an old one through a `continues` edge without writing new content into the old lane. Explicit merges create a new merged memory and link old memories into it.
+
+See [conversation-memory-lane.md](conversation-memory-lane.md) and [memory-linking-contract.md](memory-linking-contract.md).
 
 ## Format Layering
 
@@ -274,8 +276,8 @@ Project memory is intentionally not a single flat summary file. A flat file is c
 
 ```text
 memory-library/_META_INDEX.md
--> choose one category
--> category/_INDEX.md
+-> choose one category or link ledger
+-> category/_INDEX.md / memory_links.jsonl
 -> open only the matching capsule
 ```
 

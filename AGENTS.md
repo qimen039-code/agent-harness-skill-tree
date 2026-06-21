@@ -24,13 +24,13 @@ routing receipt
 -> selective runtime hard gate only for critical risks
 ```
 
-Routing receipt fields: task type, target surface, audience, active lane, risk level, semantic ambiguity, module need, memory need, memory mode, memory lane, record intent, external need, claim risk, projectization decision, receipt profile, and required gates.
+Routing receipt fields: task type, target surface, audience, active lane, risk level, semantic ambiguity, module need, memory need, memory mode, memory lane, record intent, external need, claim risk, projectization decision, conversation memory decision, link intent, receipt profile, and required gates.
 
 For projectless long-running conversations, also decide `conversation_memory_decision`. Use a conversation memory lane only when the user explicitly asks for a checkpoint or durable long-chat signals accumulate. Conversation memory is isolated by conversation/thread id, is not project memory, and is not global memory.
 
-Use receipt profiles to keep runtime cost low: `compact_runtime` for ordinary local execution, `extended_governance` for public/framework/project-boundary work, and `debug_receipt` only for router diagnosis or explicit full-receipt requests.
+Use receipt profiles to keep runtime cost low: risk classification is always internal and silent by default; `compact_runtime` is used only when fields change the next action, `extended_governance` for public/framework/project-boundary work, and `debug_receipt` only for router diagnosis or explicit full-receipt requests.
 
-Use the action-relevant rule: if a field will not change the next action, do not emit it in the default receipt. Keep it in documentation, archive meta, debug receipt, or audit logs instead. After the first receipt, use delta receipts with changed fields only unless full debug is requested.
+Use the action-relevant rule: if a field will not change the next action, do not emit it in the default receipt and do not display the R0-R5 label to the user. Keep it in documentation, archive meta, debug receipt, or audit logs instead. After the first receipt, use delta receipts with changed fields only unless full debug is requested.
 
 Re-evaluation is required after trigger events: new evidence, missing files, tool errors, scope changes, user corrections, cross-project terminology, currentness/version claims, GitHub/open-source mechanism intake, risk/cost escalation, strong claims, R5 actions, or memory writes.
 
@@ -51,7 +51,7 @@ Memory use is routed. Ordinary chat should not write memory by default. Explicit
 
 Projectless work can drift into a project. If repository, versioning, docs, tests, adapters, release, or repeated architecture-decision signals accumulate, mark the task as an emergent project candidate before writing project memory.
 
-Projectless long conversations can also drift into a conversation memory lane before they become a project. Use `templates/conversation-memory/`: read `_META_INDEX.md` first, then `conversation_state.md` or one matching JSONL family, then only matching records. Other conversations may read this lane only by explicit reference. Cross-conversation writes require explicit user instruction.
+Projectless long conversations can also drift into a conversation memory lane before they become a project. Use `templates/conversation-memory/`: read `_META_INDEX.md` first, then `conversation_state.md`, `index.json`, `memory_links.jsonl`, or one matching JSONL family, then only matching records. Other conversations may read this lane only by explicit reference. Cross-conversation writes require explicit user instruction. New conversations continuing old ones create a new memory and append a link-only `continuation` link by default; explicit merges create a new merged memory and mark old memories as sealed or redirected in indexes. If a continuation, merge, archive, or cross-conversation update is requested, resolve the link decision before the first protected tool call; otherwise the selective runtime gate may block with `conversation_link_decision_required`.
 
 Optional global archives are cold indexes, not active memory. Use active project or conversation memory first. Archive by moving or copying source files/directories by default; do not regenerate old memory content as a normal archive step. Summary capsules require explicit compression, migration, de-identification, public-release, or storage-reduction intent. Source deletion is R5.
 

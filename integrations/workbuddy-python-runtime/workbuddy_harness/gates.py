@@ -364,6 +364,26 @@ def _apply_risk_override(route: dict[str, Any], risk_level: str, policy: dict[st
     return updated
 
 
+def _conversation_link_intent(task_text: str, policy: dict[str, Any]) -> str:
+    contract = policy.get("conversation_linking_contract", {})
+    ordered_rules = [
+        ("merge_memories_explicit", "merge_triggers"),
+        ("archive_or_seal_memory", "archive_triggers"),
+        ("continue_from_referenced_memory", "continue_reference_triggers"),
+        ("continue_from_latest", "continue_latest_triggers"),
+    ]
+    for intent, trigger_key in ordered_rules:
+        if _matching_triggers(task_text, contract.get(trigger_key, [])):
+            return intent
+    return "none"
+
+
+def _conversation_link_required(route: dict[str, Any], policy: dict[str, Any]) -> bool:
+    contract = policy.get("conversation_linking_contract", {})
+    required_intents = {str(item) for item in _as_list(contract.get("link_required_intents"))}
+    return str(route.get("link_intent", "none")) in required_intents
+
+
 def intake_router(task_text: str = "", cwd: str | None = None, policy: dict[str, Any] | None = None) -> dict[str, Any]:
     policy = policy or load_policy()
     cwd = cwd or os.getcwd()
@@ -483,6 +503,10 @@ def intake_router(task_text: str = "", cwd: str | None = None, policy: dict[str,
         elif len(conversation_signals) >= conversation_threshold:
             conversation_memory_decision = "checkpoint_candidate"
 
+    link_intent = _conversation_link_intent(task_text, policy)
+    if link_intent != "none":
+        conversation_memory_decision = "read_referenced_conversation"
+
     if common_error_hits:
         memory_need = "common_error_corpus"
     elif explicit_record_hits and memory_need == "none":
@@ -498,11 +522,19 @@ def intake_router(task_text: str = "", cwd: str | None = None, policy: dict[str,
         record_intent = "explicit_conversation_memory_request"
     elif conversation_memory_decision == "checkpoint_candidate":
         record_intent = "conversation_checkpoint"
+    elif link_intent in {"merge_memories_explicit", "archive_or_seal_memory"}:
+        record_intent = "explicit_cross_conversation_update"
+    elif link_intent != "none":
+        record_intent = "conversation_link_review"
     else:
         record_intent = "no_record"
 
-    if conversation_memory_decision != "none" and memory_need == "none":
+    if link_intent != "none" and memory_need == "none":
+        memory_need = "index_only"
+    elif conversation_memory_decision != "none" and memory_need == "none":
         memory_need = "conversation_state"
+    if link_intent != "none":
+        required_gates.append("conversation_link_gate")
 
     if common_error_hits:
         memory_lane = "common_error_corpus"
@@ -512,6 +544,8 @@ def intake_router(task_text: str = "", cwd: str | None = None, policy: dict[str,
         memory_lane = "current_project"
     elif projectization_decision == "emergent_project_candidate":
         memory_lane = "emergent_project_candidate"
+    elif link_intent != "none":
+        memory_lane = "referenced_conversation"
     elif conversation_memory_decision != "none":
         memory_lane = "current_conversation"
     else:
@@ -522,6 +556,7 @@ def intake_router(task_text: str = "", cwd: str | None = None, policy: dict[str,
         "inferred_reusable_error",
         "explicit_conversation_memory_request",
         "conversation_checkpoint",
+        "explicit_cross_conversation_update",
     }:
         memory_mode = "write"
     elif memory_need != "none":
@@ -551,6 +586,8 @@ def intake_router(task_text: str = "", cwd: str | None = None, policy: dict[str,
         module_need.append("memory_meta_index")
     if conversation_memory_decision != "none":
         module_need.append("conversation_memory_index")
+    if link_intent != "none":
+        module_need.append("memory_link_ledger")
     if external_need and external_need[0] != "none":
         module_need.append("external_research_gate")
     if claim_risk != "none":
@@ -580,6 +617,8 @@ def intake_router(task_text: str = "", cwd: str | None = None, policy: dict[str,
             profile_reason.append("projectization_candidate")
         if conversation_memory_decision != "none":
             profile_reason.append("conversation_memory_candidate")
+        if link_intent != "none":
+            profile_reason.append("conversation_link_boundary")
         if len(profile_reason) > 1:
             receipt_profile = "extended_governance"
     profile_reason = _unique(profile_reason)
@@ -602,6 +641,7 @@ def intake_router(task_text: str = "", cwd: str | None = None, policy: dict[str,
         "claim_risk": claim_risk,
         "projectization_decision": projectization_decision,
         "conversation_memory_decision": conversation_memory_decision,
+        "link_intent": link_intent,
         "conversation_signals": _unique(conversation_explicit_hits + conversation_signals),
         "receipt_profile": receipt_profile,
         "projectization_signals": projectization_signals,
@@ -614,6 +654,7 @@ def intake_router(task_text: str = "", cwd: str | None = None, policy: dict[str,
         "memory_mode": memory_mode,
         "memory_lane": memory_lane,
         "conversation_memory_decision": conversation_memory_decision,
+        "link_intent": link_intent,
         "external_need": external_need,
         "claim_risk": claim_risk,
         "human_confirmation_need": human_confirmation_need,
@@ -642,6 +683,7 @@ def intake_router(task_text: str = "", cwd: str | None = None, policy: dict[str,
         "claim_risk": claim_risk,
         "projectization_decision": projectization_decision,
         "conversation_memory_decision": conversation_memory_decision,
+        "link_intent": link_intent,
         "projectization_signals": projectization_signals,
         "conversation_signals": _unique(conversation_explicit_hits + conversation_signals),
         "triggered_risks": sorted(set(triggered_risks), key=triggered_risks.index),
@@ -752,6 +794,7 @@ def runtime_enforcer(
     final_text: str = "",
     human_confirmed: bool = False,
     boundary_reviewed: bool = False,
+    conversation_link_resolved: bool = False,
     constitution_reviewed: bool = False,
     constitution_path: str = "",
     log_path: str | os.PathLike[str] | None = None,
@@ -769,6 +812,7 @@ def runtime_enforcer(
     tool_text = tool_risk_text
     hard_hits = _pattern_hits(tool_text, HARD_TOOL_PATTERNS)
     change_hits = _pattern_hits(tool_text, CHANGE_TOOL_PATTERNS)
+    conversation_link_required = _conversation_link_required(route, policy)
 
     blocked: list[str] = []
     warnings: list[str] = []
@@ -779,6 +823,9 @@ def runtime_enforcer(
         blocked.append("tool_call_requires_human_confirmation")
     if route["fallback_model_judgment_recommended"] and not boundary_reviewed:
         blocked.append("boundary_review_required_for_low_confidence_route")
+    if stage in {"pre_task", "pre_tool"} and conversation_link_required and not conversation_link_resolved:
+        reason = str(policy.get("conversation_linking_contract", {}).get("unresolved_block_reason") or "conversation_link_decision_required")
+        blocked.append(reason)
 
     resolved_constitution = ""
     constitution_candidates = [constitution_path, os.path.join(cwd, "AGENTS.md")]
@@ -811,6 +858,8 @@ def runtime_enforcer(
         "tool_text_scope": "command_fields_only_for_command_tools",
         "tool_hard_hits": hard_hits,
         "tool_change_hits": change_hits,
+        "conversation_link_required": conversation_link_required,
+        "conversation_link_resolved": conversation_link_resolved,
         "constitution_path": resolved_constitution,
         "blocked_reasons": sorted(set(blocked)),
         "warnings": sorted(set(warnings)),

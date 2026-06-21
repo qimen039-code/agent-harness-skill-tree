@@ -41,7 +41,7 @@ If the agent cannot confirm that it read the meta layer first, treat the memory 
 
 Use [memory-meta-index-contract.md](memory-meta-index-contract.md) as the recommended field shape. The important part is not the exact Markdown formatting; it is the ability to select by lane, scope, category, record type, status, retrieval terms, applicability, linked modules, linked records, and review freshness before opening a payload.
 
-For long-running conversations that are not yet project lanes, use [conversation-memory-lane.md](conversation-memory-lane.md) and `templates/conversation-memory/`. Conversation memory is isolated by thread/session, follows the same meta-first rule, and should not silently write into project or global memory.
+For long-running conversations that are not yet project lanes, use [conversation-memory-lane.md](conversation-memory-lane.md), [memory-linking-contract.md](memory-linking-contract.md), and `templates/conversation-memory/`. Conversation memory is isolated by thread/session, follows the same meta-first rule, and should not silently write into project or global memory. New conversations continue old ones through link-only edges by default; explicit merges create a new merged memory.
 
 Use [format-layering.md](format-layering.md) when deciding whether a record belongs in Markdown, JSON, JSONL, CSV/TSV, or a queryable local store. Public explanations can stay in Markdown; machine-owned routing facts and append-only records should use structured formats.
 
@@ -74,11 +74,11 @@ Stronger setups can run:
 
 Also make the advisory control plane mandatory:
 
-1. Create a lightweight routing receipt for nontrivial work: task type, target surface, audience, lane, risk, semantic ambiguity, module need, memory need, memory mode, memory lane, record intent, external need, claim risk, projectization decision, conversation memory decision, receipt profile, and required gates.
+1. Create a lightweight routing receipt for nontrivial work: task type, target surface, audience, lane, risk, semantic ambiguity, module need, memory need, memory mode, memory lane, record intent, external need, claim risk, projectization decision, conversation memory decision, link intent, receipt profile, and required gates.
 2. Re-evaluate only after trigger events: new evidence, missing files, tool errors, scope changes, user corrections, cross-project terminology, currentness/version claims, GitHub/open-source mechanism intake, risk/cost escalation, strong claims, R5 actions, or memory writes.
 3. Final-check claim scope, memory scope, version metadata, and unresolved verification debt.
 
-For local single-user adapters, start with `compact_runtime`. Expand to `extended_governance` only when public/private boundaries, framework rules, adapters, project memory, memory writes, semantic ambiguity, or projectization drift appear. Use `debug_receipt` only for router troubleshooting.
+For local single-user adapters, including Codex-style local harness installs, keep R0-R5 classification internal and silent by default. Start with no visible receipt for ordinary work, use `compact_runtime` only when a boundary changes the next action, expand to `extended_governance` only when public/private boundaries, framework rules, adapters, project memory, memory writes, conversation-link decisions, semantic ambiguity, or projectization drift appear, and use `debug_receipt` only for router troubleshooting or explicit audit requests.
 
 Do not make this expensive by default. The control plane should choose the cheapest sufficient route and should not wrap every tool call.
 
@@ -96,6 +96,8 @@ When adapting the harness into a concrete runtime, use [declarative-governance-c
 Keep this contract small. It should not cause ordinary R0/R1 work to load all memory, all skill files, all tool schemas, or all external sources.
 
 Use [memory-routing-contract.md](memory-routing-contract.md) when wiring memory writes. Start with common error corpus records for small reusable mistakes, including the applied solution and validation, and upgrade to paired ERR/SOL records only when the issue is explicit, high-impact, or repeated.
+
+For conversation-memory continuation, merge, archive, or cross-conversation update requests, resolve the link decision through meta-first lookup before the first protected tool call. If the host has a pre-tool hook, wrapper, or tool proxy, unresolved link decisions should block with `conversation_link_decision_required`; if it does not, mark that surface advisory.
 
 For selective runtime hard stops, route only critical boundaries through these entry points:
 

@@ -65,7 +65,286 @@ Most adopters should aim for L1 plus L2. Do not try to wrap every tool call unti
 | DEP-023 | Final answers still overclaim validation or verification | No Stop/final-answer hook is wired, or final text is not passed into the claim gate | Wire a Stop/final hook when the host exposes final text; otherwise mark final claims advisory and require self-downgrade wording | A final sentence with a strong validation claim and no claim schema blocks or is rewritten |
 | DEP-024 | Voice or recording prompts do not affect routing | The host passes raw audio, file paths, blobs, or base64 data instead of a transcript field | Add host-side transcription and pass bounded text fields such as `transcript`, `transcription`, `caption`, `content`, `message`, or `text` | A recording whose transcript contains an R5 action produces an R5 route before planning |
 | DEP-025 | Nested claim JSON works in direct tests but fails inside hooks | Multiple shells reinterpret quotes or escapes before the adapter receives JSON | Use a file-based handoff such as `--ClaimFile` or a JSON file path for nested claims | Replay a nested claim payload through the exact hook shell and confirm the parser receives the same JSON |
+| DEP-026 | The agent continues an old conversation without reading the right memory lane | Conversation linking is advisory or the host never asks for a link decision before tools | Add a pre-action gate that blocks continuation, merge, archive, or cross-conversation memory tasks until meta-first lookup resolves the link | Ask to continue the previous conversation; the first protected tool call should block with `conversation_link_decision_required` until the link is selected |
 
+## Deployment Problem Examples And Solution Playbooks
+
+These examples are written for the adopting user's agent. They are not product-specific guarantees. Use them as candidate solution paths, then verify the exact hook, wrapper, shell, and runtime behavior on the target machine.
+
+### Example 1: Instruction File Exists But The Agent Ignores It
+
+Symptom:
+
+```text
+The repository contains AGENTS.md or CLAUDE.md, but the agent answers as if no harness exists.
+```
+
+Check:
+
+- Confirm which instruction filename the agent actually reads.
+- Confirm the file is at the workspace root or configured path.
+- Ask the agent for a compact routing receipt on a mixed-risk task.
+
+Solution path:
+
+1. Rename or mirror the root instructions to the file the agent reads, such as `AGENTS.md`, `CLAUDE.md`, or the agent's configured rule file.
+2. Keep the root file short enough to load reliably.
+3. Put large memory, examples, and adapter details behind links or meta indexes.
+4. Re-run the routing receipt test.
+
+Acceptance check:
+
+```text
+A task that includes edit + benchmark + commit is not treated as ordinary chat, and commit still requires explicit confirmation.
+```
+
+### Example 2: Hook Returns Blocked But Tool Still Executes
+
+Symptom:
+
+```text
+Hook logs show status=blocked, but the shell command or tool action still runs.
+```
+
+Check:
+
+- Is the hook attached to a pre-action event, or only a post-action event?
+- Does the host require a specific denial payload, exception type, or exit code?
+- Is the command executed through a different tool path than the one matched by the hook?
+
+Solution path:
+
+1. Move the gate to the earliest pre-tool or pre-command surface.
+2. Match the host's required denial schema exactly.
+3. Return the host-supported blocked exit code or raised exception.
+4. Add a disposable blocked-action test.
+5. Mark any unhooked paths as advisory.
+
+Acceptance check:
+
+```text
+The blocked action does not happen. Do not count the test as passed just because the hook printed blocked.
+```
+
+### Example 3: Pre-Tool Hook Loses The Original User Task
+
+Symptom:
+
+```text
+PreToolUse receives only a compact value such as R5, or only the tool command, so memory/search/claim routing is wrong.
+```
+
+Check:
+
+- Does the prompt-stage payload expose the original user text?
+- Is a session id available in both prompt and pre-tool events?
+- Does the adapter store prompt state in a workspace-local state file?
+
+Solution path:
+
+1. Add a prompt-stage hook that stores `session_id`, `cwd`, original task text, and compact receipt.
+2. During pre-tool checks, reload the stored task by session id.
+3. Pass both the compact risk override and the original task text into the runtime enforcer.
+4. If the host has no prompt-stage event, keep the route advisory and state the limitation.
+
+Acceptance check:
+
+```text
+The pre-tool log shows the original task, not only the tool command and not only a risk label.
+```
+
+### Example 4: File Edits Are Blocked Because The File Mentions Dangerous Words
+
+Symptom:
+
+```text
+A safe documentation edit is denied because the file content contains examples such as delete, permission, or rm -rf.
+```
+
+Check:
+
+- Is a broad `*` pre-tool matcher sending file-write payloads into a command-pattern gate?
+- Does the gate distinguish command fields from document content fields?
+- Is the tool a command executor or a file editor?
+
+Solution path:
+
+1. Start hard enforcement with command-tool matchers such as `Bash`, `PowerShell`, `Shell`, or `Command`.
+2. Inspect only command-like fields for command risk.
+3. Add a separate file-tool policy if file edits need hard enforcement.
+4. Keep documentation examples from being interpreted as attempted commands.
+
+Acceptance check:
+
+```text
+A file edit that merely documents rm -rf is allowed, while an actual shell command `rm -rf build` is blocked without confirmation.
+```
+
+### Example 5: Current Facts And GitHub Claims Skip Search
+
+Symptom:
+
+```text
+The agent claims a latest version, release status, GitHub behavior, license fact, or policy fact without current sources.
+```
+
+Check:
+
+- Does the router detect `latest`, `current`, `release`, `GitHub`, `repo`, `issue`, `license`, `policy`, or `price`?
+- Is the external research gate connected to dynamic re-evaluation?
+- Does the final answer separate source-prior facts from local validation?
+
+Solution path:
+
+1. Route official/current facts to official or authority sources first.
+2. Route GitHub claims to README, source tree, releases/changelog, issues, and license surfaces.
+3. Record source date and boundary.
+4. Do not upgrade external reading into `local_validated` until a local check or reproduction confirms it.
+
+Acceptance check:
+
+```text
+The final answer says what was externally sourced, what was locally verified, and what remains unverified.
+```
+
+### Example 6: Conversation Continuation Reads The Wrong Memory
+
+Symptom:
+
+```text
+The user asks to continue the previous conversation, but the agent opens the globally newest memory or an unrelated project memory.
+```
+
+Check:
+
+- Is there a lane-scoped conversation index?
+- Are active, paused, sealed, archived, merged, and superseded states represented?
+- Does the adapter require link decision resolution before tools?
+
+Solution path:
+
+1. Read the current project or PROJECTLESS conversation index first.
+2. Filter out sealed, archived, merged, and superseded memories.
+3. Sort active candidates by `updated_at` inside the active lane only.
+4. If ambiguous, ask the user to choose from a few summaries.
+5. Create a link-only continuation by default; do not write into the old memory unless explicitly requested.
+6. If a pre-tool hook exists, block protected tool calls until the link decision is resolved.
+
+Acceptance check:
+
+```text
+An unresolved continuation blocks with conversation_link_decision_required; after the selected memory is resolved, the same action proceeds.
+```
+
+### Example 7: Final Answer Still Says Validated Without Evidence
+
+Symptom:
+
+```text
+The final message says validated, verified, stable, or proven, but there is no claim schema or evidence boundary.
+```
+
+Check:
+
+- Can the runtime inspect final text before display?
+- Does the claim gate receive `final_text`?
+- Are claim type, source type, source reference, and evidence boundary present for strong claims?
+
+Solution path:
+
+1. Wire a Stop/final-answer hook when the host supports it.
+2. Pass final response text into the claim gate.
+3. If no final hook exists, require the agent to self-downgrade claims in the root instruction file.
+4. Use `validated` only for locally verified checks, not for source-prior or partial smoke results.
+
+Acceptance check:
+
+```text
+A strong final claim without evidence schema blocks, or the agent downgrades it before display.
+```
+
+### Example 8: Hook Fails On Non-ASCII Or Recording Payloads
+
+Symptom:
+
+```text
+The hook fails with a UTF-8 encoding error, or a voice/recording prompt routes as ordinary chat.
+```
+
+Check:
+
+- Does stdin JSON contain lone surrogate escapes such as `\udcac` or `\udc80`?
+- Are hook wrappers forcing UTF-8 mode?
+- Does the payload contain transcript text, or only raw audio/base64/file path data?
+
+Solution path:
+
+1. Sanitize nested strings before routing, logging, state writes, and output.
+2. Use ASCII-escaped hook output when the host shell is fragile.
+3. Set `PYTHONUTF8=1` and `PYTHONIOENCODING=utf-8` for Python hook runners.
+4. Add host-side transcription and pass bounded fields such as `transcript`, `transcription`, `caption`, `content`, `message`, or `text`.
+5. Ignore raw media blobs inside the harness adapter unless a separate permission policy exists.
+
+Acceptance check:
+
+```text
+A payload with malformed surrogate text does not crash the hook, and a recording transcript containing a high-risk action routes before planning.
+```
+
+### Example 9: Windows PowerShell Parses Policy JSON Incorrectly
+
+Symptom:
+
+```text
+ConvertFrom-Json fails on policy files that contain non-ASCII trigger text, even though Python can parse the JSON.
+```
+
+Check:
+
+- Is the PowerShell gate using default `Get-Content -Raw` encoding?
+- Does the file contain non-ASCII triggers or comments copied from docs?
+- Are all policy readers patched, or only the validator?
+
+Solution path:
+
+1. Use explicit UTF-8 reads in every PowerShell policy reader.
+2. Search all scripts for `Get-Content ... ConvertFrom-Json`.
+3. Keep machine policy JSON parseable in the exact shell that will execute it.
+4. Validate both the standalone validator and the runtime enforcer.
+
+Acceptance check:
+
+```text
+The validator, intake router, and runtime enforcer all parse the same policy file in the target shell.
+```
+
+### Example 10: Client Update Silently Breaks The Adapter
+
+Symptom:
+
+```text
+The harness worked before, then stopped after the agent client updated.
+```
+
+Check:
+
+- Did the instruction file path change?
+- Did hook names, hook payload schema, or denial semantics change?
+- Did the bundled Python, Node, Bash, or command path change?
+- Did the client reset workspace settings?
+
+Solution path:
+
+1. Re-run instruction-load, allowed-action, blocked-action, and hook payload tests.
+2. Refresh the compatibility manifest with the checked client version and adapter version.
+3. Re-confirm wrapper paths and environment variables.
+4. Treat enforcement as unverified until the blocked-action test passes again.
+
+Acceptance check:
+
+```text
+After the update, the same disposable blocked action is still stopped before execution.
+```
 ## Agent-Facing Troubleshooting Runbook
 
 When an adopting agent reports "the harness is deployed but it does not behave like a hard gate", do not guess from repository files alone. Check the actual runtime path in this order.

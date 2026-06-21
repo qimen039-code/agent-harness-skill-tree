@@ -1,17 +1,39 @@
 {
+  "memory_id": "CONVERSATION_TEMPLATE",
+  "memory_type": "conversation",
   "lane": "CONVERSATION_TEMPLATE",
   "status": "TEMPLATE",
   "scope": "one isolated long-running conversation or thread",
+  "title": "Replace with a short title",
+  "summary": "Synthetic template only. No real conversation history is included.",
+  "created_at": "YYYY-MM-DDTHH:MM:SS+00:00",
+  "updated_at": "YYYY-MM-DDTHH:MM:SS+00:00",
+  "retrieval_terms": [],
+  "semantic_anchors": [],
+  "open_loops": [],
+  "link_policy": "link_only_by_default",
+  "links": {
+    "continues_from": [],
+    "continued_by": [],
+    "merged_from": [],
+    "merged_into": null,
+    "archived_as": null
+  },
   "retrieval_order": [
     "_META_INDEX.md",
-    "conversation_state.md or matching jsonl family",
+    "conversation_state.md or index.json",
+    "memory_links.jsonl when continuation/merge/reference is involved",
     "matching records only"
   ],
   "record_families": {
+    "memory_links": "memory_links.jsonl",
     "decisions": "decisions.jsonl",
     "open_loops": "open_loops.jsonl",
     "errors_and_solutions": "errors_and_solutions.jsonl",
     "references": "references.jsonl"
   },
-  "write_boundary": "current conversation only; cross-conversation writes require explicit user instruction"
+  "write_boundary": "current conversation only; cross-conversation writes require explicit user instruction",
+  "max_continuation_depth": 5,
+  "active_successor_memory_id": null,
+  "redirect_read_to": null
 }

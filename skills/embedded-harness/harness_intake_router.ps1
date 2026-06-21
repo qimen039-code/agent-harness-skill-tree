@@ -6,7 +6,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $policyPath = Join-Path $PSScriptRoot "embedded_harness_policy.json"
-$policy = Get-Content -LiteralPath $policyPath -Raw | ConvertFrom-Json
+$policy = Get-Content -LiteralPath $policyPath -Raw -Encoding UTF8 | ConvertFrom-Json
 
 function ConvertTo-Array($value) {
   if ($null -eq $value) {
@@ -351,6 +351,23 @@ if (($projectLane -eq "PROJECTLESS") -and ($projectizationDecision -eq "not_proj
   }
 }
 
+$linkIntent = "none"
+$linkContract = $policy.conversation_linking_contract
+if ($null -ne $linkContract) {
+  if ((Get-MatchedTriggers (Get-ObjectPropertyValue $linkContract "merge_triggers")).Count -gt 0) {
+    $linkIntent = "merge_memories_explicit"
+  } elseif ((Get-MatchedTriggers (Get-ObjectPropertyValue $linkContract "archive_triggers")).Count -gt 0) {
+    $linkIntent = "archive_or_seal_memory"
+  } elseif ((Get-MatchedTriggers (Get-ObjectPropertyValue $linkContract "continue_reference_triggers")).Count -gt 0) {
+    $linkIntent = "continue_from_referenced_memory"
+  } elseif ((Get-MatchedTriggers (Get-ObjectPropertyValue $linkContract "continue_latest_triggers")).Count -gt 0) {
+    $linkIntent = "continue_from_latest"
+  }
+}
+if ($linkIntent -ne "none") {
+  $conversationMemoryDecision = "read_referenced_conversation"
+}
+
 if ($commonErrorHits.Count -gt 0) {
   $memoryNeed = "common_error_corpus"
 } elseif (($explicitRecordHits.Count -gt 0) -and ($memoryNeed -eq "none")) {
@@ -368,10 +385,19 @@ if ($explicitRecordHits.Count -gt 0) {
   $recordIntent = "explicit_conversation_memory_request"
 } elseif ($conversationMemoryDecision -eq "checkpoint_candidate") {
   $recordIntent = "conversation_checkpoint"
+} elseif ($linkIntent -in @("merge_memories_explicit", "archive_or_seal_memory")) {
+  $recordIntent = "explicit_cross_conversation_update"
+} elseif ($linkIntent -ne "none") {
+  $recordIntent = "conversation_link_review"
 }
 
-if (($conversationMemoryDecision -ne "none") -and ($memoryNeed -eq "none")) {
+if (($linkIntent -ne "none") -and ($memoryNeed -eq "none")) {
+  $memoryNeed = "index_only"
+} elseif (($conversationMemoryDecision -ne "none") -and ($memoryNeed -eq "none")) {
   $memoryNeed = "conversation_state"
+}
+if ($linkIntent -ne "none") {
+  $requiredGates += "conversation_link_gate"
 }
 
 $memoryLane = "none"
@@ -383,12 +409,14 @@ if ($commonErrorHits.Count -gt 0) {
   $memoryLane = "current_project"
 } elseif ($projectizationDecision -eq "emergent_project_candidate") {
   $memoryLane = "emergent_project_candidate"
+} elseif ($linkIntent -ne "none") {
+  $memoryLane = "referenced_conversation"
 } elseif ($conversationMemoryDecision -ne "none") {
   $memoryLane = "current_conversation"
 }
 
 $memoryMode = "none"
-if (($recordIntent -eq "explicit_user_request") -or ($recordIntent -eq "inferred_reusable_error") -or ($recordIntent -eq "explicit_conversation_memory_request") -or ($recordIntent -eq "conversation_checkpoint")) {
+if (($recordIntent -eq "explicit_user_request") -or ($recordIntent -eq "inferred_reusable_error") -or ($recordIntent -eq "explicit_conversation_memory_request") -or ($recordIntent -eq "conversation_checkpoint") -or ($recordIntent -eq "explicit_cross_conversation_update")) {
   $memoryMode = "write"
 } elseif ($memoryNeed -ne "none") {
   $memoryMode = "read"
@@ -413,6 +441,7 @@ if ($requiredSkills.Count -gt 0) { $moduleNeed += "skill_matrix" }
 if ($semanticAmbiguity.Count -gt 0) { $moduleNeed += "semantic_anchors" }
 if ($memoryNeed -ne "none") { $moduleNeed += "memory_meta_index" }
 if ($conversationMemoryDecision -ne "none") { $moduleNeed += "conversation_memory_index" }
+if ($linkIntent -ne "none") { $moduleNeed += "memory_link_ledger" }
 if (($externalNeed.Count -gt 0) -and ($externalNeed[0] -ne "none")) { $moduleNeed += "external_research_gate" }
 if ($claimRisk -ne "none") { $moduleNeed += "claim_schema_verifier" }
 if (($risk -eq "R5") -or ($classificationConfidence -eq "low")) { $moduleNeed += "runtime_gate" }
@@ -445,6 +474,9 @@ if ($debugHits.Count -gt 0) {
   if ($conversationMemoryDecision -ne "none") {
     $profileReason += "conversation_memory_candidate"
   }
+  if ($linkIntent -ne "none") {
+    $profileReason += "conversation_link_boundary"
+  }
   if ($profileReason.Count -gt 1) {
     $receiptProfile = "extended_governance"
   }
@@ -468,6 +500,7 @@ $routingReceipt = [ordered]@{
   claim_risk = $claimRisk
   projectization_decision = $projectizationDecision
   conversation_memory_decision = $conversationMemoryDecision
+  link_intent = $linkIntent
   receipt_profile = $receiptProfile
   projectization_signals = @($projectizationSignals)
   conversation_signals = @(@($conversationExplicitHits) + @($conversationSignals) | Select-Object -Unique)
@@ -481,6 +514,7 @@ $compactReceipt = [ordered]@{
   memory_mode = $memoryMode
   memory_lane = $memoryLane
   conversation_memory_decision = $conversationMemoryDecision
+  link_intent = $linkIntent
   external_need = @($externalNeed)
   claim_risk = $claimRisk
   human_confirmation_need = $humanConfirmationNeed
@@ -509,6 +543,7 @@ $result = [ordered]@{
   claim_risk = $claimRisk
   projectization_decision = $projectizationDecision
   conversation_memory_decision = $conversationMemoryDecision
+  link_intent = $linkIntent
   projectization_signals = @($projectizationSignals)
   conversation_signals = @(@($conversationExplicitHits) + @($conversationSignals) | Select-Object -Unique)
   triggered_risks = @($triggeredRisks | Select-Object -Unique)

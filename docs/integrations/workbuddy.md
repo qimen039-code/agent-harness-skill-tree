@@ -37,7 +37,7 @@ Stop hook
 
 That gives the harness a real pre-tool interception point without editing WorkBuddy internals.
 
-`UserPromptSubmit` is required for active routing. If only `PreToolUse` is wired, the runtime can still block high-risk tools, but the agent may not receive the compact route, memory/search decision, or original-task state before planning.
+`UserPromptSubmit` is required for active routing. If only `PreToolUse` is wired, the runtime can still block high-risk tools, but the agent may not preserve the original task state before planning. Ordinary low-risk prompt-stage classifications stay silent; boundary-changing classifications inject minimal context.
 
 Prefer a command-tool matcher such as `Bash|PowerShell` for the first hard `PreToolUse` deployment. A broad `*` matcher can pass file-edit payloads through the hard command gate; documentation or patch content may contain words such as `delete`, `permission`, or `rm -rf` without being an attempted command. If you want to gate file tools too, add a separate file-tool policy that understands that tool's schema instead of reusing command-pattern matching on raw file content.
 
@@ -172,6 +172,8 @@ If event logging is enabled, pass `log_path` for a concrete JSONL file or `log_d
 
 The hook runner also stores `workbuddy_hook_state.json` in the log directory so `PreToolUse` can use the original `UserPromptSubmit` text instead of routing from a compact field such as `R5`.
 
+Conversation-memory continuation, merge, archive, and cross-conversation update tasks require a resolved link decision before the first protected tool call. The adapter blocks unresolved cases with `conversation_link_decision_required`; after meta-first lookup and link selection are complete, pass `conversation_link_resolved=True` to the in-process function or `--conversation-link-resolved` to the hook runner.
+
 For nested claim payloads, prefer a file-based claim handoff such as `--ClaimFile` in the PowerShell reference scripts or a JSON file path in custom adapters. Passing deeply nested JSON directly through multiple shells is fragile because each shell has different quote and escape rules.
 
 ## Recording And Transcript Payloads
@@ -193,7 +195,7 @@ The hook runner recursively extracts bounded text from those fields and ignores 
 
 ```text
 Send a voice/recording prompt whose transcript asks for a known R5 action.
-Expected: UserPromptSubmit additionalContext reports risk=R5, and PreToolUse later uses the stored transcript as the original task.
+Expected: UserPromptSubmit additionalContext reports `human_confirmation=required`, and PreToolUse later uses the stored transcript as the original task.
 ```
 
 If the host only passes a file path or binary audio blob, add a host-side transcription step first. Do not make the harness adapter responsible for opening arbitrary recording files unless your runtime has a separate privacy and permission policy for that.

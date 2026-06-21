@@ -6,6 +6,7 @@ param(
   [string]$ConstitutionPath = "",
   [switch]$HumanConfirmed,
   [switch]$BoundaryReviewed,
+  [switch]$ConversationLinkResolved,
   [switch]$ConstitutionReviewed
 )
 
@@ -32,6 +33,7 @@ $gateArgs = @{
 }
 if ($HumanConfirmed) { $gateArgs.HumanConfirmed = $true }
 if ($BoundaryReviewed) { $gateArgs.BoundaryReviewed = $true }
+if ($ConversationLinkResolved) { $gateArgs.ConversationLinkResolved = $true }
 if ($ConstitutionReviewed) { $gateArgs.ConstitutionReviewed = $true }
 
 $gateOutput = & (Join-Path $PSScriptRoot "harness_runtime_enforcer.ps1") @gateArgs

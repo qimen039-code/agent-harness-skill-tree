@@ -1,7 +1,9 @@
 {
   "version": 1,
   "default_language": "user_preferred",
-  "ordinary_chat_default": ["microkernel_only"],
+  "ordinary_chat_default": [
+    "microkernel_only"
+  ],
   "risk_levels": {
     "R0": "ordinary chat or stable knowledge answer",
     "R1": "read-only local inspection",
@@ -10,47 +12,245 @@
     "R4": "experiment, build, performance, runtime, external research, or current factual claim",
     "R5": "delete, commit, install, login, payment, permission, network/firewall/proxy edit, sensitive transfer, or long-term memory write"
   },
-  "risk_order_high_to_low": ["R5", "R4", "R3", "R2", "R1"],
+  "risk_order_high_to_low": [
+    "R5",
+    "R4",
+    "R3",
+    "R2",
+    "R1"
+  ],
   "risk_trigger_rules": {
-    "R0": { "en": [], "zh": [] },
+    "R0": {
+      "en": [],
+      "zh": []
+    },
     "R5": {
-      "en": ["delete", "remove", "Remove-Item", "commit", "push", "git commit", "git push", "install", "uninstall", "login", "permission", "firewall", "proxy", "private value", "sensitive value", "credential-like value", "long-term memory", "write memory", "payment"],
-      "zh": ["\u5220\u9664", "\u79fb\u9664", "\u63d0\u4ea4", "\u5b89\u88c5", "\u767b\u5f55", "\u6743\u9650", "\u9632\u706b\u5899", "\u4ee3\u7406", "\u654f\u611f", "\u957f\u671f\u8bb0\u5fc6", "\u5199\u5165\u8bb0\u5fc6", "\u4ed8\u6b3e"]
+      "en": [
+        "delete",
+        "remove",
+        "Remove-Item",
+        "commit",
+        "push",
+        "git commit",
+        "git push",
+        "install",
+        "uninstall",
+        "login",
+        "permission",
+        "firewall",
+        "proxy",
+        "private value",
+        "sensitive value",
+        "credential-like value",
+        "long-term memory",
+        "write memory",
+        "payment"
+      ],
+      "zh": [
+        "删除",
+        "移除",
+        "提交",
+        "安装",
+        "登录",
+        "权限",
+        "防火墙",
+        "代理",
+        "敏感",
+        "长期记忆",
+        "写入记忆",
+        "付款"
+      ]
     },
     "R4": {
-      "en": ["experiment", "benchmark", "performance", "GPU", "runtime", "network", "search the web", "latest", "current", "GitHub", "open source", "official", "price", "policy", "law", "release"],
-      "zh": ["\u5b9e\u9a8c", "\u6027\u80fd", "\u8fd0\u884c\u65f6", "\u8054\u7f51", "\u68c0\u7d22", "\u6700\u65b0", "\u76ee\u524d", "\u73b0\u5728", "\u5f00\u6e90", "\u5b98\u65b9", "\u4ef7\u683c", "\u653f\u7b56", "\u6cd5\u5f8b"]
+      "en": [
+        "experiment",
+        "benchmark",
+        "performance",
+        "GPU",
+        "runtime",
+        "network",
+        "search the web",
+        "latest",
+        "current",
+        "GitHub",
+        "open source",
+        "official",
+        "price",
+        "policy",
+        "law",
+        "release"
+      ],
+      "zh": [
+        "实验",
+        "性能",
+        "运行时",
+        "联网",
+        "检索",
+        "最新",
+        "目前",
+        "现在",
+        "开源",
+        "官方",
+        "价格",
+        "政策",
+        "法律"
+      ]
     },
     "R3": {
-      "en": ["modify", "update", "implement", "fix", "code", "config", "AGENTS", "harness", "script", "dynamic evaluation", "decision layer", "governance layer", "governance update", "routing rule", "route rule", "trigger rule", "risk rule", "decision matrix", "framework rule", "framework behavior", "rule update", "rule change", "apply_patch", "patch", "edit"],
-      "zh": ["\u4fee\u6539", "\u66f4\u65b0", "\u5b9e\u73b0", "\u4fee\u590d", "\u4ee3\u7801", "\u914d\u7f6e", "\u811a\u672c", "\u6cbb\u7406\u5c42", "\u52a8\u6001\u8bc4\u4f30", "\u51b3\u7b56\u5c42", "\u8def\u7531\u89c4\u5219", "\u89c4\u5219\u66f4\u65b0", "\u89c4\u5219\u6f0f\u5224", "\u89e6\u53d1\u8bcd", "\u51b3\u7b56\u77e9\u9635", "\u9884\u8bc4\u4f30", "\u590d\u8bc4"]
+      "en": [
+        "modify",
+        "update",
+        "implement",
+        "fix",
+        "code",
+        "config",
+        "AGENTS",
+        "harness",
+        "script",
+        "dynamic evaluation",
+        "decision layer",
+        "governance layer",
+        "governance update",
+        "routing rule",
+        "route rule",
+        "trigger rule",
+        "risk rule",
+        "decision matrix",
+        "framework rule",
+        "framework behavior",
+        "rule update",
+        "rule change",
+        "apply_patch",
+        "patch",
+        "edit"
+      ],
+      "zh": [
+        "修改",
+        "更新",
+        "实现",
+        "修复",
+        "代码",
+        "配置",
+        "脚本",
+        "治理层",
+        "动态评估",
+        "决策层",
+        "路由规则",
+        "规则更新",
+        "规则漏判",
+        "触发词",
+        "决策矩阵",
+        "预评估",
+        "复评"
+      ]
     },
     "R2": {
-      "en": ["report", "handoff", "ledger", "archive", "document", "write file", "create file", "generate file"],
-      "zh": ["\u62a5\u544a", "\u4ea4\u63a5", "\u5f52\u6863", "\u6587\u6863", "\u5199\u5165", "\u521b\u5efa\u6587\u4ef6", "\u751f\u6210\u6587\u4ef6"]
+      "en": [
+        "report",
+        "handoff",
+        "ledger",
+        "archive",
+        "document",
+        "write file",
+        "create file",
+        "generate file"
+      ],
+      "zh": [
+        "报告",
+        "交接",
+        "归档",
+        "文档",
+        "写入",
+        "创建文件",
+        "生成文件"
+      ]
     },
     "R1": {
-      "en": ["inspect", "check", "read", "local search", "read-only", "locate", "rg", "Get-Content", "memory", "retrieve", "meta", "index", "capsule", "_META_INDEX"],
-      "zh": ["\u68c0\u67e5", "\u67e5\u770b", "\u8bfb\u53d6", "\u641c\u7d22\u672c\u5730", "\u53ea\u8bfb", "\u5b9a\u4f4d", "\u8bb0\u5fc6", "\u5143\u6458\u8981"]
+      "en": [
+        "inspect",
+        "check",
+        "read",
+        "local search",
+        "read-only",
+        "locate",
+        "rg",
+        "Get-Content",
+        "memory",
+        "retrieve",
+        "meta",
+        "index",
+        "capsule",
+        "_META_INDEX"
+      ],
+      "zh": [
+        "检查",
+        "查看",
+        "读取",
+        "搜索本地",
+        "只读",
+        "定位",
+        "记忆",
+        "元摘要"
+      ]
     }
   },
   "risk_gate_rules": {
-    "R1": ["read_only_context_gate"],
-    "R2": ["artifact_boundary_gate", "claim_gate"],
-    "R3": ["project_context_gate", "change_contract_gate", "claim_gate"],
-    "R4": ["project_context_gate", "change_contract_gate", "external_research_gate", "verification_gate", "claim_gate"],
-    "R5": ["human_confirmation"]
+    "R1": [
+      "read_only_context_gate"
+    ],
+    "R2": [
+      "artifact_boundary_gate",
+      "claim_gate"
+    ],
+    "R3": [
+      "project_context_gate",
+      "change_contract_gate",
+      "claim_gate"
+    ],
+    "R4": [
+      "project_context_gate",
+      "change_contract_gate",
+      "external_research_gate",
+      "verification_gate",
+      "claim_gate"
+    ],
+    "R5": [
+      "human_confirmation"
+    ]
   },
   "risk_approval_rules": {
-    "R5": ["high_risk_action"]
+    "R5": [
+      "high_risk_action"
+    ]
   },
-  "fallback_boundary_triggers": ["task", "handle", "organize", "analyze", "project", "file", "problem", "issue", "bug", "error", "failure", "repo", "repository"],
+  "fallback_boundary_triggers": [
+    "task",
+    "handle",
+    "organize",
+    "analyze",
+    "project",
+    "file",
+    "problem",
+    "issue",
+    "bug",
+    "error",
+    "failure",
+    "repo",
+    "repository"
+  ],
   "project_lanes": {
-    "EXAMPLE_PROJECT": ["C:\\path\\to\\project"]
+    "EXAMPLE_PROJECT": [
+      "C:\\path\\to\\project"
+    ]
   },
   "memory_roots": {
-    "EXAMPLE_PROJECT": ["C:\\path\\to\\project\\.agent-memory", "C:\\path\\to\\project\\memory-bank"],
-    "GLOBAL": ["C:\\path\\to\\agent-home\\memories"]
+    "EXAMPLE_PROJECT": [
+      "C:\\path\\to\\project\\.agent-memory",
+      "C:\\path\\to\\project\\memory-bank"
+    ],
+    "GLOBAL": [
+      "C:\\path\\to\\agent-home\\memories"
+    ]
   },
   "global_memory_lane": {
     "lane": "GLOBAL",
@@ -77,71 +277,458 @@
       "projectization_decision",
       "conversation_memory_decision",
       "receipt_profile",
-      "required_gates"
+      "required_gates",
+      "link_intent"
     ],
-    "target_surface_values": ["public_docs", "local_harness", "project_memory", "conversation_memory", "skill_matrix", "tool_call", "adapter", "git_action", "private_rule", "current_chat"],
-    "audience_values": ["public_user", "local_maintainer", "project_operator", "current_chat"],
-    "module_need_values": ["none", "project_router", "semantic_anchors", "skill_matrix", "memory_meta_index", "conversation_memory_index", "external_research_gate", "claim_schema_verifier", "runtime_gate"],
-    "memory_need_values": ["none", "meta_only", "index_only", "capsule_payload", "paired_err_sol", "common_error_corpus", "conversation_state"],
-    "memory_mode_values": ["none", "read", "write", "update"],
-    "memory_lane_values": ["none", "current_project", "current_conversation", "referenced_conversation", "emergent_project_candidate", "common_error_corpus", "self_reflection_matrix", "global_inbox"],
-    "record_intent_values": ["no_record", "explicit_user_request", "inferred_reusable_error", "projectization_review", "conversation_checkpoint", "explicit_conversation_memory_request"],
-    "conversation_memory_decision_values": ["none", "create_or_update_current_conversation", "checkpoint_candidate", "read_referenced_conversation", "explicit_cross_conversation_update"],
-    "external_need_values": ["none", "official_authority_source_search", "github_open_source_repository_search", "general_web_cross_check", "source_grounded_learning_intake", "local_validation_route"],
-    "claim_risk_values": ["none", "operational_note", "weak_claim", "strong_claim_needs_schema"],
+    "target_surface_values": [
+      "public_docs",
+      "local_harness",
+      "project_memory",
+      "conversation_memory",
+      "skill_matrix",
+      "tool_call",
+      "adapter",
+      "git_action",
+      "private_rule",
+      "current_chat"
+    ],
+    "audience_values": [
+      "public_user",
+      "local_maintainer",
+      "project_operator",
+      "current_chat"
+    ],
+    "module_need_values": [
+      "none",
+      "project_router",
+      "semantic_anchors",
+      "skill_matrix",
+      "memory_meta_index",
+      "conversation_memory_index",
+      "external_research_gate",
+      "claim_schema_verifier",
+      "runtime_gate",
+      "memory_link_ledger"
+    ],
+    "memory_need_values": [
+      "none",
+      "meta_only",
+      "index_only",
+      "capsule_payload",
+      "paired_err_sol",
+      "common_error_corpus",
+      "conversation_state"
+    ],
+    "memory_mode_values": [
+      "none",
+      "read",
+      "write",
+      "update"
+    ],
+    "memory_lane_values": [
+      "none",
+      "current_project",
+      "current_conversation",
+      "referenced_conversation",
+      "emergent_project_candidate",
+      "common_error_corpus",
+      "self_reflection_matrix",
+      "global_inbox"
+    ],
+    "record_intent_values": [
+      "no_record",
+      "explicit_user_request",
+      "inferred_reusable_error",
+      "projectization_review",
+      "conversation_checkpoint",
+      "explicit_conversation_memory_request",
+      "conversation_link_review",
+      "explicit_cross_conversation_update"
+    ],
+    "conversation_memory_decision_values": [
+      "none",
+      "create_or_update_current_conversation",
+      "checkpoint_candidate",
+      "read_referenced_conversation",
+      "explicit_cross_conversation_update"
+    ],
+    "external_need_values": [
+      "none",
+      "official_authority_source_search",
+      "github_open_source_repository_search",
+      "general_web_cross_check",
+      "source_grounded_learning_intake",
+      "local_validation_route"
+    ],
+    "claim_risk_values": [
+      "none",
+      "operational_note",
+      "weak_claim",
+      "strong_claim_needs_schema"
+    ],
     "target_surface_trigger_rules": {
-      "git_action": ["git commit", "git push", "commit", "push", "\u63d0\u4ea4", "\u63a8\u9001"],
-      "tool_call": ["tool proxy", "tool call", "shell_command", "command", "\u5de5\u5177\u8c03\u7528", "\u547d\u4ee4"],
-      "adapter": ["WorkBuddy", "Claude Code", "adapter", "client update", "\u9002\u914d", "\u5ba2\u6237\u7aef"],
-      "public_docs": ["public", "README", "GitHub", "open source", "repo", "repository", "whiteboard", "\u516c\u5f00", "\u767d\u677f", "\u4ed3\u5e93"],
-      "private_rule": ["internal", "private", "local maintainer", "local-only", "\u672c\u673a", "\u672c\u5730", "\u5185\u90e8", "\u79c1\u6709"],
-      "project_memory": ["memory", "history", "_META_INDEX", "capsule", "ERR-", "SOL-", "\u8bb0\u5fc6", "\u5386\u53f2", "\u5143\u6458\u8981"],
-      "conversation_memory": ["conversation memory", "thread memory", "chat memory", "continue this conversation", "checkpoint this conversation", "conversation checkpoint", "\u5bf9\u8bdd\u8bb0\u5fc6", "\u4f1a\u8bdd\u8bb0\u5fc6", "\u5bf9\u8bdd\u68c0\u67e5\u70b9", "\u7ee7\u7eed\u8fd9\u4e2a\u5bf9\u8bdd"],
-      "skill_matrix": ["skill", "semantic anchor", "skill matrix", "skill\u77e9\u9635", "\u8bed\u4e49\u951a\u70b9"],
-      "local_harness": ["harness", "AGENTS", "policy", "route", "routing", "dynamic evaluation", "decision layer", "governance layer", "\u8def\u7531", "\u52a8\u6001\u8bc4\u4f30", "\u51b3\u7b56\u5c42", "\u6cbb\u7406\u5c42"]
+      "git_action": [
+        "git commit",
+        "git push",
+        "commit",
+        "push",
+        "提交",
+        "推送"
+      ],
+      "tool_call": [
+        "tool proxy",
+        "tool call",
+        "shell_command",
+        "command",
+        "工具调用",
+        "命令"
+      ],
+      "adapter": [
+        "WorkBuddy",
+        "Claude Code",
+        "adapter",
+        "client update",
+        "适配",
+        "客户端"
+      ],
+      "public_docs": [
+        "public",
+        "README",
+        "GitHub",
+        "open source",
+        "repo",
+        "repository",
+        "whiteboard",
+        "公开",
+        "白板",
+        "仓库"
+      ],
+      "private_rule": [
+        "internal",
+        "private",
+        "local maintainer",
+        "local-only",
+        "本机",
+        "本地",
+        "内部",
+        "私有"
+      ],
+      "project_memory": [
+        "memory",
+        "history",
+        "_META_INDEX",
+        "capsule",
+        "ERR-",
+        "SOL-",
+        "记忆",
+        "历史",
+        "元摘要"
+      ],
+      "conversation_memory": [
+        "conversation memory",
+        "thread memory",
+        "chat memory",
+        "continue this conversation",
+        "checkpoint this conversation",
+        "conversation checkpoint",
+        "对话记忆",
+        "会话记忆",
+        "对话检查点",
+        "继续这个对话"
+      ],
+      "skill_matrix": [
+        "skill",
+        "semantic anchor",
+        "skill matrix",
+        "skill矩阵",
+        "语义锚点"
+      ],
+      "local_harness": [
+        "harness",
+        "AGENTS",
+        "policy",
+        "route",
+        "routing",
+        "dynamic evaluation",
+        "decision layer",
+        "governance layer",
+        "路由",
+        "动态评估",
+        "决策层",
+        "治理层"
+      ]
     },
     "audience_trigger_rules": {
-      "public_user": ["public", "README", "GitHub", "open source", "repo", "repository", "whiteboard", "\u516c\u5f00", "\u767d\u677f", "\u4ed3\u5e93"],
-      "local_maintainer": ["internal", "private", "local maintainer", "local-only", "\u672c\u673a", "\u672c\u5730", "\u5185\u90e8", "\u79c1\u6709"]
+      "public_user": [
+        "public",
+        "README",
+        "GitHub",
+        "open source",
+        "repo",
+        "repository",
+        "whiteboard",
+        "公开",
+        "白板",
+        "仓库"
+      ],
+      "local_maintainer": [
+        "internal",
+        "private",
+        "local maintainer",
+        "local-only",
+        "本机",
+        "本地",
+        "内部",
+        "私有"
+      ]
     },
-    "semantic_ambiguity_triggers": ["update", "record", "publish", "call", "use", "memory", "skill", "route", "harness", "public", "internal", "whiteboard", "\u66f4\u65b0", "\u8bb0\u5f55", "\u53d1\u5e03", "\u8c03\u7528", "\u4f7f\u7528", "\u8bb0\u5fc6", "skill\u77e9\u9635", "\u8def\u7531", "\u516c\u5f00", "\u5185\u90e8", "\u767d\u677f"],
-    "memory_need_triggers": ["memory", "history", "_META_INDEX", "capsule", "remember", "previous", "ERR-", "SOL-", "meta index", "meta summary", "\u8bb0\u5fc6", "\u5386\u53f2", "\u4e4b\u524d", "\u5143\u6458\u8981"],
-    "paired_memory_triggers": ["ERR-", "SOL-", "error memory", "solution memory", "self-reflection", "\u9519\u8bef\u8bb0\u5f55", "\u89e3\u51b3\u8bb0\u5f55", "\u81ea\u53cd\u7701"],
-    "explicit_record_triggers": ["record this error", "record this mistake", "remember this issue", "write this to memory", "add this to memory", "self-reflection matrix", "\u8bb0\u5f55\u6b64\u6b21\u9519\u8bef", "\u8bb0\u5f55\u8fd9\u6b21\u9519\u8bef", "\u8bb0\u4e00\u4e0b\u8fd9\u4e2a\u95ee\u9898", "\u8bb0\u5f55\u8fd9\u4e2a\u95ee\u9898", "\u6309\u81ea\u53cd\u7701\u77e9\u9635\u8bb0\u5f55", "\u8bb0\u5fc6\u4e00\u4e0b"],
-    "common_error_triggers": ["common error", "common mistake", "field error", "schema error", "function call error", "tool call error", "semantic error", "patch context", "apply_patch context", "wildcard error", "quoting error", "\u5e38\u89c1\u9519\u8bef", "\u5b57\u6bb5\u9519\u8bef", "\u8c03\u7528\u9519\u8bef", "\u51fd\u6570\u8c03\u7528\u9519\u8bef", "\u5de5\u5177\u8c03\u7528\u9519\u8bef", "\u8bed\u4e49\u9519\u8bef", "\u8bed\u4e49\u5b9a\u4f4d\u9519\u8bef", "\u4e0a\u4e0b\u6587\u4e0d\u5339\u914d", "\u901a\u914d\u7b26\u9519\u8bef"],
-    "conversation_memory_explicit_triggers": ["remember this conversation", "checkpoint this conversation", "continue this conversation later", "save this conversation state", "create conversation memory", "update this conversation memory", "thread memory", "conversation memory", "\u8bb0\u4f4f\u8fd9\u4e2a\u5bf9\u8bdd", "\u8bb0\u5f55\u8fd9\u4e2a\u5bf9\u8bdd", "\u4fdd\u5b58\u8fd9\u4e2a\u5bf9\u8bdd\u72b6\u6001", "\u5efa\u7acb\u5bf9\u8bdd\u8bb0\u5fc6", "\u66f4\u65b0\u8fd9\u4efd\u5bf9\u8bdd\u8bb0\u5fc6", "\u7ee7\u7eed\u8fd9\u4e2a\u5bf9\u8bdd"],
-    "conversation_memory_signals": ["long conversation", "context compression", "continue later", "open loops", "unresolved", "decision", "checkpoint", "handoff", "ordinary conversation", "projectless", "\u957f\u5bf9\u8bdd", "\u4e0a\u4e0b\u6587\u538b\u7f29", "\u7a0d\u540e\u7ee7\u7eed", "\u5f85\u529e", "\u672a\u5b8c\u6210", "\u672a\u9a8c\u8bc1", "\u51b3\u7b56", "\u68c0\u67e5\u70b9", "\u4ea4\u63a5", "\u666e\u901a\u5bf9\u8bdd", "\u975e\u9879\u76ee"],
+    "semantic_ambiguity_triggers": [
+      "update",
+      "record",
+      "publish",
+      "call",
+      "use",
+      "memory",
+      "skill",
+      "route",
+      "harness",
+      "public",
+      "internal",
+      "whiteboard",
+      "更新",
+      "记录",
+      "发布",
+      "调用",
+      "使用",
+      "记忆",
+      "skill矩阵",
+      "路由",
+      "公开",
+      "内部",
+      "白板"
+    ],
+    "memory_need_triggers": [
+      "memory",
+      "history",
+      "_META_INDEX",
+      "capsule",
+      "remember",
+      "previous",
+      "ERR-",
+      "SOL-",
+      "meta index",
+      "meta summary",
+      "记忆",
+      "历史",
+      "之前",
+      "元摘要"
+    ],
+    "paired_memory_triggers": [
+      "ERR-",
+      "SOL-",
+      "error memory",
+      "solution memory",
+      "self-reflection",
+      "错误记录",
+      "解决记录",
+      "自反省"
+    ],
+    "explicit_record_triggers": [
+      "record this error",
+      "record this mistake",
+      "remember this issue",
+      "write this to memory",
+      "add this to memory",
+      "self-reflection matrix",
+      "记录此次错误",
+      "记录这次错误",
+      "记一下这个问题",
+      "记录这个问题",
+      "按自反省矩阵记录",
+      "记忆一下"
+    ],
+    "common_error_triggers": [
+      "common error",
+      "common mistake",
+      "field error",
+      "schema error",
+      "function call error",
+      "tool call error",
+      "semantic error",
+      "patch context",
+      "apply_patch context",
+      "wildcard error",
+      "quoting error",
+      "常见错误",
+      "字段错误",
+      "调用错误",
+      "函数调用错误",
+      "工具调用错误",
+      "语义错误",
+      "语义定位错误",
+      "上下文不匹配",
+      "通配符错误"
+    ],
+    "conversation_memory_explicit_triggers": [
+      "remember this conversation",
+      "checkpoint this conversation",
+      "continue this conversation later",
+      "save this conversation state",
+      "create conversation memory",
+      "update this conversation memory",
+      "thread memory",
+      "conversation memory",
+      "记住这个对话",
+      "记录这个对话",
+      "保存这个对话状态",
+      "建立对话记忆",
+      "更新这份对话记忆",
+      "继续这个对话"
+    ],
+    "conversation_memory_signals": [
+      "long conversation",
+      "context compression",
+      "continue later",
+      "open loops",
+      "unresolved",
+      "decision",
+      "checkpoint",
+      "handoff",
+      "ordinary conversation",
+      "projectless",
+      "长对话",
+      "上下文压缩",
+      "稍后继续",
+      "待办",
+      "未完成",
+      "未验证",
+      "决策",
+      "检查点",
+      "交接",
+      "普通对话",
+      "非项目"
+    ],
     "conversation_memory_threshold": 2,
-    "projectization_signals": ["version", "VERSION", "CHANGELOG", "README", "repository", "repo", "GitHub", "release", "tests", "adapter", "policy", "runtime", "public package", "docs", "template", "\u7248\u672c", "\u4ed3\u5e93", "\u53d1\u5e03", "\u6d4b\u8bd5", "\u9002\u914d\u5668", "\u767d\u677f", "\u9879\u76ee\u5316", "\u9879\u76ee\u6587\u4ef6"],
+    "projectization_signals": [
+      "version",
+      "VERSION",
+      "CHANGELOG",
+      "README",
+      "repository",
+      "repo",
+      "GitHub",
+      "release",
+      "tests",
+      "adapter",
+      "policy",
+      "runtime",
+      "public package",
+      "docs",
+      "template",
+      "版本",
+      "仓库",
+      "发布",
+      "测试",
+      "适配器",
+      "白板",
+      "项目化",
+      "项目文件"
+    ],
     "projectization_threshold": 3,
     "low_cost_rule": "Use microkernel -> router contract -> one matching module -> one needed gate -> one needed index -> only matching payload.",
-    "source_grounded_influences": ["policy_decision_point", "admission_precheck", "metadata_router", "triggered_reassessment", "failure_mode_preflight", "audience_boundary"]
+    "source_grounded_influences": [
+      "policy_decision_point",
+      "admission_precheck",
+      "metadata_router",
+      "triggered_reassessment",
+      "failure_mode_preflight",
+      "audience_boundary"
+    ],
+    "link_intent_values": [
+      "none",
+      "continue_from_latest",
+      "continue_from_referenced_memory",
+      "merge_memories_explicit",
+      "archive_or_seal_memory",
+      "explicit_cross_conversation_update"
+    ]
   },
   "receipt_profiles": {
     "default_profile": "compact_runtime",
-    "profile_rule": "Always compute the full routing decision internally, but expose the smallest receipt profile that fits the task. Expand only when governance, public/private, projectization, R4/R5, memory write, strong claim, or debug triggers require it.",
+    "profile_rule": "Always compute the full routing decision internally. Keep R0-R5 labels silent by default and expose only fields that change execution path, cost, permission, memory, conversation-linking, external search, or claim behavior. Expand only when governance, public/private, projectization, R4/R5, memory write, conversation-link, strong claim, or debug triggers require it.",
     "compact_runtime": {
       "purpose": "default low-cost runtime receipt for ordinary nontrivial tasks and single-user local agents",
-      "fields": ["task_type", "risk_level", "required_gates", "memory_mode", "memory_lane", "external_need", "claim_risk", "human_confirmation_need"],
-      "expand_when": ["public_or_private_audience", "semantic_ambiguity_present", "framework_or_adapter_or_project_memory_surface", "memory_write_or_update", "projectization_candidate", "debug_requested"]
+      "fields": [
+        "task_type",
+        "risk_level",
+        "required_gates",
+        "memory_mode",
+        "memory_lane",
+        "external_need",
+        "claim_risk",
+        "human_confirmation_need",
+        "link_intent"
+      ],
+      "expand_when": [
+        "public_or_private_audience",
+        "semantic_ambiguity_present",
+        "framework_or_adapter_or_project_memory_surface",
+        "memory_write_or_update",
+        "projectization_candidate",
+        "debug_requested"
+      ]
     },
     "extended_governance": {
       "purpose": "expanded receipt for framework rules, public repositories, adapters, project memory, conversation memory, projectization, archive, persona, and cross-boundary governance",
-      "fields": ["task_type", "target_surface", "audience", "project_lane", "risk_level", "semantic_ambiguity", "module_need", "memory_need", "memory_mode", "memory_lane", "record_intent", "external_need", "claim_risk", "projectization_decision", "conversation_memory_decision", "required_gates"]
+      "fields": [
+        "task_type",
+        "target_surface",
+        "audience",
+        "project_lane",
+        "risk_level",
+        "semantic_ambiguity",
+        "module_need",
+        "memory_need",
+        "memory_mode",
+        "memory_lane",
+        "record_intent",
+        "external_need",
+        "claim_risk",
+        "projectization_decision",
+        "conversation_memory_decision",
+        "link_intent",
+        "required_gates"
+      ]
     },
     "debug_receipt": {
       "purpose": "full diagnostic receipt for router development and misroute debugging",
-      "fields": ["full_routing_receipt", "triggered_risks", "matched_risk_triggers", "negated_risk_triggers", "classification_confidence", "profile_reason"]
+      "fields": [
+        "full_routing_receipt",
+        "triggered_risks",
+        "matched_risk_triggers",
+        "negated_risk_triggers",
+        "classification_confidence",
+        "profile_reason"
+      ]
     },
-    "debug_triggers": ["debug receipt", "full receipt", "route debug", "routing debug", "\u8c03\u8bd5\u56de\u6267", "\u5b8c\u6574\u56de\u6267", "\u8def\u7531\u8c03\u8bd5"]
+    "debug_triggers": [
+      "debug receipt",
+      "full receipt",
+      "route debug",
+      "routing debug",
+      "调试回执",
+      "完整回执",
+      "路由调试"
+    ]
   },
   "cost_control_contract": {
     "principle": "Maximum leverage, minimum active context.",
     "action_relevant_rule": "Only emit or load a field by default if it can change the next action. Otherwise keep it in docs, archive meta, debug receipt, or audit logs.",
+    "classification_visibility_rule": "R0-R5 classification always runs internally. User-facing replies and prompt-stage context stay silent unless classification changes execution path, cost, permission, memory, external search, or claim boundary. Debug or audit requests expose the full receipt.",
     "routing_field_budget": {
       "R0": "no explicit receipt; microkernel only",
-      "R1_R2": "compact_runtime",
-      "R3_R4": "compact_runtime plus triggered fields only",
+      "R1_R2": "usually implicit; compact_runtime only when an action-changing gate appears",
+      "R3_R4": "compact_runtime plus triggered fields only; do not display risk labels unless needed for boundary explanation",
       "R5_or_boundary_sensitive": "extended_governance",
       "debug_or_audit": "debug_receipt"
     },
@@ -161,13 +748,33 @@
     "common_error_rule": "Small but recurring execution mistakes should enter common_error_corpus as lightweight CE error-and-solution records. A CE record must include the mistake, cause, applied solution, prevention rule, validation, and evidence; only high-impact, repeated, or user-explicit incidents upgrade to paired ERR/SOL records.",
     "conversation_memory_rule": "Projectless long-running conversations may create a current_conversation lane when the user explicitly asks for a checkpoint or when durable conversation signals cross the threshold. This lane is isolated by conversation/thread id, follows meta-first retrieval, and may be read by other conversations only through explicit reference. Cross-conversation writes require explicit user instruction.",
     "projectization_rule": "If projectless work accumulates durable files, versioning, repository/docs, tests, adapters, releases, or repeated architecture decisions, mark emergent_project_candidate and ask or state the lane assumption before durable memory writes.",
-    "common_error_record_shape": ["ce_id", "class", "status", "surface", "symptom", "cause", "solution_applied", "prevention", "validation", "upgrade_to_err_sol_when", "evidence", "last_reviewed"]
+    "common_error_record_shape": [
+      "ce_id",
+      "class",
+      "status",
+      "surface",
+      "symptom",
+      "cause",
+      "solution_applied",
+      "prevention",
+      "validation",
+      "upgrade_to_err_sol_when",
+      "evidence",
+      "last_reviewed"
+    ]
   },
   "global_archive_contract": {
     "mode": "optional_cold_index",
     "default_lookup_rule": "Use active project or conversation lane first. Read the global archive only when the user asks for archive lookup, the active lane has no relevant record, or a lane is being sealed or snapshotted.",
-    "allowed_operations": ["ARCHIVE_MOVE", "ARCHIVE_COPY", "ARCHIVE_SUMMARY_CAPSULE"],
-    "default_operations": ["ARCHIVE_MOVE", "ARCHIVE_COPY"],
+    "allowed_operations": [
+      "ARCHIVE_MOVE",
+      "ARCHIVE_COPY",
+      "ARCHIVE_SUMMARY_CAPSULE"
+    ],
+    "default_operations": [
+      "ARCHIVE_MOVE",
+      "ARCHIVE_COPY"
+    ],
     "summary_capsule_rule": "ARCHIVE_SUMMARY_CAPSULE requires explicit compression, migration, de-identification, public-release, or storage-reduction intent. Do not delete the source unless separately confirmed.",
     "hard_rules": [
       "do_not_regenerate_archived_memory_content_by_default",
@@ -179,8 +786,22 @@
   "persona_state_policy": {
     "default": "off",
     "scope": "current_conversation_only",
-    "may_affect": ["tone", "pacing", "roleplay_style", "companion_style"],
-    "must_not_affect": ["facts", "risk_level", "verification", "project_boundary", "memory_boundary", "claim_schema", "external_research", "test_decisions"],
+    "may_affect": [
+      "tone",
+      "pacing",
+      "roleplay_style",
+      "companion_style"
+    ],
+    "must_not_affect": [
+      "facts",
+      "risk_level",
+      "verification",
+      "project_boundary",
+      "memory_boundary",
+      "claim_schema",
+      "external_research",
+      "test_decisions"
+    ],
     "global_propagation": false,
     "project_propagation": false,
     "durable_user_profile_rule": "Only explicit operating preferences may be durable. Do not persist personality, motives, identity, emotional profile, or persona assumptions by default."
@@ -194,8 +815,32 @@
     ],
     "missing_meta_rule": "If no meta summary exists, use the smallest available top-level index or manifest as a temporary meta layer, mark the missing meta layer as an adaptation gap, and avoid broad memory/history scans.",
     "meta_index_contract": {
-      "recommended_fields": ["lane", "scope", "category", "record_type", "status", "retrieval_terms", "applies_when", "does_not_apply_when", "linked_modules", "linked_records", "last_reviewed"],
-      "category_row_shape": ["ID", "Type", "Status", "Summary", "Retrieval Terms", "Applies", "Not Applies", "Linked Modules", "Linked Records", "Supersedes", "Superseded By"],
+      "recommended_fields": [
+        "lane",
+        "scope",
+        "category",
+        "record_type",
+        "status",
+        "retrieval_terms",
+        "applies_when",
+        "does_not_apply_when",
+        "linked_modules",
+        "linked_records",
+        "last_reviewed"
+      ],
+      "category_row_shape": [
+        "ID",
+        "Type",
+        "Status",
+        "Summary",
+        "Retrieval Terms",
+        "Applies",
+        "Not Applies",
+        "Linked Modules",
+        "Linked Records",
+        "Supersedes",
+        "Superseded By"
+      ],
       "default_retrieval_budget": {
         "max_meta_indexes": 1,
         "max_category_indexes": 1,
@@ -253,12 +898,122 @@
     "cost_rule": "Use the cheapest sufficient route; do not load all memory, all skills, or all history because the dynamic layer is active.",
     "failure_rule": "If dynamic evaluation cannot be completed, mark the final answer as dynamically incomplete or unverified."
   },
+  "conversation_linking_contract": {
+    "active_lookup_scope_rule": "Latest means latest active memory inside the current project lane or PROJECTLESS lane, never global latest across unrelated lanes.",
+    "active_statuses": [
+      "active",
+      "paused",
+      "checkpoint_candidate"
+    ],
+    "terminal_statuses": [
+      "sealed",
+      "archived",
+      "merged",
+      "superseded"
+    ],
+    "max_continuation_depth": 5,
+    "link_required_intents": [
+      "continue_from_latest",
+      "continue_from_referenced_memory",
+      "merge_memories_explicit",
+      "archive_or_seal_memory",
+      "explicit_cross_conversation_update"
+    ],
+    "continue_latest_triggers": [
+      "continue previous conversation",
+      "continue the previous conversation",
+      "continue last conversation",
+      "previous conversation",
+      "last conversation",
+      "previous chat",
+      "last chat",
+      "continue from last time",
+      "resume previous conversation",
+      "上一个对话",
+      "上一段对话",
+      "上次对话",
+      "继续上一个对话",
+      "继续上一段对话",
+      "接续老对话",
+      "接上旧对话"
+    ],
+    "continue_reference_triggers": [
+      "referenced conversation",
+      "that conversation",
+      "that conversation memory",
+      "old conversation memory",
+      "specific conversation memory",
+      "那段对话",
+      "那个对话",
+      "那份对话记忆",
+      "指定对话记忆",
+      "旧对话记忆"
+    ],
+    "merge_triggers": [
+      "merge conversations",
+      "merge conversation memories",
+      "merge these conversations",
+      "consolidate conversation memory",
+      "合并对话",
+      "合并对话记忆",
+      "合并这些对话",
+      "合并记忆",
+      "整合对话记忆",
+      "merge conversation memory",
+      "merge old conversation memory",
+      "合并旧对话记忆",
+      "merge the old conversation memory",
+      "merge a referenced conversation memory"
+    ],
+    "archive_triggers": [
+      "archive conversation",
+      "seal conversation",
+      "archive this memory",
+      "seal this memory",
+      "归档对话",
+      "封存对话",
+      "归档这份记忆",
+      "封存这份记忆"
+    ],
+    "unresolved_block_reason": "conversation_link_decision_required"
+  },
   "mandatory_advisory_control_plane": {
     "mandatory": true,
     "purpose": "make routing, dynamic evaluation, and constitution governance continuously effective without wrapping every tool call",
     "default_mode": "receipt_and_event_triggered_review",
-    "routing_receipt_fields": ["task_type", "target_surface", "audience", "project_lane", "risk_level", "semantic_ambiguity", "module_need", "memory_need", "memory_mode", "memory_lane", "record_intent", "external_need", "claim_risk", "projectization_decision", "conversation_memory_decision", "required_gates"],
-    "event_triggered_review": ["new_evidence", "missing_file", "tool_error", "scope_change", "user_correction", "cross_project_term", "currentness_or_version_claim", "github_or_open_source_mechanism", "cost_or_risk_escalation", "before_high_confidence_claim", "before_R5_action", "before_long_term_memory_write"],
+    "routing_receipt_fields": [
+      "task_type",
+      "target_surface",
+      "audience",
+      "project_lane",
+      "risk_level",
+      "semantic_ambiguity",
+      "module_need",
+      "memory_need",
+      "memory_mode",
+      "memory_lane",
+      "record_intent",
+      "external_need",
+      "claim_risk",
+      "projectization_decision",
+      "conversation_memory_decision",
+      "link_intent",
+      "required_gates"
+    ],
+    "event_triggered_review": [
+      "new_evidence",
+      "missing_file",
+      "tool_error",
+      "scope_change",
+      "user_correction",
+      "cross_project_term",
+      "currentness_or_version_claim",
+      "github_or_open_source_mechanism",
+      "cost_or_risk_escalation",
+      "before_high_confidence_claim",
+      "before_R5_action",
+      "before_long_term_memory_write"
+    ],
     "cost_rule": "Use L0 only for ordinary chat; use lightweight receipts for nontrivial work; run script gates only for ambiguous boundaries, R4/R5, strong claims, memory writes, or explicit hardening.",
     "failure_rule": "If the control plane was skipped, downgrade final claims and say which boundary was not checked."
   },
@@ -267,35 +1022,155 @@
     "purpose": "avoid closed-door invention and assumption-filled external claims",
     "search_modes": {
       "official_authority_source_search": {
-        "triggers": ["official", "authority", "policy", "law", "price", "product", "institution", "current", "latest", "version", "release"],
+        "triggers": [
+          "official",
+          "authority",
+          "policy",
+          "law",
+          "price",
+          "product",
+          "institution",
+          "current",
+          "latest",
+          "version",
+          "release"
+        ],
         "boundary": "Use official or authority sources first for drift-prone public facts; cross-check when practical."
       },
       "github_open_source_repository_search": {
-        "triggers": ["GitHub", "repo", "repository", "open source", "release", "changelog", "issue", "license"],
+        "triggers": [
+          "GitHub",
+          "repo",
+          "repository",
+          "open source",
+          "release",
+          "changelog",
+          "issue",
+          "license"
+        ],
         "boundary": "Separate README intent, source-code facts, release or issue evidence, activity signals, and license boundaries."
       },
       "general_web_cross_check": {
-        "triggers": ["compare", "comparison", "ecosystem", "community", "tutorial", "trend"],
+        "triggers": [
+          "compare",
+          "comparison",
+          "ecosystem",
+          "community",
+          "tutorial",
+          "trend"
+        ],
         "boundary": "Use independent sources when practical; mark source limits when evidence is thin."
       },
       "source_grounded_learning_intake": {
-        "triggers": ["mechanism", "external architecture", "architecture comparison", "learn from", "source-grounded", "external mechanism", "avoid closed-door invention"],
+        "triggers": [
+          "mechanism",
+          "external architecture",
+          "architecture comparison",
+          "learn from",
+          "source-grounded",
+          "external mechanism",
+          "avoid closed-door invention"
+        ],
         "boundary": "Build a source ledger, classify material, preserve non-applicable boundaries, and require local validation before adoption-success claims."
       }
     },
-    "classification_labels": ["fact", "source_prior", "hypothesis", "inspiration", "unverified_implementation_path", "not_applicable", "local_validated"],
+    "classification_labels": [
+      "fact",
+      "source_prior",
+      "hypothesis",
+      "inspiration",
+      "unverified_implementation_path",
+      "not_applicable",
+      "local_validated"
+    ],
     "anti_closed_door_rule": "For external mechanisms, public repositories, current facts, or unfamiliar methods, do not rely on local reasoning alone. Search or mark the result as unverified."
   },
   "runtime_enforcement": {
     "mode": "selective_hook_wrapper_tool_proxy",
     "mandatory": true,
-    "entry_scripts": ["harness_runtime_enforcer.ps1", "harness_task_wrapper.ps1", "harness_tool_proxy.ps1"],
-    "hard_block_conditions": ["R5_without_human_confirmation", "low_confidence_route_without_boundary_review", "nontrivial_task_without_constitution_entry", "strong_final_claim_without_claim_schema", "high_risk_tool_call_without_human_confirmation"],
+    "entry_scripts": [
+      "harness_runtime_enforcer.ps1",
+      "harness_task_wrapper.ps1",
+      "harness_tool_proxy.ps1"
+    ],
+    "hard_block_conditions": [
+      "R5_without_human_confirmation",
+      "low_confidence_route_without_boundary_review",
+      "nontrivial_task_without_constitution_entry",
+      "strong_final_claim_without_claim_schema",
+      "high_risk_tool_call_without_human_confirmation"
+    ],
     "activation_boundary": "The runtime is hard-enforcing only for selected critical boundaries when agent hooks, wrappers, or tool-call paths invoke these scripts before work or tool use. Ordinary tool calls should stay on the advisory control plane."
   },
-  "approval_required_actions": ["delete_files", "git_commit", "install_package", "login", "payment", "permission_change", "network_firewall_proxy_edit", "sensitive_data_transfer", "long_term_memory_write"],
-  "external_research_triggers": ["today", "latest", "current", "version", "release", "GitHub", "repo", "repository", "open source", "official", "authority", "price", "law", "policy", "CEO", "president", "changelog", "issue", "license", "mechanism", "external architecture", "architecture comparison", "compare", "comparison", "learn from", "source-grounded", "avoid closed-door invention"],
-  "skill_matrix_triggers": ["skill matrix", "semantic anchor", "reflection", "self-improvement", "Computer Use", "Chrome", "network failure", "plugin"],
-  "blocked_claim_phrases_without_schema": ["validated", "verified successfully", "stable pass", "complete proof", "proven effective"],
-  "gate_enforcement_boundary": "These gates are hard runtime checks when called through hook/wrapper/tool proxy scripts. They still cannot enforce sandbox-level stops if the caller bypasses the runtime entry scripts."
+  "approval_required_actions": [
+    "delete_files",
+    "git_commit",
+    "install_package",
+    "login",
+    "payment",
+    "permission_change",
+    "network_firewall_proxy_edit",
+    "sensitive_data_transfer",
+    "long_term_memory_write"
+  ],
+  "external_research_triggers": [
+    "today",
+    "latest",
+    "current",
+    "version",
+    "release",
+    "GitHub",
+    "repo",
+    "repository",
+    "open source",
+    "official",
+    "authority",
+    "price",
+    "law",
+    "policy",
+    "CEO",
+    "president",
+    "changelog",
+    "issue",
+    "license",
+    "mechanism",
+    "external architecture",
+    "architecture comparison",
+    "compare",
+    "comparison",
+    "learn from",
+    "source-grounded",
+    "avoid closed-door invention"
+  ],
+  "skill_matrix_triggers": [
+    "skill matrix",
+    "semantic anchor",
+    "reflection",
+    "self-improvement",
+    "Computer Use",
+    "Chrome",
+    "network failure",
+    "plugin"
+  ],
+  "blocked_claim_phrases_without_schema": [
+    "validated",
+    "verified successfully",
+    "stable pass",
+    "complete proof",
+    "proven effective"
+  ],
+  "gate_enforcement_boundary": "These gates are hard runtime checks when called through hook/wrapper/tool proxy scripts. They still cannot enforce sandbox-level stops if the caller bypasses the runtime entry scripts.",
+  "runtime_gate_contract": {
+    "critical_boundaries": [
+      "unresolved_conversation_link_decision"
+    ],
+    "runtime_triggers": [
+      "conversation_link_required"
+    ]
+  },
+  "dynamic_decision_layer": {
+    "routing_receipt_fields": [
+      "link_intent"
+    ]
+  }
 }

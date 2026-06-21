@@ -6,7 +6,8 @@ The rule is:
 
 ```text
 complete internal contract
--> smallest useful receipt
+-> silent risk classification by default
+-> smallest useful receipt only when behavior changes
 -> event-triggered expansion
 -> changed fields only after the first receipt
 ```
@@ -17,13 +18,28 @@ Use fields only when they can change the next action.
 
 | Situation | Default receipt | Rule |
 | --- | --- | --- |
-| R0 ordinary chat | no explicit receipt | Use the microkernel only. |
-| R1/R2 local work | `compact_runtime` | Include only risk, gates, memory mode/lane, external need, claim risk, and confirmation need. |
-| R3/R4 work | compact plus triggered fields | Expand only the fields that decide project, memory, search, claim, or verification behavior. |
+| R0 ordinary chat | no explicit receipt | Use the microkernel only; do not display the risk label. |
+| R1/R2 local work | usually implicit | Keep classification internal unless local files, claim boundaries, memory, external lookup, or another gate changes the path. |
+| R3/R4 work | compact plus triggered fields | Show only the reason that changes execution path, cost, search, verification, memory, or claim behavior. |
 | R5, public docs, adapter, memory write, archive, persona, or cross-boundary work | `extended_governance` | Include boundary fields and required gates. |
 | Router debugging or audits | `debug_receipt` | Include trigger evidence and full diagnostics. |
 
 Do not put a field in the default receipt only because it exists in the full contract.
+
+## Visibility Rule
+
+R0-R5 classification is always performed internally, but it is silent by default in user-facing replies and prompt-stage hook context.
+
+Expose the smallest necessary explanation only when the classification changes one of these:
+
+- execution path or required gate;
+- cost or context expansion;
+- permission or human confirmation;
+- memory read/write/link/merge/archive behavior;
+- external search or current-fact verification;
+- claim schema or evidence boundary.
+
+When the user asks for debug, audit, route diagnosis, or a full receipt, expose the complete `debug_receipt`. Diagnostic CLI scripts may still print full receipts because their purpose is inspection, not ordinary conversation.
 
 ## Action-Relevant Rule
 

@@ -2,7 +2,7 @@
 
 Stop your coding agent from calling weak evidence "validated." Agent Memory Lane Harness adds deterministic routing, memory isolation, and claim checks to coding-agent workflows.
 
-Current version: `v0.14.1`
+Current version: `v0.14.4`
 
 Formerly: Agent Harness Skill Tree.
 
@@ -32,12 +32,15 @@ flowchart TD
 - **Codex field-use boundary:** this framework has been tried in one private Codex-based project workflow. That early use suggests the routing chain can persist across new conversations when the root instruction file, harness policy, project registry, and skill tree are installed, but it has not yet been broadly validated across many projects or many agent runtimes.
 - **Independent project lanes:** separate projects can run separate local chains. With clear global routing boundaries, each project keeps its own instructions, memory roots, and progress records, which reduces silent memory bleed and cross-project contamination.
 - **Mandatory advisory control plane:** nontrivial tasks must create a lightweight routing receipt, re-evaluate only on trigger events, and final-check claim/memory/search boundaries without wrapping every tool call.
-- **Receipt profiles:** the router computes the full decision internally but can expose a compact runtime receipt by default, expanding only for governance, public/private, projectization, memory-write, or debug cases.
+- **Silent-by-default risk classification:** R0-R5 is always computed internally, but user-facing replies and prompt-stage hook context show it only when it changes execution path, cost, permission, memory, search, or claim boundaries. Debug/audit requests can expose the full receipt.
+- **Receipt profiles:** the router computes the full decision internally but can expose a compact runtime receipt only when action-changing fields are needed, expanding for governance, public/private, projectization, memory-write, or debug cases.
 - **Router decision contract:** the router and dynamic decision layer use a compact receipt to decide target surface, audience, ambiguity, module need, memory need, external need, and claim risk before opening deeper context.
 - **Declarative governance contract:** adapters can declare the minimum stages, receipt fields, denial semantics, payload safety boundary, and cost profile they must honor without adding a heavy runtime framework.
 - **Version compatibility manifest:** adapters can record the exact runtime version, hook schema, wrapper paths, denial behavior, payload-safety checks, bypass surfaces, and drift policy that were actually checked.
 - **Memory routing contract:** the router decides whether memory should be skipped, read, written, or updated; it also decides the lane before opening memory payloads.
 - **Conversation memory lane:** long-running projectless conversations can get their own isolated memory lane when explicitly requested or when checkpoint signals accumulate. This prevents context-compression loss without mixing the conversation into project or global memory.
+- **Memory linking contract:** project, conversation, and archive memories use stable IDs, `updated_at`, index-level retrieval terms, and append-only link ledgers so new conversations can continue old ones without polluting old memory. Explicit merges create a new merged memory.
+- **Conversation-link gate:** continuation, merge, archive, and cross-conversation memory tasks must resolve the link decision through meta-first lookup before the first protected tool call when the host supports hooks, wrappers, or tool proxies.
 - **Cost control contract:** complete governance stays available internally, but the default path emits the smallest action-relevant receipt and uses delta receipts after trigger events.
 - **Projectization drift detection:** projectless conversations that accumulate repository, versioning, docs, tests, adapters, release, or architecture-decision signals can be flagged as emergent project candidates.
 - **Format layering:** human-facing docs stay in Markdown, but machine-owned routing facts, append-only records, and large tables should move to JSON, JSONL, CSV/TSV, or SQLite-style stores so agents do not rely on fragile Markdown tables and long lines.
@@ -55,7 +58,7 @@ flowchart TD
 - **WorkBuddy hard enforcement requires hooks:** the WorkBuddy adapter is advisory until the adopter wires it into WorkBuddy/CodeBuddy hooks. For tool execution, start with command-tool `PreToolUse` matchers such as `Bash|PowerShell` so the hook runner can return `permissionDecision: deny` and exit code `2` before commands run. Do not patch the installed WorkBuddy app; configure the supported hook surface in the adopting workspace.
 - **WorkBuddy active routing needs prompt-stage hooks:** use `UserPromptSubmit` to store the original prompt and inject compact route context before `PreToolUse` enforces tool calls. The Python hook runner sanitizes lone UTF-16 surrogate values and forces UTF-8 in the included wrappers so malformed or non-ASCII payload text does not disable routing.
 - **WorkBuddy final and recording boundaries:** use a `Stop` or final-answer hook when the host exposes final text before display. Voice or recording input is routed only when the host passes transcript text; the adapter does not decode raw audio, blobs, base64 strings, or arbitrary recording files.
-- **Deployment is path-specific:** every agent runtime has its own instruction, hook, wrapper, middleware, or sandbox surface. A gate is hard only on the execution path that invokes it and honors the blocked result; other paths remain advisory until separately wired and tested.
+- **Deployment is path-specific:** every agent runtime has its own instruction, hook, wrapper, middleware, or sandbox surface. The same governance chain applies to Codex-style local harness installs, Claude-style instruction files, WorkBuddy-style hooks, and custom agent loops, but a gate is hard only on the execution path that invokes it and honors the blocked result; other paths remain advisory until separately wired and tested.
 - **Agent client updates require re-adaptation:** Codex, Claude Code, and other agent clients may change paths, launchers, hook behavior, skill loading, or bundled runtimes after updates. Re-run adapter checks and smoke tests after client updates so stale paths do not silently disable the harness.
 
 ## What Problem It Solves
@@ -136,6 +139,7 @@ user request
 |   +-- memory-routing-contract.md
 |   +-- common-error-corpus.md
 |   +-- conversation-memory-lane.md
+|   +-- memory-linking-contract.md
 |   +-- format-layering.md
 |   +-- cost-control-contract.md
 |   +-- archive-and-persona-boundaries.md
@@ -293,10 +297,11 @@ The package includes synthetic examples that show the intended record shapes wit
 - [docs/memory-meta-index-contract.md](docs/memory-meta-index-contract.md): multi-axis meta index contract for memory libraries.
 - [docs/common-error-corpus.md](docs/common-error-corpus.md): lightweight common-error sample format.
 - [docs/conversation-memory-lane.md](docs/conversation-memory-lane.md): isolated memory lane for long-running projectless conversations.
+- [docs/memory-linking-contract.md](docs/memory-linking-contract.md): stable memory IDs, timestamps, link-only continuation, explicit merge, and fuzzy lookup rules.
 - [docs/format-layering.md](docs/format-layering.md): when to use Markdown, JSON, JSONL, CSV/TSV, SQLite, or generated Markdown.
 - [docs/cost-control-contract.md](docs/cost-control-contract.md): routing field budgets, delta receipts, active-context ceilings, and action-relevant field rules.
 - [docs/archive-and-persona-boundaries.md](docs/archive-and-persona-boundaries.md): optional cold archive, move/copy archive defaults, summary capsule exceptions, and conversation-only persona boundaries.
-- [docs/deployment-risk-patterns.md](docs/deployment-risk-patterns.md): common deployment failures and fixes for WorkBuddy-like hooks, CLI agents, IDE agents, custom orchestrators, hosted agents, and wrapper-only setups.
+- [docs/deployment-risk-patterns.md](docs/deployment-risk-patterns.md): common deployment failures, concrete issue examples, and solution playbooks for WorkBuddy-like hooks, CLI agents, IDE agents, custom orchestrators, hosted agents, and wrapper-only setups.
 - [docs/examples.md](docs/examples.md): expected gate behavior and how to interpret examples.
 
 ## Quick Start

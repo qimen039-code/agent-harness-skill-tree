@@ -62,6 +62,7 @@ FINAL_KEY_NAMES = {
     "result",
     "text",
 }
+SILENT_PROMPT_GATES = {"microkernel", "read_only_context_gate"}
 RAW_MEDIA_KEY_NAMES = {
     "audio",
     "audiodata",
@@ -302,17 +303,83 @@ def _allow_output() -> dict[str, Any]:
     return {"continue": True, "suppressOutput": True}
 
 
-def _context_output(route: dict[str, Any]) -> dict[str, Any]:
+def _as_text_list(value: Any) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return [str(item) for item in value]
+    return [str(value)]
+
+
+def _without_none(values: list[str]) -> list[str]:
+    return [item for item in values if item and item != "none"]
+
+
+def _needs_prompt_context(route: dict[str, Any]) -> bool:
     receipt = route.get("compact_receipt", {})
-    context = (
-        "Agent Memory Lane Harness route: "
-        f"risk={receipt.get('risk_level', route.get('risk_level', 'unknown'))}; "
-        f"gates={','.join(str(item) for item in receipt.get('required_gates', [])) or 'none'}; "
-        f"memory={receipt.get('memory_mode', route.get('memory_mode', 'none'))}/"
-        f"{receipt.get('memory_lane', route.get('memory_lane', 'none'))}; "
-        f"external={','.join(str(item) for item in receipt.get('external_need', [])) or 'none'}; "
-        f"claim={receipt.get('claim_risk', route.get('claim_risk', 'none'))}."
+    required_gates = _without_none(_as_text_list(receipt.get("required_gates") or route.get("required_gates")))
+    external_need = _without_none(_as_text_list(receipt.get("external_need") or route.get("external_need")))
+    memory_mode = str(receipt.get("memory_mode", route.get("memory_mode", "none")))
+    claim_risk = str(receipt.get("claim_risk", route.get("claim_risk", "none")))
+
+    return any(
+        [
+            bool(receipt.get("human_confirmation_need")),
+            bool(external_need),
+            memory_mode != "none",
+            claim_risk != "none",
+            str(route.get("classification_confidence")) == "low",
+            str(route.get("receipt_profile")) in {"extended_governance", "debug_receipt"},
+            any(gate not in SILENT_PROMPT_GATES for gate in required_gates),
+        ]
     )
+
+
+def _context_output(route: dict[str, Any]) -> dict[str, Any]:
+    if not _needs_prompt_context(route):
+        return _allow_output()
+
+    if str(route.get("receipt_profile")) == "debug_receipt":
+        context = "Agent Memory Lane Harness debug receipt: " + json.dumps(
+            sanitize_json_value(route),
+            ensure_ascii=True,
+            sort_keys=True,
+        )
+        return {
+            "continue": True,
+            "suppressOutput": True,
+            "hookSpecificOutput": {
+                "hookEventName": "UserPromptSubmit",
+                "additionalContext": context,
+            },
+        }
+
+    receipt = route.get("compact_receipt", {})
+    required_gates = _without_none(_as_text_list(receipt.get("required_gates", [])))
+    external_need = _without_none(_as_text_list(receipt.get("external_need", [])))
+    memory_mode = str(receipt.get("memory_mode", route.get("memory_mode", "none")))
+    memory_lane = str(receipt.get("memory_lane", route.get("memory_lane", "none")))
+    claim_risk = str(receipt.get("claim_risk", route.get("claim_risk", "none")))
+    link_intent = str(receipt.get("link_intent", route.get("link_intent", "none")))
+
+    parts: list[str] = []
+    if str(route.get("classification_confidence")) == "low":
+        parts.append("boundary_review=required")
+    if bool(receipt.get("human_confirmation_need")):
+        parts.append("human_confirmation=required")
+    visible_gates = [gate for gate in required_gates if gate not in SILENT_PROMPT_GATES]
+    if visible_gates:
+        parts.append(f"gates={','.join(visible_gates)}")
+    if memory_mode != "none":
+        parts.append(f"memory={memory_mode}/{memory_lane}")
+    if link_intent != "none":
+        parts.append(f"link={link_intent}")
+    if external_need:
+        parts.append(f"external={','.join(external_need)}")
+    if claim_risk != "none":
+        parts.append(f"claim={claim_risk}")
+
+    context = "Agent Memory Lane Harness boundary: " + "; ".join(parts) + "."
     return {
         "continue": True,
         "suppressOutput": True,
@@ -401,6 +468,7 @@ def _handle_pre_tool(
         tool_input=_tool_input(payload),
         human_confirmed=args.human_confirmed,
         boundary_reviewed=args.boundary_reviewed,
+        conversation_link_resolved=args.conversation_link_resolved,
         constitution_reviewed=args.constitution_reviewed,
         constitution_path=args.constitution_path,
         log_dir=log_dir,
@@ -429,6 +497,7 @@ def _handle_final(
         final_text=_final_text(payload),
         human_confirmed=args.human_confirmed,
         boundary_reviewed=args.boundary_reviewed,
+        conversation_link_resolved=args.conversation_link_resolved,
         constitution_reviewed=args.constitution_reviewed,
         constitution_path=args.constitution_path,
         log_dir=log_dir,
@@ -506,6 +575,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--boundary-reviewed",
         action="store_true",
         help="Mark low-confidence routing boundary review as complete.",
+    )
+    parser.add_argument(
+        "--conversation-link-resolved",
+        action="store_true",
+        help="Mark required conversation-memory link selection or merge/archive decision as resolved.",
     )
     parser.add_argument(
         "--human-confirmed",

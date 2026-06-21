@@ -91,6 +91,22 @@ class HarnessGateTests(unittest.TestCase):
         self.assertEqual(route["record_intent"], "explicit_conversation_memory_request")
         self.assertIn("conversation_memory_index", route["module_need"])
 
+    def test_router_detects_continue_previous_conversation_link_intent(self) -> None:
+        route = intake_router("continue from the previous conversation", policy=self.policy)
+        self.assertEqual(route["link_intent"], "continue_from_latest")
+        self.assertEqual(route["conversation_memory_decision"], "read_referenced_conversation")
+        self.assertEqual(route["memory_lane"], "referenced_conversation")
+        self.assertEqual(route["memory_mode"], "read")
+        self.assertIn("conversation_link_gate", route["required_gates"])
+        self.assertIn("memory_link_ledger", route["module_need"])
+
+    def test_router_detects_explicit_merge_memory_link_intent(self) -> None:
+        route = intake_router("merge the old conversation memory with this conversation", policy=self.policy)
+        self.assertEqual(route["link_intent"], "merge_memories_explicit")
+        self.assertEqual(route["record_intent"], "explicit_cross_conversation_update")
+        self.assertEqual(route["memory_mode"], "write")
+        self.assertIn("conversation_link_gate", route["required_gates"])
+
     def test_router_detects_conversation_checkpoint_candidate(self) -> None:
         route = intake_router("long conversation with open loops and context compression risk", policy=self.policy)
         self.assertEqual(route["conversation_memory_decision"], "checkpoint_candidate")
@@ -168,6 +184,33 @@ class HarnessGateTests(unittest.TestCase):
         self.assertEqual(decision["task_text_for_route"], "delete stale files after review")
         self.assertEqual(decision["status"], "blocked")
         self.assertIn("human_confirmation_required_for_R5", decision["blocked_reasons"])
+
+    def test_runtime_blocks_unresolved_conversation_link_before_tool(self) -> None:
+        decision = runtime_enforcer(
+            stage="pre_tool",
+            task_text="continue from the previous conversation",
+            tool_name="shell",
+            tool_input={"command": "echo ok"},
+            constitution_reviewed=True,
+            policy=self.policy,
+        )
+        self.assertEqual(decision["status"], "blocked")
+        self.assertTrue(decision["conversation_link_required"])
+        self.assertIn("conversation_link_decision_required", decision["blocked_reasons"])
+
+    def test_runtime_allows_resolved_conversation_link_before_tool(self) -> None:
+        decision = runtime_enforcer(
+            stage="pre_tool",
+            task_text="continue from the previous conversation",
+            tool_name="shell",
+            tool_input={"command": "echo ok"},
+            conversation_link_resolved=True,
+            constitution_reviewed=True,
+            policy=self.policy,
+        )
+        self.assertEqual(decision["status"], "pass")
+        self.assertTrue(decision["conversation_link_required"])
+        self.assertTrue(decision["conversation_link_resolved"])
 
     def test_runtime_treats_risk_label_task_text_as_explicit_risk(self) -> None:
         decision = runtime_enforcer(
@@ -278,14 +321,14 @@ class HarnessGateTests(unittest.TestCase):
             check=False,
         )
 
-    def test_workbuddy_user_prompt_hook_stores_route_context(self) -> None:
+    def test_workbuddy_user_prompt_hook_stays_silent_for_low_risk_context(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             result = self._run_hook(
                 {
                     "hook_event_name": "UserPromptSubmit",
                     "session_id": "session-a",
                     "cwd": tmp,
-                    "prompt": "inspect files and summarize the repository",
+                    "prompt": "inspect local notes and summarize findings",
                 },
                 "--stage",
                 "user_prompt",
@@ -293,9 +336,8 @@ class HarnessGateTests(unittest.TestCase):
             )
             self.assertEqual(result.returncode, 0, result.stderr)
             output = json.loads(result.stdout)
-            hook_output = output["hookSpecificOutput"]
-            self.assertEqual(hook_output["hookEventName"], "UserPromptSubmit")
-            self.assertIn("Agent Memory Lane Harness route", hook_output["additionalContext"])
+            self.assertTrue(output["continue"])
+            self.assertNotIn("hookSpecificOutput", output)
             state_path = Path(tmp) / "workbuddy_hook_state.json"
             self.assertTrue(state_path.exists())
 
@@ -318,10 +360,29 @@ class HarnessGateTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             output = json.loads(result.stdout)
             context = output["hookSpecificOutput"]["additionalContext"]
-            self.assertIn("risk=R5", context)
+            self.assertIn("human_confirmation=required", context)
             state_path = Path(tmp) / "workbuddy_hook_state.json"
             state_text = state_path.read_text(encoding="utf-8")
             self.assertIn("delete stale files after review", state_text)
+
+    def test_workbuddy_user_prompt_hook_exposes_debug_receipt_when_requested(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            result = self._run_hook(
+                {
+                    "hook_event_name": "UserPromptSubmit",
+                    "session_id": "session-debug",
+                    "cwd": tmp,
+                    "prompt": "route debug full receipt for this task",
+                },
+                "--stage",
+                "user_prompt",
+                log_dir=tmp,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            output = json.loads(result.stdout)
+            context = output["hookSpecificOutput"]["additionalContext"]
+            self.assertIn("Agent Memory Lane Harness debug receipt", context)
+            self.assertIn("matched_risk_triggers", context)
 
     def test_workbuddy_user_prompt_hook_sanitizes_lone_surrogate_payload(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -433,6 +494,67 @@ class HarnessGateTests(unittest.TestCase):
                 "--stage",
                 "pre_tool",
                 "--constitution-reviewed",
+                log_dir=tmp,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            output = json.loads(result.stdout)
+            self.assertTrue(output["continue"])
+
+    def test_workbuddy_pre_tool_hook_blocks_unresolved_conversation_link(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            self._run_hook(
+                {
+                    "hook_event_name": "UserPromptSubmit",
+                    "session_id": "session-link",
+                    "cwd": tmp,
+                    "prompt": "continue from the previous conversation",
+                },
+                "--stage",
+                "user_prompt",
+                log_dir=tmp,
+            )
+            result = self._run_hook(
+                {
+                    "hook_event_name": "PreToolUse",
+                    "session_id": "session-link",
+                    "cwd": tmp,
+                    "tool_name": "Bash",
+                    "tool_input": {"command": "ls"},
+                },
+                "--stage",
+                "pre_tool",
+                "--constitution-reviewed",
+                log_dir=tmp,
+            )
+            self.assertEqual(result.returncode, 2, result.stderr)
+            output = json.loads(result.stdout)
+            self.assertIn("conversation_link_decision_required", output["hookSpecificOutput"]["permissionDecisionReason"])
+
+    def test_workbuddy_pre_tool_hook_allows_resolved_conversation_link(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            self._run_hook(
+                {
+                    "hook_event_name": "UserPromptSubmit",
+                    "session_id": "session-link-ok",
+                    "cwd": tmp,
+                    "prompt": "continue from the previous conversation",
+                },
+                "--stage",
+                "user_prompt",
+                log_dir=tmp,
+            )
+            result = self._run_hook(
+                {
+                    "hook_event_name": "PreToolUse",
+                    "session_id": "session-link-ok",
+                    "cwd": tmp,
+                    "tool_name": "Bash",
+                    "tool_input": {"command": "ls"},
+                },
+                "--stage",
+                "pre_tool",
+                "--constitution-reviewed",
+                "--conversation-link-resolved",
                 log_dir=tmp,
             )
             self.assertEqual(result.returncode, 0, result.stderr)

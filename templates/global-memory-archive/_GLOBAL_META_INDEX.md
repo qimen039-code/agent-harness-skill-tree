@@ -31,6 +31,8 @@ Do not regenerate old memory content as a default archive step.
 | File | Purpose |
 | --- | --- |
 | `archive_index.jsonl` | Append-only archive index records. |
+| `conversation_index.jsonl` | Cold lookup index for sealed or archived conversation memories by memory_id, title, summary, updated_at, retrieval terms, and semantic anchors. |
+| `memory_links.jsonl` | Cross-lane continuation, merge, supersession, archive, and reference edges. |
 | `source_refs.jsonl` | Source lane, original path, archive path, and evidence boundary references. |
 | `supersession.jsonl` | Optional links between old and replacement archive records. |
 | `capsules/` | Optional cold payload folders or compressed capsules. |
@@ -38,6 +40,7 @@ Do not regenerate old memory content as a default archive step.
 ## Retrieval Boundary
 
 - Read archive meta first.
-- Select one archive index record.
+- Select one archive index or conversation index record.
+- For continuation or merge lookup, read one matching `memory_links.jsonl` edge before opening payloads.
 - Open one matching capsule only when needed.
 - Do not scan all capsules by default.

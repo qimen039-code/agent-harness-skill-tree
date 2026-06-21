@@ -12,6 +12,7 @@ project memory lane
 
 conversation memory lane
 -> one long-running conversation or thread, isolated by session/thread id
+-> can link to older conversation lanes without writing into them
 
 common error corpus
 -> reusable small error-and-solution samples across work surfaces
@@ -41,6 +42,7 @@ If project signals become strong enough for a real project lane, mark `projectiz
 
 - Current conversation writes only to its own conversation memory lane.
 - Other conversations may read this lane only by explicit reference or user request.
+- New conversations that continue this lane should create their own memory and append a `continues` link; they should not write into the old lane by default.
 - Other conversations may not write to this lane unless the user explicitly asks to update that specific conversation memory.
 - Project memory must not be written from conversation memory by default.
 - Conversation memory must not copy another project's private payloads. Use references and boundaries instead.
@@ -54,7 +56,7 @@ Conversation memory follows the same retrieval rule as project memory:
 
 ```text
 conversation-memory/_META_INDEX.md
--> conversation_state.md or one JSONL record family
+-> conversation_state.md, index.json, memory_links.jsonl, or one JSONL record family
 -> only matching record(s)
 ```
 
@@ -67,6 +69,7 @@ conversation-memory/
   _META_INDEX.md
   conversation_state.md
   index.json
+  memory_links.jsonl
   decisions.jsonl
   open_loops.jsonl
   errors_and_solutions.jsonl
@@ -78,7 +81,8 @@ Field intent:
 
 - `_META_INDEX.md`: first-read routing surface, scope, lane id, record families, freshness, and cross-reference rules.
 - `conversation_state.md`: human-readable current state summary.
-- `index.json`: machine-readable retrieval surface for scripts or agents.
+- `index.json`: machine-readable retrieval surface for scripts or agents, including `memory_id`, `created_at`, `updated_at`, retrieval terms, and link policy.
+- `memory_links.jsonl`: append-only continuation, reference, merge, archive, and supersession edges.
 - `decisions.jsonl`: append-only decision records.
 - `open_loops.jsonl`: unresolved questions, tasks, and verification debt.
 - `errors_and_solutions.jsonl`: paired lightweight errors and applied solutions discovered in this conversation.
@@ -103,9 +107,34 @@ conversation_memory_decision:
   checkpoint_candidate
   read_referenced_conversation
   explicit_cross_conversation_update
+
+link_intent:
+  none
+  continue_from_latest
+  continue_from_referenced_memory
+  merge_memories_explicit
+  archive_or_seal_memory
 ```
 
 `create_or_update_current_conversation` requires an explicit user request. `checkpoint_candidate` is the router saying the conversation is becoming durable; the adopting agent can ask, create a lightweight checkpoint, or state the assumption according to local policy.
+
+## Continuation And Merge Policy
+
+Default continuation is link-only:
+
+```text
+old conversation memory
+-> new conversation memory with a new memory_id
+-> append continues edge old -> new in memory_links.jsonl or global link ledger
+-> copy only a bounded summary snapshot from the old meta/current-state summary
+-> write new durable state only to the new memory
+```
+
+Do not mutate the old memory just because a new conversation continues it. If the user explicitly asks to merge two conversations, create a new merged memory, append `merged_into` links, mark old memories as sealed or redirected in indexes, and keep old payloads for audit unless deletion is separately confirmed.
+
+Use `updated_at` to support "continue the previous conversation" lookups. If the user remembers only vague keywords, search the index-level fields first: title, summary, retrieval terms, semantic anchors, and open loops. Ask the user to choose among candidates when ambiguous before opening payload records.
+
+See [memory-linking-contract.md](memory-linking-contract.md) for the cross-lane link schema.
 
 ## Write Policy
 
