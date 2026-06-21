@@ -4,6 +4,11 @@ All notable public changes should be recorded here.
 
 This project uses `vMAJOR.MINOR.PATCH` version labels while the framework is still early-stage.
 
+## v0.14.7 - 2026-06-21
+
+- Added a public design note for Claim Boundary Harness, covering claim boundaries, meta-first routing, project-scoped memory lanes, receipt-based risk routing, runtime enforcement limits, SkillOpt-style default-off boundaries, deployment pitfalls, and reproduction scope.
+- Linked the article from the README documentation index so external curated-list submissions can point to a technical explanation rather than only the project homepage.
+
 ## v0.14.6 - 2026-06-21
 
 - Clarified the SkillOpt-style training layer activation boundary: it is default-off for ordinary work and should be used only for recurring skill/router improvements, candidate rule edits, rejected-edit review, slow updates, or external skill-optimization intake.
