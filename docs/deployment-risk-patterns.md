@@ -1,6 +1,6 @@
 # Deployment Risk Patterns
 
-Use this guide when adapting Agent Memory Lane Harness into an agent runtime.
+Use this guide when adapting Claim Boundary Harness into an agent runtime.
 
 The WorkBuddy case shows the core deployment risk: copying the harness files is not the same as wiring the harness into the execution path. If the agent runtime does not call the gate before the protected action, the harness remains advisory for that action.
 

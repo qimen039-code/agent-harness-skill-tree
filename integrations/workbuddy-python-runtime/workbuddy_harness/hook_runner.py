@@ -296,7 +296,7 @@ def _decision_reason(decision: dict[str, Any]) -> str:
     reasons = decision.get("blocked_reasons") or []
     if isinstance(reasons, list) and reasons:
         return "; ".join(str(item) for item in reasons)
-    return "blocked by Agent Memory Lane Harness"
+    return "blocked by Claim Boundary Harness"
 
 
 def _allow_output() -> dict[str, Any]:
@@ -340,7 +340,7 @@ def _context_output(route: dict[str, Any]) -> dict[str, Any]:
         return _allow_output()
 
     if str(route.get("receipt_profile")) == "debug_receipt":
-        context = "Agent Memory Lane Harness debug receipt: " + json.dumps(
+        context = "Claim Boundary Harness debug receipt: " + json.dumps(
             sanitize_json_value(route),
             ensure_ascii=True,
             sort_keys=True,
@@ -379,7 +379,7 @@ def _context_output(route: dict[str, Any]) -> dict[str, Any]:
     if claim_risk != "none":
         parts.append(f"claim={claim_risk}")
 
-    context = "Agent Memory Lane Harness boundary: " + "; ".join(parts) + "."
+    context = "Claim Boundary Harness boundary: " + "; ".join(parts) + "."
     return {
         "continue": True,
         "suppressOutput": True,
@@ -534,7 +534,7 @@ def _handle_passthrough(
 
 
 def _handle_error(args: argparse.Namespace, stage: str, exc: Exception) -> tuple[int, dict[str, Any]]:
-    reason = str(sanitize_json_value(f"Agent Memory Lane Harness hook runner failed: {exc}"))
+    reason = str(sanitize_json_value(f"Claim Boundary Harness hook runner failed: {exc}"))
     if args.fail_open:
         return 0, {
             "continue": True,
@@ -555,7 +555,7 @@ def _handle_error(args: argparse.Namespace, stage: str, exc: Exception) -> tuple
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="WorkBuddy hook runner for Agent Memory Lane Harness.")
+    parser = argparse.ArgumentParser(description="WorkBuddy hook runner for Claim Boundary Harness.")
     parser.add_argument(
         "--stage",
         choices=["auto", "user_prompt", "pre_tool", "post_tool", "final"],

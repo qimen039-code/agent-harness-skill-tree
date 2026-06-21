@@ -1,10 +1,10 @@
-# Agent Memory Lane Harness
+# Claim Boundary Harness
 
-Stop your coding agent from calling weak evidence "validated." Agent Memory Lane Harness adds deterministic routing, memory isolation, and claim checks to coding-agent workflows.
+Stop coding agents from calling weak evidence "validated." Claim Boundary Harness adds meta-first routing, project-scoped memory lanes, R0-R5 risk receipts, and deployment adapters for claim verification.
 
-Current version: `v0.14.4`
+Current version: `v0.14.5`
 
-Formerly: Agent Harness Skill Tree.
+Formerly: Agent Memory Lane Harness, originally Agent Harness Skill Tree.
 
 It is not tied to one agent runtime. It is a neutral starting point that can be mapped into any agent that can read workspace instructions, run local scripts, use command or skill folders, or call hooks before tools.
 

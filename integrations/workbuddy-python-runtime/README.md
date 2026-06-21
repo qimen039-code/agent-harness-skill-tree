@@ -1,6 +1,6 @@
 # WorkBuddy Python Runtime Adapter
 
-Experimental public WorkBuddy-oriented Python adapter for Agent Memory Lane Harness.
+Experimental public WorkBuddy-oriented Python adapter for Claim Boundary Harness.
 
 This adapter shows how the same routing, memory-isolation, claim-check, and runtime-enforcement decisions can be called as in-process Python functions instead of launching PowerShell subprocesses.
 

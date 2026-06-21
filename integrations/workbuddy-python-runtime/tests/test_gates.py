@@ -381,7 +381,7 @@ class HarnessGateTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             output = json.loads(result.stdout)
             context = output["hookSpecificOutput"]["additionalContext"]
-            self.assertIn("Agent Memory Lane Harness debug receipt", context)
+            self.assertIn("Claim Boundary Harness debug receipt", context)
             self.assertIn("matched_risk_triggers", context)
 
     def test_workbuddy_user_prompt_hook_sanitizes_lone_surrogate_payload(self) -> None:

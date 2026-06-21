@@ -4,6 +4,12 @@ All notable public changes should be recorded here.
 
 This project uses `vMAJOR.MINOR.PATCH` version labels while the framework is still early-stage.
 
+## v0.14.5 - 2026-06-21
+
+- Renamed the public framework identity to Claim Boundary Harness so the repository name, README headline, and claim-boundary terminology use one consistent concept.
+- Refined the public positioning around claim verification, meta-first routing, project-scoped memory lanes, R0-R5 risk receipts, and deployment adapters.
+- Prepared the GitHub repository metadata for a shorter, less crowded name and a focused topic set without near-duplicate discovery keywords.
+
 ## v0.14.4 - 2026-06-21
 
 - Added concrete deployment problem examples and solution playbooks for instruction loading, hook denial, prompt-state transfer, file-tool false positives, external search, conversation linking, final-claim gating, encoding/recording payloads, PowerShell policy parsing, and client-update drift.
@@ -192,5 +198,5 @@ This project uses `vMAJOR.MINOR.PATCH` version labels while the framework is sti
 
 - Added the first explicit public version marker.
 - Established the version update rule for future repository changes.
-- Current framework name: Agent Memory Lane Harness.
+- Initial public framework name: Agent Memory Lane Harness.
 - Includes meta-first memory retrieval, project-scoped memory lanes, synthetic examples, whiteboard templates, and paired error/solution record shapes.

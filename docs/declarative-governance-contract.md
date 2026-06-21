@@ -1,6 +1,6 @@
 # Declarative Governance Contract
 
-The governance contract is the machine-readable boundary between an agent runtime and Agent Memory Lane Harness.
+The governance contract is the machine-readable boundary between an agent runtime and Claim Boundary Harness.
 
 It does not replace hooks, wrappers, or tool proxies. It declares what the runtime must decide before deeper work starts, which stages are expected to call the harness, and which outputs the runtime must honor.
 

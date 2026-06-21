@@ -1,6 +1,6 @@
 # Architecture
 
-Agent Memory Lane Harness has four layers.
+Claim Boundary Harness has four layers.
 
 ## 1. Root Microkernel
 
