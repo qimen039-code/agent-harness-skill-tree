@@ -4,6 +4,11 @@ All notable public changes should be recorded here.
 
 This project uses `vMAJOR.MINOR.PATCH` version labels while the framework is still early-stage.
 
+## v0.14.10 - 2026-06-22
+
+- Removed the former-name line from the README so the public homepage presents Claim Boundary Harness as a new, focused project identity.
+- Added a compact Start Here guide near the top of the README so readers can quickly choose the overview, architecture, adoption, deployment, or example path.
+
 ## v0.14.9 - 2026-06-21
 
 - Added a temporary Claude Code deployment boundary note: the public package has not yet completed a full Claude Code client deployment validation.
