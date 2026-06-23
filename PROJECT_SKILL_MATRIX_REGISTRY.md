@@ -49,7 +49,9 @@ Memory recording is routed separately from memory reading. Explicit "record this
 
 Reusable memory capsules use source-monitoring fields: `source_tag` `belief_status` `confidence` `derived_from` `source_monitoring` `belief_trace_summary`. Treat optional numeric scores as adapter metadata, not as a replacement for evidence basis and provenance.
 
-Governance-layer updates, dynamic-evaluation rule changes, routing-rule changes, trigger-term updates, decision-matrix edits, and framework behavior changes are `R3` even when they are documentation-only. A missed route should be fixed with the narrowest useful trigger term rather than a broad catch-all.
+Governance-layer updates, dynamic-evaluation rule changes, routing-rule changes, trigger-term updates, decision-matrix edits, and framework behavior changes are `R3` even when they are documentation-only. A missed route should be fixed with the narrowest reusable trigger term rather than a broad catch-all.
+
+Trigger terms should be promoted only when they represent a durable routing class: recurring, cross-task, boundary-changing, and not already covered by an existing generic edit/report/search/memory rule. One-off wording for a single documentation request should stay in the task receipt or changelog, not in the long-lived policy.
 
 ## Selective Runtime Enforcement Layer
 

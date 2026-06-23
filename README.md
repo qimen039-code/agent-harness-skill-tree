@@ -386,6 +386,10 @@ Validate the policy after editing it:
 powershell -ExecutionPolicy Bypass -File .\skills\embedded-harness\validate_policy.ps1
 ```
 
+The validator checks policy shape and, when run from the repository package,
+also checks the memory invariant that `belief_trace_summary.current_status`
+matches `belief_status`.
+
 On Bash environments with `jq`:
 
 ```bash

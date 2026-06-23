@@ -4,6 +4,21 @@ All notable public changes should be recorded here.
 
 This project uses `vMAJOR.MINOR.PATCH` version labels while the framework is still early-stage.
 
+## v0.14.25 - 2026-06-23
+
+- Extended the policy validator to check that `belief_trace_summary.current_status` stays synchronized with `belief_status` when reusable memory examples or templates include both fields.
+- Added the same lightweight invariant check to the Bash reference validator when `jq` and Bash are available.
+
+## v0.14.24 - 2026-06-23
+
+- Added a trigger-promotion gate so one-off task wording does not become long-lived router policy.
+- Removed README-specific simplification terms from the R3 trigger list; generic edit and documentation rules continue to route those tasks.
+
+## v0.14.23 - 2026-06-23
+
+- Reworded public changelog entries so release notes describe user-facing documentation changes without internal maintenance phrasing.
+- Replaced colloquial public-documentation routing triggers with neutral wording.
+
 ## v0.14.22 - 2026-06-23
 
 - Reworded metadata field lists so GitHub line wrapping does not leave punctuation separated from inline field names.
@@ -11,10 +26,10 @@ This project uses `vMAJOR.MINOR.PATCH` version labels while the framework is sti
 
 ## v0.14.21 - 2026-06-23
 
-- Slimmed the README first screen by replacing the long start menu and repeated value sections with a compact overview, fast-path table, and shorter difference summary.
+- Reworked the README opening section with a compact overview, fast-path table, and shorter project-difference summary.
 - Condensed the adoption notes on the README into a shorter reality-check section that links to the detailed adoption and deployment-risk docs.
 - Made the WorkBuddy hook runner emit readable Unicode JSON by default while retaining a UTF-8 fallback for stdout encoding failures.
-- Added routing triggers for README first-screen slimming and similar public-doc simplification tasks so they do not fall through as R0.
+- Added routing coverage for README overview restructuring and similar public-documentation edits through the existing generic edit path.
 
 ## v0.14.20 - 2026-06-23
 

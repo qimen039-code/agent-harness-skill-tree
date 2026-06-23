@@ -3,11 +3,13 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 POLICY_PATH="$(cd "$SCRIPT_DIR/.." && pwd -P)/embedded_harness_policy.json"
+REPO_ROOT=""
 OUTPUT_PATH=""
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --policy|-PolicyPath) POLICY_PATH="${2:-}"; shift 2 ;;
+    --repo-root|-RepoRoot) REPO_ROOT="${2:-}"; shift 2 ;;
     --output|-OutputPath) OUTPUT_PATH="${2:-}"; shift 2 ;;
     *) echo "Unknown argument: $1" >&2; exit 1 ;;
   esac
@@ -39,6 +41,92 @@ add_unique() {
 
 issues=()
 
+check_text_belief_invariants() {
+  local file="$1"
+  local root="$2"
+  local relative="${file#$root/}"
+  awk -v file="$relative" '
+    /^[[:space:]]*belief_status:[[:space:]]*/ {
+      status=$0
+      sub(/^[[:space:]]*belief_status:[[:space:]]*`?/, "", status)
+      sub(/`?[[:space:]#].*$/, "", status)
+      saw_summary=0
+      next
+    }
+    status != "" && /^[[:space:]]*belief_trace_summary:[[:space:]]*/ {
+      saw_summary=1
+      next
+    }
+    status != "" && saw_summary && /^[[:space:]]*current_status:[[:space:]]*/ {
+      current=$0
+      sub(/^[[:space:]]*current_status:[[:space:]]*`?/, "", current)
+      sub(/`?[[:space:]#].*$/, "", current)
+      if (current != status) {
+        printf "belief_trace_current_status_mismatch:%s:%d:%s!=%s\n", file, NR, status, current
+      }
+      status=""
+      saw_summary=0
+    }
+    END {
+      if (status != "" && saw_summary) {
+        printf "belief_trace_summary_current_status_missing:%s\n", file
+      }
+    }
+  ' "$file"
+}
+
+check_json_belief_invariants() {
+  local file="$1"
+  local root="$2"
+  local relative="${file#$root/}"
+  if [ "${file##*.}" = "jsonl" ]; then
+    jq -r --arg file "$relative" '
+      def check:
+        .. | objects
+        | select(has("belief_status") and has("belief_trace_summary"))
+        | if (.belief_trace_summary.current_status == null) then
+            "belief_trace_summary_current_status_missing:\($file)"
+          elif ((.belief_trace_summary.current_status | tostring) != (.belief_status | tostring)) then
+            "belief_trace_current_status_mismatch:\($file):\(.belief_status)!=\(.belief_trace_summary.current_status)"
+          else empty end;
+      check
+    ' "$file" 2>/dev/null || printf 'belief_invariant_json_parse_failed:%s\n' "$relative"
+  else
+    jq -r --arg file "$relative" '
+      .. | objects
+      | select(has("belief_status") and has("belief_trace_summary"))
+      | if (.belief_trace_summary.current_status == null) then
+          "belief_trace_summary_current_status_missing:\($file)"
+        elif ((.belief_trace_summary.current_status | tostring) != (.belief_status | tostring)) then
+          "belief_trace_current_status_mismatch:\($file):\(.belief_status)!=\(.belief_trace_summary.current_status)"
+        else empty end
+    ' "$file" 2>/dev/null || printf 'belief_invariant_json_parse_failed:%s\n' "$relative"
+  fi
+}
+
+check_belief_invariants() {
+  local root="$1"
+  local item file issue
+  for item in docs examples templates skills AGENTS.md README.md; do
+    [ -e "$root/$item" ] || continue
+    if [ -d "$root/$item" ]; then
+      while IFS= read -r -d '' file; do
+        case "$file" in
+          *.md|*.yaml|*.yml)
+            while IFS= read -r issue; do add_unique issues "$issue"; done < <(check_text_belief_invariants "$file" "$root")
+            ;;
+          *.json|*.jsonl)
+            while IFS= read -r issue; do add_unique issues "$issue"; done < <(check_json_belief_invariants "$file" "$root")
+            ;;
+        esac
+      done < <(find "$root/$item" -type f -print0)
+    else
+      file="$root/$item"
+      while IFS= read -r issue; do add_unique issues "$issue"; done < <(check_text_belief_invariants "$file" "$root")
+    fi
+  done
+}
+
 if [ ! -f "$POLICY_PATH" ]; then
   add_unique issues "policy_file_missing"
 elif ! jq empty "$POLICY_PATH" >/dev/null 2>&1; then
@@ -68,6 +156,16 @@ else
   fi
 fi
 
+if [ -z "$REPO_ROOT" ]; then
+  candidate="$(cd "$SCRIPT_DIR/../.." && pwd -P)"
+  if [ -f "$candidate/VERSION" ] && [ -f "$candidate/skills/embedded-harness/embedded_harness_policy.json" ]; then
+    REPO_ROOT="$candidate"
+  fi
+fi
+if [ -n "$REPO_ROOT" ] && [ -d "$REPO_ROOT" ]; then
+  check_belief_invariants "$(cd "$REPO_ROOT" && pwd -P)"
+fi
+
 status="pass"
 if [ "${#issues[@]}" -gt 0 ]; then
   status="blocked"
@@ -85,7 +183,7 @@ result="$(
       status: $status,
       policy_path: $policy_path,
       issues: $issues,
-      rule: "lightweight parse and shape check only; not a full JSON Schema validator"
+      rule: "lightweight policy parse, shape check, and belief_trace_summary.current_status invariant check when repo root is available; not a full JSON Schema validator"
     }'
 )"
 

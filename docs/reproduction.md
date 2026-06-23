@@ -27,6 +27,8 @@ powershell -ExecutionPolicy Bypass -File .\skills\embedded-harness\validate_poli
 Expected highlight:
 
 - `status`: `pass`.
+- `rule`: includes the lightweight `belief_trace_summary.current_status`
+  invariant check when the repository root is available.
 
 ## 1. Intake Router
 

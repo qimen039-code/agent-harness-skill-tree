@@ -132,7 +132,7 @@ Runtime hard-stop conditions:
 - Long-term memory write without explicit user request.
 - Final strong claim without claim schema evidence boundary.
 
-Configure `embedded_harness_policy.json` for project lanes, memory roots, trigger terms, and claim phrases.
+Configure `embedded_harness_policy.json` for project lanes, memory roots, trigger terms, and claim phrases. Promote trigger terms only for recurring routing classes that change gates or boundaries; keep one-off task wording out of long-lived policy.
 
 ## Limitations
 

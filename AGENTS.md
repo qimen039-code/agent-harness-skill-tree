@@ -75,6 +75,8 @@ Persona or companion state is conversation-only and default-off. It may affect t
 
 Governance-layer updates, dynamic-evaluation rule changes, routing-rule changes, trigger-term updates, decision-matrix edits, and framework behavior changes are `R3` even when they are documentation-only.
 
+Trigger-term promotion must pass a durability check. Promote a term only when it describes a recurring routing class that changes execution boundaries, memory/search/claim behavior, or risk. Do not promote one-off task wording into long-lived policy when an existing generic rule already routes the work.
+
 ## Selective Runtime Enforcement Surface
 
 The routing, dynamic evaluation, and constitution rules become hard runtime checks only at selected critical boundaries and only when the adopting agent routes work through one of these surfaces:

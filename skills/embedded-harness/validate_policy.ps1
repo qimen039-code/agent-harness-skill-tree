@@ -1,5 +1,6 @@
 param(
   [string]$PolicyPath = (Join-Path $PSScriptRoot "embedded_harness_policy.json"),
+  [string]$RepoRoot = "",
   [string]$OutputPath = ""
 )
 
@@ -15,6 +16,119 @@ function ConvertTo-Array($value) {
 
 function Add-Issue([string]$issue) {
   $script:issues += $issue
+}
+
+function Get-RelativeDisplayPath([string]$Path, [string]$Root) {
+  try {
+    $resolvedPath = (Resolve-Path -LiteralPath $Path).Path
+    $resolvedRoot = (Resolve-Path -LiteralPath $Root).Path
+    if ($resolvedPath.StartsWith($resolvedRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
+      return $resolvedPath.Substring($resolvedRoot.Length).TrimStart('\','/')
+    }
+  } catch {
+  }
+  return $Path
+}
+
+function Get-ObjectPropertyValue($Object, [string]$Name) {
+  if ($null -eq $Object) { return $null }
+  $property = $Object.PSObject.Properties[$Name]
+  if ($null -eq $property) { return $null }
+  return $property.Value
+}
+
+function Test-JsonBeliefInvariant($Node, [string]$Source, [string]$Root) {
+  if ($null -eq $Node) { return }
+  if ($Node -is [System.Array]) {
+    foreach ($item in $Node) { Test-JsonBeliefInvariant $item $Source $Root }
+    return
+  }
+  if ($Node -isnot [pscustomobject]) { return }
+
+  $beliefStatus = Get-ObjectPropertyValue $Node "belief_status"
+  $traceSummary = Get-ObjectPropertyValue $Node "belief_trace_summary"
+  if (($null -ne $beliefStatus) -and ($null -ne $traceSummary)) {
+    $currentStatus = Get-ObjectPropertyValue $traceSummary "current_status"
+    $relative = Get-RelativeDisplayPath $Source $Root
+    if ($null -eq $currentStatus) {
+      Add-Issue "belief_trace_summary_current_status_missing:$relative"
+    } elseif ([string]$currentStatus -ne [string]$beliefStatus) {
+      Add-Issue "belief_trace_current_status_mismatch:${relative}:${beliefStatus}!=$currentStatus"
+    }
+  }
+
+  foreach ($property in $Node.PSObject.Properties) {
+    Test-JsonBeliefInvariant $property.Value $Source $Root
+  }
+}
+
+function Test-TextBeliefInvariant([string]$Path, [string]$Root) {
+  $relative = Get-RelativeDisplayPath $Path $Root
+  $lines = Get-Content -LiteralPath $Path -Encoding UTF8
+  $beliefStatus = $null
+  $sawSummary = $false
+  $lineNumber = 0
+  foreach ($line in $lines) {
+    $lineNumber += 1
+    if ($line -match '^\s*belief_status:\s*`?([^`\s#]+)`?') {
+      $beliefStatus = $Matches[1].Trim()
+      $sawSummary = $false
+      continue
+    }
+    if ($null -eq $beliefStatus) { continue }
+    if ($line -match '^\s*belief_trace_summary:\s*') {
+      $sawSummary = $true
+      continue
+    }
+    if ($sawSummary -and ($line -match '^\s*current_status:\s*`?([^`\s#]+)`?')) {
+      $currentStatus = $Matches[1].Trim()
+      if ($currentStatus -ne $beliefStatus) {
+        Add-Issue "belief_trace_current_status_mismatch:${relative}:${lineNumber}:${beliefStatus}!=$currentStatus"
+      }
+      $beliefStatus = $null
+      $sawSummary = $false
+    }
+  }
+  if (($null -ne $beliefStatus) -and $sawSummary) {
+    Add-Issue "belief_trace_summary_current_status_missing:$relative"
+  }
+}
+
+function Test-BeliefTraceInvariants([string]$Root) {
+  if ([string]::IsNullOrWhiteSpace($Root) -or -not (Test-Path -LiteralPath $Root)) {
+    return
+  }
+  $resolvedRoot = (Resolve-Path -LiteralPath $Root).Path
+  $textExtensions = @(".md", ".yaml", ".yml")
+  $jsonExtensions = @(".json", ".jsonl")
+  $scanRoots = @("docs", "examples", "templates", "skills", "AGENTS.md", "README.md")
+  foreach ($entry in $scanRoots) {
+    $entryPath = Join-Path $resolvedRoot $entry
+    if (-not (Test-Path -LiteralPath $entryPath)) { continue }
+    $files = if ((Get-Item -LiteralPath $entryPath).PSIsContainer) {
+      Get-ChildItem -LiteralPath $entryPath -Recurse -File
+    } else {
+      @(Get-Item -LiteralPath $entryPath)
+    }
+    foreach ($file in $files) {
+      if ($textExtensions -contains $file.Extension.ToLowerInvariant()) {
+        Test-TextBeliefInvariant $file.FullName $resolvedRoot
+      } elseif ($jsonExtensions -contains $file.Extension.ToLowerInvariant()) {
+        try {
+          if ($file.Extension.ToLowerInvariant() -eq ".jsonl") {
+            foreach ($line in (Get-Content -LiteralPath $file.FullName -Encoding UTF8)) {
+              if ([string]::IsNullOrWhiteSpace($line)) { continue }
+              Test-JsonBeliefInvariant ($line | ConvertFrom-Json) $file.FullName $resolvedRoot
+            }
+          } else {
+            Test-JsonBeliefInvariant ((Get-Content -LiteralPath $file.FullName -Raw -Encoding UTF8) | ConvertFrom-Json) $file.FullName $resolvedRoot
+          }
+        } catch {
+          Add-Issue "belief_invariant_json_parse_failed:$(Get-RelativeDisplayPath $file.FullName $resolvedRoot)"
+        }
+      }
+    }
+  }
 }
 
 try {
@@ -65,6 +179,12 @@ if ($null -ne $policy) {
   }
 }
 
+$repoCandidate = if ($RepoRoot) { $RepoRoot } else { Join-Path $PSScriptRoot "..\.." }
+if ((Test-Path -LiteralPath (Join-Path $repoCandidate "VERSION")) -and
+    (Test-Path -LiteralPath (Join-Path $repoCandidate "skills\embedded-harness\embedded_harness_policy.json"))) {
+  Test-BeliefTraceInvariants $repoCandidate
+}
+
 $status = if ($issues.Count -gt 0) { "blocked" } else { "pass" }
 $result = [ordered]@{
   ts = (Get-Date).ToString("o")
@@ -72,7 +192,7 @@ $result = [ordered]@{
   status = $status
   policy_path = $PolicyPath
   issues = @($issues | Select-Object -Unique)
-  rule = "lightweight parse and shape check only; not a full JSON Schema validator"
+  rule = "lightweight policy parse, shape check, and belief_trace_summary.current_status invariant check when repo root is available; not a full JSON Schema validator"
 }
 
 $json = $result | ConvertTo-Json -Depth 20

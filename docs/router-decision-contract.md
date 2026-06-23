@@ -114,6 +114,22 @@ the task expensive by itself; it tells the agent to avoid under-routing and to
 re-evaluate before editing, writing memory, searching externally, or making a
 strong claim.
 
+## Trigger Promotion Gate
+
+Do not add every successful task phrase to the long-lived trigger list. Promote
+a trigger term only when all of these are true:
+
+- it describes a recurring routing class, not one user's one-off wording;
+- it changes the needed gates, risk, memory, search, claim, or permission path;
+- it is not already covered by a generic edit, report, search, memory, or risk
+  trigger;
+- it can be tested with at least one positive and one non-applicable example.
+
+One-off phrases should remain in the task receipt, changelog, issue note, or
+candidate SkillOpt-style proposal. They should not become deterministic router
+policy until repeated evidence or explicit maintainer approval shows that the
+term is durable.
+
 ## SkillOpt-Style Training Boundary
 
 The SkillOpt-style training layer is default-off for ordinary tasks. The router should consider it only when the task is about recurring skill or router improvement, candidate rule edits, rejected-edit review, textual learning-rate limits, slow updates, or external skill-optimization mechanism intake.
