@@ -2,7 +2,7 @@
 
 Stop coding agents from calling weak evidence "validated." Claim Boundary Harness adds meta-first routing, project-scoped memory lanes, R0-R5 risk receipts, and deployment adapters for claim verification.
 
-Current version: `v0.15.2`
+Current version: `v0.15.3`
 
 It is not tied to one agent runtime. It is a neutral starting point that can be mapped into any agent that can read workspace instructions, run local scripts, use command or skill folders, or call hooks before tools.
 
@@ -275,13 +275,13 @@ user request
 
 This framework can be adapted to agents that support one or more of these surfaces:
 
-- workspace instruction files;
-- project instruction files;
-- command or skill folders;
-- local script execution;
-- tool-call hooks;
-- project memory folders;
-- wrapper scripts around the agent process.
+- workspace instruction files
+- project instruction files
+- command or skill folders
+- local script execution
+- tool-call hooks
+- project memory folders
+- wrapper scripts around the agent process
 
 If an agent only reads instruction files, this framework acts as a soft workflow contract. If an agent also supports hooks or wrappers, the gate scripts can become stronger runtime checks.
 

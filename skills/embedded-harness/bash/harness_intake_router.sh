@@ -36,14 +36,14 @@ json_array() {
 }
 
 add_unique() {
-  local -n target="$1"
+  local -n array_ref="$1"
   local value="$2"
   local item
   [ -z "$value" ] && return 0
-  for item in "${target[@]}"; do
+  for item in "${array_ref[@]}"; do
     [ "$item" = "$value" ] && return 0
   done
-  target+=("$value")
+  array_ref+=("$value")
 }
 
 regex_escape() {
@@ -196,12 +196,12 @@ first_matching_rule() {
 
 collect_matching_triggers() {
   local filter="$1"
-  local -n target="$2"
+  local target_array_name="$2"
   local trigger
   while IFS= read -r trigger; do
     [ -z "$trigger" ] && continue
     if match_trigger "$TASK_TEXT" "$trigger"; then
-      add_unique target "$trigger"
+      add_unique "$target_array_name" "$trigger"
     fi
   done < <(triggers_from_filter "$filter")
 }

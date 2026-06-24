@@ -4,6 +4,11 @@ All notable public changes should be recorded here.
 
 This project uses `vMAJOR.MINOR.PATCH` version labels while the framework is still early-stage.
 
+## v0.15.3 - 2026-06-24
+
+- Fixed the Bash router helper so CI smoke checks no longer hit a Bash nameref self-reference warning during trigger collection.
+- Normalized the `Where It Can Be Used` README list punctuation for consistency.
+
 ## v0.15.2 - 2026-06-24
 
 - Added a generic existing-file local-patch rule: ordinary change, update, fix, sync, or adapt requests should modify only the necessary anchored section unless the user explicitly asks for a full-file rewrite or replacement.
@@ -243,7 +248,7 @@ This project uses `vMAJOR.MINOR.PATCH` version labels while the framework is sti
 
 - Reworked the README opening around the concrete failure mode of weak evidence being overstated as validated.
 - Added a compact Mermaid architecture diagram near the top of the README so adopters can see the routing, memory, search, claim, and selective hard-gate flow quickly.
-- Prepared repository discoverability metadata through focused GitHub topics.
+- Updated repository metadata with focused GitHub topics.
 
 ## v0.10.0 - 2026-06-18
 
