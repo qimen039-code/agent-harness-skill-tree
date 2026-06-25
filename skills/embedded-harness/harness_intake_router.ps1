@@ -252,7 +252,7 @@ function Get-R5ContextDecision {
   }
 }
 
-function Get-TargetSurface() {
+function Get-TargetSurface {
   $rules = $policy.router_decision_contract.target_surface_trigger_rules
   if ($null -ne $rules) {
     foreach ($name in @("git_action", "tool_call", "adapter", "public_docs", "conversation_ledger", "conversation_memory", "private_rule", "local_harness", "skill_matrix", "project_memory")) {
@@ -899,6 +899,5 @@ if ($OutputPath) {
   Set-Content -LiteralPath $OutputPath -Value $json -Encoding UTF8
 }
 $json
-
 
 
