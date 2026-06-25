@@ -321,6 +321,7 @@ Integration examples are intentionally small and conservative:
 - [docs/integrations/codex.md](docs/integrations/codex.md)
 - [docs/integrations/claude-code.md](docs/integrations/claude-code.md)
 - [docs/integrations/workbuddy.md](docs/integrations/workbuddy.md)
+- [docs/integrations/doubao.md](docs/integrations/doubao.md)
 - [integrations/workbuddy-python-runtime/README.md](integrations/workbuddy-python-runtime/README.md)
 
 ## Why Skills Are Bounded
@@ -367,6 +368,13 @@ One observed side effect in that private Codex workflow is better reuse of prior
 
 This is not yet broad field validation. The public package has not been battle-tested across many projects, many operators, or many agent runtimes.
 
+Current client boundary:
+
+- **Codex**: extended private local use plus source/active harness smoke checks in a Windows Codex workflow.
+- **WorkBuddy**: local Python adapter tests plus one operator-confirmed local hook deployment path. This is still not a complete WorkBuddy version or platform certification.
+- **Doubao**: one operator-confirmed local client adaptation and deployment test, plus repository-side review of the generated adaptation report, script chain, JSON memory layout, and a host-owned `interaction.warn` hard-confirmation test for a destructive delete path.
+- **Other clients**: reference mappings only until the target client, instruction surface, hook or wrapper path, denial behavior, and bypass surfaces are tested in that client.
+
 The PowerShell, Bash, and WorkBuddy Python adapters are also not complete compatibility claims.
 They were adapted from one local device environment. PowerShell and the WorkBuddy Python decision layer were smoke-tested locally; the Bash/mac-style scripts are reference adapters and still need target-shell verification on the adopter's machine.
 The WorkBuddy Python adapter now includes a hook runner tested through local unit tests, including prompt routing, command-tool denial, Stop/final claim checks, and transcript extraction. One local WorkBuddy hook deployment has also been confirmed to run normally with this package. Real hard enforcement still depends on each adopter's WorkBuddy version honoring hook denial, exit code `2`, final-hook blocking, and the configured matcher scope.
@@ -403,6 +411,7 @@ The package includes synthetic examples that show the intended record shapes wit
 - [docs/cost-control-contract.md](docs/cost-control-contract.md): routing field budgets, delta receipts, active-context ceilings, and action-relevant field rules.
 - [docs/archive-and-persona-boundaries.md](docs/archive-and-persona-boundaries.md): optional cold archive, move/copy archive defaults, summary capsule exceptions, and conversation-only persona boundaries.
 - [docs/deployment-risk-patterns.md](docs/deployment-risk-patterns.md): common deployment failures, concrete issue examples, and solution playbooks for WorkBuddy-like hooks, CLI agents, IDE agents, custom orchestrators, hosted agents, and wrapper-only setups.
+- [docs/integrations/doubao.md](docs/integrations/doubao.md): transferable notes from a local Doubao client adaptation, including downgraded surfaces, script checks, UTF-8 deployment requirements, and attribution boundaries.
 - [docs/examples.md](docs/examples.md): expected gate behavior and how to interpret examples.
 
 ## Quick Start
@@ -513,8 +522,10 @@ This is a foundation package, not a complete safety system.
 - The trigger lists are intentionally small and should be tuned.
 - The memory format is a template, not a database.
 - Different agents need different adapter files and launch methods.
+- Completed local adaptation/deployment testing currently covers Codex, WorkBuddy, and Doubao only, with the evidence boundaries described above.
 - The Claude Code guide is a reference mapping and has not yet been fully deployment-validated in an installed Claude Code client.
 - The WorkBuddy Python adapter is experimental and is not a complete WorkBuddy compatibility guarantee.
+- Other clients, IDE agents, CLI agents, hosted agents, and custom orchestrators remain unverified reference paths until their exact runtime surfaces are tested.
 - Bash/macOS/Linux support is a reference path until it is tested on the target machine and shell.
 - There are likely missing cases, rough edges, and workflows we have not considered.
 

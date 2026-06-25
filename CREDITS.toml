@@ -100,6 +100,33 @@ not_adopted = [
 boundary = "source-prior design influence only"
 docs_ref = "docs/influences-and-attribution.md"
 
+[[client_artifact_reference]]
+id = "doubao-built-in-finance-market-skills"
+name = "Doubao built-in finance and market-analysis skills"
+source_type = "local_client_artifact"
+observed_at = "2026-06-25"
+used_for = [
+  "staged contract loading",
+  "source facts payload separation",
+  "evidence lane boundaries",
+  "deterministic scaffold derive lint repair verify flow",
+  "check-only render gates",
+  "two-stage artifact delivery",
+  "domain aesthetic rubric inspiration",
+  "domain source-tier catalog inspiration",
+  "external-model structured JSON filler boundary",
+]
+not_adopted = [
+  "Doubao code",
+  "prompt text",
+  "templates",
+  "proprietary schema",
+  "finance-domain data-source rules",
+  "finance-specific facts schema as a global default",
+]
+boundary = "source-prior local client artifact reference only; no implementation text or proprietary assets are copied"
+docs_ref = "docs/influences-and-attribution.md"
+
 [[pattern]]
 id = "policy-decision-enforcement-separation"
 name = "Policy decision point / policy enforcement point separation"

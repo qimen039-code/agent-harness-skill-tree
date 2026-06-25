@@ -7,6 +7,11 @@ This project uses `vMAJOR.MINOR.PATCH` version labels while the framework is sti
 ## Unreleased
 
 - Extended the WorkBuddy adapter manifest and documentation for optional quality-reference, domain source-tier, claim-artifact, and external-model JSON-filler surfaces. These remain default-off, advisory/source-prior, and unverified until a host version tests them.
+- Added attribution for the Doubao built-in finance and market-analysis skill artifacts that informed those optional contract-boundary patterns, with an explicit no-code/no-template/no-proprietary-schema copying boundary.
+- Added transferable Doubao client adaptation notes covering soft and semi-hard deployment, downgraded enforcement surfaces, script-chain checks, UTF-8 console requirements, and attribution boundaries.
+- Clarified the Doubao notes with an operator-provided local hard-constraint test: a destructive delete path was forced through the platform-owned `interaction.warn` confirmation surface, so the adaptation should align with host safety guards without claiming framework-owned hard enforcement.
+- Documented the portability principle that different clients may legitimately provide different enforcement strengths; adapters should map, align, test, and disclose those host-specific surfaces instead of pretending every deployment has identical hard gates.
+- Added a README field-use boundary listing Codex, WorkBuddy, and Doubao as the only currently locally tested adaptation/deployment surfaces, while keeping other clients as unverified reference paths.
 
 ## v0.16.0 - 2026-06-25
 

@@ -193,6 +193,8 @@ For nested claim payloads, prefer a file-based claim handoff such as `--ClaimFil
 
 The current WorkBuddy Python adapter implements routing, memory isolation, R5/runtime gates, conversation-link blocking, and final claim checks. It does not implement a full quality-reference layer or a claim-artifact renderer.
 
+The optional surfaces below were informed in part by the non-GitHub client artifact reference recorded in [Influences And Attribution](../influences-and-attribution.md): Doubao built-in finance and market-analysis skills inspected locally on 2026-06-25. That reference is source-prior only; this repository does not copy Doubao code, prompts, templates, proprietary schemas, or finance-domain rules.
+
 If an adopting WorkBuddy loop adds those surfaces, keep them separate from hard runtime gates:
 
 - `domain_aesthetic_rubric` records are advisory quality references. They can describe domain-specific output dimensions, bands, examples, and failure modes, but they must not block tool execution by themselves.

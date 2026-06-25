@@ -34,6 +34,12 @@ deployment notes.
 | Meta-first retrieval | Read summaries and indexes before opening deep payloads. | This is a retrieval discipline, not a guarantee of semantic correctness. |
 | Project manuals and wiki-style knowledge bases | Keep stable module maps, commands, conventions, and interface notes close to the repository. | Static notes are source-prior orientation aids until checked against files, tests, or other evidence. |
 
+## Non-GitHub Client Artifact References
+
+| Source | Absorbed or adapted ideas | Boundary |
+| --- | --- | --- |
+| Doubao built-in finance and market-analysis skills, inspected as local client skill artifacts on 2026-06-25 | Staged contract loading, source/facts/payload separation, evidence lanes, deterministic scaffold/derive/lint/repair/verify flows, check-only render gates, two-stage artifact delivery, domain scoring as an advisory rubric, domain source-tier catalogs, and external-model structured-JSON filler boundaries. | No Doubao code, prompt text, templates, proprietary schema, data-source list, or finance-domain rules are vendored or copied. The reference is source-prior design input only; local harness behavior remains independently implemented and must be validated by this repository's own tests. |
+
 ## Project Contributions
 
 The repository's own contribution is the combined boundary contract and runnable
