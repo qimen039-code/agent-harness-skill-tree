@@ -1,4 +1,4 @@
-param(
+﻿param(
   [string]$TaskText = "",
   [string]$Cwd = (Get-Location).Path,
   [string]$OutputPath = ""
