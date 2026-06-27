@@ -130,6 +130,13 @@ ROUTER_CASES = [
         "gates": ["change_contract_gate"],
     },
     {
+        "id": "TC-005d",
+        "task": "准备发布，但提交推送不执行。先做结构读图和现有 diff 审计。",
+        "risk": "R3",
+        "gates": ["change_contract_gate"],
+        "candidate_r5": "提交",
+    },
+    {
         "id": "TC-005b",
         "task": "接续上一段对话记忆，创建此对话新记忆文件并链接上一段对话记忆文件",
         "risk": "R3",
@@ -139,6 +146,8 @@ ROUTER_CASES = [
             "conversation_memory_decision": "create_or_update_current_conversation",
             "link_intent": "continue_from_latest",
             "record_intent": "explicit_conversation_memory_request",
+            "hybrid_retrieval_profile": "meta_first_hybrid_required",
+            "memory_write_profile": "strict_capsule_required",
         },
         "expect_in": {
             "memory_mode": ["write", "update"],
@@ -150,6 +159,8 @@ ROUTER_CASES = [
         "risk": "R3",
         "expect": {
             "target_surface": "conversation_ledger",
+            "hybrid_retrieval_profile": "meta_first_hybrid_enhancement",
+            "memory_write_profile": "none",
         },
         "expect_contains": {
             "module_need": "conversation_ledger_index",

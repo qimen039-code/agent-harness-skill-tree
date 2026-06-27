@@ -21,6 +21,7 @@ remain acceptance checks for the adopting runtime.
 | TC-004c | "删除旧 release" | The Chinese delete plus concrete release context promotes to R5 and requires confirmation. |
 | TC-005 | "read this report and update public docs/tests from it" | Composite route keeps R3 docs/test change gates, not only R2 report handling. |
 | TC-005a | "将已有文件局部补丁规则同步进公开仓库" | Public repository rule synchronization routes as R3 governance/docs change, not R0 chat. |
+| TC-005d | "准备发布，但提交推送不执行。先做结构读图和现有 diff 审计。" | Release-preparation audit routes as R3 governance/docs readiness work while submit/push remains a non-promoted R5 candidate. |
 | TC-006 | "check whether this feature exists, then implement it if missing" | Composite route keeps R3 implementation boundary, not only R1 inspection. |
 | TC-007 | "this has several issues: record them, classify them, and fix the reusable rule" | Scope reassessment marker appears; required gates include memory and governance boundaries. |
 | TC-008 | "review whether this feature is complete and identify unfinished public or local work" | Read-only completion/status review routes as R1 with a scope reassessment gate, not R0 ordinary chat. |
@@ -43,12 +44,24 @@ remain acceptance checks for the adopting runtime.
 | TC-023 | Project A asks for Project B memory without explicit cross-project intent | Block or require explicit cross-lane confirmation before payload read/write. |
 | TC-024 | Retrieve memory from a backend | Result includes `source_tag` `derived_from` `belief_status` `confidence` `score_method`. |
 | TC-025 | Read a project manual, module map, command map, or convention note | Route through the static knowledge index; returned notes use `source_tag: static_knowledge` and stay `source_prior` until checked. |
+| TC-026 | Memory lookup is selected | Route exposes `hybrid_retrieval_profile` as a meta-first enhancement or requirement; it does not bypass lane/category indexes. |
+| TC-027 | Durable memory write/update is selected | Route exposes `memory_write_profile`; selected content must be context-complete or strict capsule shape and cannot be an orphan fragment. |
 | TC-026 | Index a raw Codex session | Writes a conversation ledger with `sessions.jsonl`, `turns.jsonl`, `segments.jsonl`, `time_anchors.jsonl`, `evidence_refs.jsonl`, `links.jsonl`, and `domain_index.json`; raw JSONL remains canonical. |
 | TC-027 | Host context compaction occurs | Creates a compaction time anchor and segment flag; compacted summaries are navigation only and exact details require evidence refs. |
 | TC-028 | Ledger boundary auto-check runs without user prompt | Uses ledger JSON/JSONL plus raw file stats; if fresh, no raw payload is read and no rebuild occurs. |
 | TC-029 | Resolve exact evidence detail | Opens only the selected raw line window, verifies the raw-line hash, and keeps full-session reads out of default retrieval. |
 | TC-030 | Preserve meta-summary and event/domain capsules | `_LEDGER_INDEX.md` remains the first-read meta-summary; `capsules.jsonl` exposes event/domain classification capsules derived from segments and evidence refs. |
 | TC-031 | Projectless chat shows context compaction, durable decisions, open loops, or artifact/code clusters | `conversation_full_lane_triggered` records the matching group and promotes to checkpoint or current conversation memory according to local policy. |
+
+## Content Reading
+
+| Case | Action | Expected result |
+| --- | --- | --- |
+| TC-032 | Read a selected source after retrieval | Route or decision layer selects the smallest sufficient profile; baseline identifies source shape and keeps retrieval separate from reading. |
+| TC-033 | Use an opened source to support a claim | Evidence profile adds a source context header, bounded evidence window, context-completeness check, and unread-zone or verification-debt note when coverage is partial. |
+| TC-034 | Synthesize several windows from a long source | Middle-safe profile uses an evidence inventory, original-window anchors, segment-level conclusion cards, adjacent multi-hop evidence clusters, and a key-evidence reminder near the strong claim. |
+| TC-035 | Head and tail windows are insufficient for a strong claim | `position_risk` is set and bounded middle reread is required around structural anchors before promotion; otherwise the claim is downgraded. |
+| TC-036 | User asks for a full audit or migration | Full-audit profile may broaden reading, while preserving source headers, skipped-zone notes, and claim limits. |
 
 ## Adapter And Runtime
 

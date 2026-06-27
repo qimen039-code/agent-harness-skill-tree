@@ -15,7 +15,9 @@ risk_level
 semantic_ambiguity
 module_need
 memory_need
+hybrid_retrieval_profile
 memory_mode
+memory_write_profile
 memory_lane
 record_intent
 external_need
@@ -39,7 +41,9 @@ Field meanings:
 | `semantic_ambiguity` | Mark terms that could mean multiple actions, such as update, record, publish, call, route, memory, or skill. |
 | `module_need` | Decide whether to use no module, project router, semantic anchors, skill matrix, memory meta index, conversation memory index, static knowledge index, external research gate, claim verifier, or runtime hard gate. |
 | `memory_need` | Decide whether memory is unnecessary, meta-only, index-only, capsule-level, paired ERR/SOL retrieval, common error corpus, or conversation state. |
+| `hybrid_retrieval_profile` | Decide whether memory lookup stays unused, uses the normal meta-first surface, or must add the hybrid lexical/original-language enhancement over the already bounded candidate set. |
 | `memory_mode` | Decide whether memory should be skipped, read, written, or updated. |
+| `memory_write_profile` | Decide whether a memory write is absent, context-complete, or strict reusable-capsule shape. |
 | `memory_lane` | Decide whether the memory action belongs to a current project, current conversation, referenced conversation, emergent project candidate, common error corpus, self-reflection matrix, global inbox, or no lane. |
 | `record_intent` | Decide whether there is no record request, explicit user request, inferred reusable error, projectization review, conversation checkpoint, or explicit conversation memory request. |
 | `external_need` | Decide whether external lookup is unnecessary, official-source, GitHub/open-source, general cross-check, source-grounded learning, or local validation. |
@@ -63,6 +67,31 @@ The router should compute the full decision internally, then expose the smallest
 | `debug_receipt` | Router debugging, misroute analysis, or user asks for full receipt. | Full receipt plus matched/negated triggers, confidence, and profile reasons. |
 
 This keeps Codex-style, Claude-style, WorkBuddy-style, and custom local adapters cheap while preserving the full whiteboard schema for migration, audits, and public framework work.
+
+## Memory Retrieval And Write Profiles
+
+`hybrid_retrieval_profile` is subordinate to `memory_need`. It must never bypass
+`memory_summary`, `_META_INDEX`, lane/category narrowing, memory isolation, or
+source-monitoring fields.
+
+Allowed values:
+
+| Value | Meaning |
+| --- | --- |
+| `none` | No memory lookup is needed. |
+| `meta_first_hybrid_enhancement` | Use meta-first retrieval, then add bounded retrieval terms, exact phrases, original-language keywords, Chinese character n-grams, English terms, and optional lexical ranking over the selected candidate set. |
+| `meta_first_hybrid_required` | The task reads or writes reusable capsules, ERR/SOL records, common-error records, conversation state, or memory links; the adapter should expose the hybrid enhancement as an execution requirement, not a replacement retrieval stack. |
+
+`memory_write_profile` is subordinate to `memory_mode`. It does not authorize
+writing by itself.
+
+Allowed values:
+
+| Value | Meaning |
+| --- | --- |
+| `none` | No durable memory write/update is selected. |
+| `context_complete_required` | Any durable memory write/update must include actor/source, action or decision, object/scope, time or version when relevant, provenance boundary, and non-applicable boundary when needed. |
+| `strict_capsule_required` | Explicit reusable memory, conversation-memory, or cross-conversation writes must use source-preserving capsule shape and cannot write orphan fragments. |
 
 For field-budget, silent classification, and delta-receipt rules, see [cost-control-contract.md](cost-control-contract.md). The short rule is: classify every task internally, but emit a field by default only when it can change the next action.
 

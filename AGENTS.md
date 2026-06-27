@@ -60,7 +60,14 @@ Memory use is routed. Ordinary chat should not write memory by default. Explicit
 
 Reusable memory capsules should use source-monitoring fields: `source_tag` `belief_status` `confidence` `derived_from` `source_monitoring` `lifecycle` `belief_trace_summary`. `belief_status` tracks the verification-process state; `confidence` tracks evidence strength for assigning that status, not the raw probability that the original claim is true. Compressed or synthesized capsules must preserve `derived_from`.
 
+Reusable memory content must be context-complete. Do not save isolated fragments as durable guidance. Each promoted capsule should identify the actor/source, action or claim, object/scope, time or version when relevant, evidence boundary, and non-applicable boundary when needed. Keep code-facing structure fields in English, but preserve the original language of the memory content; Chinese content stays Chinese, English content stays English.
+
 Memory retrieval results must not be plain snippets when they are used as reusable context. Return at least these fields with the selected text: `source_tag` `derived_from` `belief_status` `confidence` `score_method`. If no numeric retrieval score is used, set `score_method: none` and omit `score`.
+
+Hybrid memory retrieval is meta-first plus bounded structural and lexical signals: lane/category filters, retrieval terms, exact phrase matching, original-language keywords, Chinese character n-gram overlap, English term matching, and optional lexical ranking over an already small candidate set. SQL, SQLite, vector stores, and embedding databases are not default semantic-memory or retrieval cores.
+Expose this through `hybrid_retrieval_profile` only after `memory_need` is selected; it augments the existing meta-first chain and must not replace lane/category filtering, source-monitoring, or claim gates. Expose `memory_write_profile` only after `memory_mode` selects a durable write/update; it constrains write shape and does not authorize memory writes by itself.
+
+Content reading happens after retrieval selects a candidate, and the route or decision layer must choose the smallest sufficient reading profile: `baseline`, `evidence_window`, `middle_safe`, or `full_audit`. Baseline source reads identify source shape, prefer an existing structure map, use a temporary micro-map when no map exists, and keep retrieval separate from reading. Evidence reads attach a compact source context header, read a bounded evidence window, expand only missing context, and report unread zones or verification debt before stronger claims. For long, multi-window, multi-hop, public, memory-promotion, R4/R5, or strong-claim cases, use middle-safe layout: evidence inventory plus original windows, per-window conclusion cards before synthesis, adjacent multi-hop evidence clusters, key evidence reminders near strong claims, and a `position_risk` marker. If only head/tail anchors were read and they do not provide enough fact, scope, time, or relevance for a strong claim, trigger a bounded middle reread around structural anchors before promoting the claim.
 
 Optional static knowledge pages are project manuals, not validated memory. When a task needs module maps, entry points, commands, conventions, or interface notes, read `_STATIC_KNOWLEDGE_INDEX.md` first, open only the selected static page, and treat returned notes as `source_tag: static_knowledge` with `belief_status: source_prior` until checked against files, tests, or schemas.
 
@@ -163,7 +170,7 @@ Use Markdown for human-facing instructions, explanations, and meta summaries. Us
 JSON/TOML/YAML -> policy, routing rules, config
 JSONL -> append-only decisions, open loops, errors, solutions, references
 CSV/TSV -> large table data
-SQLite or another local database -> larger queryable state
+JSON/JSONL/CSV or explicitly approved local store -> non-semantic operational indexes
 generated Markdown -> public presentation tables
 ```
 

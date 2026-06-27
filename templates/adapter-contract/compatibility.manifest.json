@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1",
   "manifest_type": "agent_memory_lane_compatibility_manifest",
-  "harness_version": "v0.16.0",
+  "harness_version": "v0.17.0",
   "adapter": {
     "name": "example-adapter",
     "version": "unverified",
@@ -55,12 +55,29 @@
     }
   },
   "memory_retrieval_result": {
+    "hybrid_retrieval_profile_supported": "unverified",
+    "hybrid_retrieval_profile_values": [
+      "none",
+      "meta_first_hybrid_enhancement",
+      "meta_first_hybrid_required"
+    ],
+    "hybrid_retrieval_is_meta_first_enhancement": true,
     "requires_source_tag": true,
     "requires_belief_status": true,
     "requires_confidence": true,
     "requires_derived_from": true,
     "requires_score_method": true,
     "text_only_results_are_unbounded": true
+  },
+  "memory_write_granularity": {
+    "memory_write_profile_supported": "unverified",
+    "memory_write_profile_values": [
+      "none",
+      "context_complete_required",
+      "strict_capsule_required"
+    ],
+    "durable_writes_require_context_complete_content": true,
+    "strict_capsules_reject_orphan_fragments": true
   },
   "wrappers": {
     "python": {

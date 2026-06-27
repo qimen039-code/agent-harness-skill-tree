@@ -68,7 +68,9 @@ risk_level
 semantic_ambiguity
 module_need
 memory_need
+hybrid_retrieval_profile
 memory_mode
+memory_write_profile
 memory_lane
 record_intent
 external_need
@@ -144,7 +146,9 @@ Memory use has its own routed decision:
 
 ```text
 memory_need
+hybrid_retrieval_profile
 memory_mode
+memory_write_profile
 memory_lane
 record_intent
 projectization_decision
@@ -155,6 +159,28 @@ This prevents the framework from treating every mistake as permanent memory or e
 See [memory-routing-contract.md](memory-routing-contract.md) and [common-error-corpus.md](common-error-corpus.md).
 
 Memory retrieval results should preserve provenance. A selected record should return at least these fields alongside the snippet: `source_tag` `derived_from` `belief_status` `confidence` `score_method`. A relevance score can rank candidates, but it does not turn a raw observation or source prior into a validated claim.
+
+Reusable memory content must also preserve meaning. A promoted capsule should be
+context-complete, preserve the source language in the content plane, and keep
+English structure fields for adapters. Hybrid retrieval is meta-first and
+source-preserving: lane/category/status filters select a small candidate set
+before exact phrase, original-language keyword, Chinese character n-gram,
+English term, or optional lexical ranking is used.
+The route exposes this as `hybrid_retrieval_profile` so adapters can strengthen
+recall inside the existing meta-first path without replacing it. Durable memory
+writes expose `memory_write_profile` so the selected write shape is
+context-complete or strict-capsule as needed.
+
+Reading is a separate routed step after retrieval. The route or decision layer
+chooses `baseline`, `evidence_window`, `middle_safe`, or `full_audit` reading.
+This keeps ordinary reads cheap while still enabling source context headers,
+bounded evidence windows, unread-zone notes, and middle-safe evidence layout
+when a strong claim, memory promotion, release note, R4/R5 decision, long
+source, or multi-hop evidence chain requires it.
+
+See [memory-write-granularity-contract.md](memory-write-granularity-contract.md),
+[hybrid-memory-retrieval-contract.md](hybrid-memory-retrieval-contract.md), and
+[content-reading-contract.md](content-reading-contract.md).
 
 ## Conversation Memory Lane
 
@@ -206,7 +232,7 @@ Markdown -> public explanation, meta index, short capsules
 JSON -> router policy and machine-readable indexes
 JSONL -> append-only decisions, open loops, errors, solutions, references
 CSV/TSV -> large tabular matrices
-SQLite -> larger queryable local state
+JSON/JSONL/CSV or explicitly approved local store -> non-semantic operational indexes
 ```
 
 See [format-layering.md](format-layering.md).

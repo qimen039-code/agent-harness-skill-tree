@@ -22,6 +22,8 @@ deployment notes.
 | LanNguyenSi/harness: https://github.com/LanNguyenSi/harness | Declarative control-plane vocabulary, adapter compatibility thinking, evidence-ledger and policy/enforcement separation ideas. | This repository does not require its manifest format, CLI, Rego-like policy layer, generated runtime config, or always-on hook enforcement. |
 | epicsagas/epic-harness: https://github.com/epicsagas/epic-harness | Hook health, pipeline state, multi-tool harness framing, and self-improvement as a staged maintenance concern. | This repository does not adopt always-on self-evolution, autonomous spec-to-PR behavior, or unified memory as the default. |
 | ChatBotKit template-node-agent-cli-js: https://github.com/chatbotkit/template-node-agent-cli-js | Tool schema, CLI-agent structure, and structured command-output inspiration. | This repository does not depend on ChatBotKit or its SDK. |
+| Anthropic Contextual Retrieval: https://www.anthropic.com/news/contextual-retrieval | Chunk-level context pressure informed the source context header and bounded evidence-window reading contract. | This repository does not require Claude-generated contextual chunks, embeddings, vector databases, BM25, rerankers, prompt caching, or generated chunk context as a fact source. |
+| Liu et al., "Lost in the Middle": https://arxiv.org/abs/2307.03172 | Position sensitivity in long contexts informed the middle-safe evidence layout, position-risk marker, and bounded middle-reread gate. | This repository does not claim to solve model attention behavior, add positional training, or rely on blind long-context stuffing. |
 
 ## Established Pattern Influences
 

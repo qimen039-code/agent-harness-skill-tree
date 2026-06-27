@@ -202,6 +202,8 @@ class HarnessGateTests(unittest.TestCase):
         self.assertEqual(route["memory_mode"], "write")
         self.assertEqual(route["record_intent"], "explicit_conversation_memory_request")
         self.assertIn("conversation_memory_index", route["module_need"])
+        self.assertEqual(route["hybrid_retrieval_profile"], "meta_first_hybrid_required")
+        self.assertEqual(route["memory_write_profile"], "strict_capsule_required")
 
     def test_router_detects_continue_previous_conversation_link_intent(self) -> None:
         route = self._route("continue from the previous conversation", policy=self.policy)
@@ -211,6 +213,8 @@ class HarnessGateTests(unittest.TestCase):
         self.assertEqual(route["memory_mode"], "read")
         self.assertIn("conversation_link_gate", route["required_gates"])
         self.assertIn("memory_link_ledger", route["module_need"])
+        self.assertEqual(route["hybrid_retrieval_profile"], "meta_first_hybrid_required")
+        self.assertEqual(route["memory_write_profile"], "none")
 
     def test_router_detects_continue_previous_and_create_current_memory(self) -> None:
         route = self._route(
@@ -223,6 +227,8 @@ class HarnessGateTests(unittest.TestCase):
         self.assertEqual(route["memory_mode"], "write")
         self.assertEqual(route["record_intent"], "explicit_conversation_memory_request")
         self.assertIn("conversation_link_gate", route["required_gates"])
+        self.assertEqual(route["hybrid_retrieval_profile"], "meta_first_hybrid_required")
+        self.assertEqual(route["memory_write_profile"], "strict_capsule_required")
 
     def test_router_detects_conversation_ledger_surface(self) -> None:
         route = self._route(
@@ -231,6 +237,8 @@ class HarnessGateTests(unittest.TestCase):
         )
         self.assertEqual(route["target_surface"], "conversation_ledger")
         self.assertIn("conversation_ledger_index", route["module_need"])
+        self.assertEqual(route["hybrid_retrieval_profile"], "meta_first_hybrid_enhancement")
+        self.assertEqual(route["memory_write_profile"], "none")
 
     def test_router_detects_explicit_merge_memory_link_intent(self) -> None:
         route = self._route("merge the old conversation memory with this conversation", policy=self.policy)

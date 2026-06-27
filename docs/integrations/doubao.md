@@ -86,6 +86,8 @@ enforcement and what has actually been tested.
 | R0-R5 router receipt | Mode and risk-routing rules in the prompt/docs | Partially substituted |
 | Final claim gate | `lint_claims.py` post-check over selected output files | Downgraded to post-run validation |
 | Project/conversation memory lanes | `facts.json` and `hypotheses.json` stores | Partial; no automatic lane router or raw-session ledger |
+| Hybrid retrieval profile | Instruction/script convention that can require meta-first plus bounded original-language matching before reading facts or hypotheses | Partial; no tested automatic route field unless the local adapter adds it |
+| Memory write granularity profile | Schema/lint convention requiring context-complete facts and hypotheses before durable reuse | Partial; post-run or workflow-level unless wired before memory writes |
 | Raw session ledger | Not implemented in the reviewed demo | Missing |
 | R5 single-event permit | Doubao user confirmation may block or allow some destructive commands | Host-owned confirmation exists for the tested delete path; no replay-protected Claim Boundary Harness permit |
 | External research gate | Evidence-tier labels and output contract | Partial; no automatic authority/GitHub search trigger |
@@ -134,14 +136,18 @@ unsupported certainty language.
 4. Generate derived facts from raw facts only. Do not hand-edit derived values.
 5. Keep repair mechanical. A repair script may add missing fields or normalize
    schema shape; it must not invent evidence or fill unknown data.
-6. Run lint after important outputs and before publishing strong claims. Treat
+6. If the client has a memory workflow, add route-visible fields equivalent to
+   `hybrid_retrieval_profile` and `memory_write_profile`. Treat them as
+   meta-first retrieval and write-shape selectors, not as proof that claims are
+   true.
+7. Run lint after important outputs and before publishing strong claims. Treat
    warnings as review debt, not as a validated pass.
-7. Test the host's own hard guard with a harmless disposable file before relying
+8. Test the host's own hard guard with a harmless disposable file before relying
    on it. Record whether the client requires `interaction.warn`, whether user
    refusal stops execution, and which command classes are covered.
-8. Record unsupported or host-owned hard-gate surfaces in the compatibility
+9. Record unsupported or host-owned hard-gate surfaces in the compatibility
    manifest as advisory, partial, host-owned, or unverified.
-9. Keep attribution and source boundaries explicit when the adaptation was
+10. Keep attribution and source boundaries explicit when the adaptation was
    inspired by local client artifacts or other non-GitHub sources.
 
 ## Acceptance Checklist
@@ -155,6 +161,10 @@ Before calling a Doubao-style deployment successful, verify:
 - `facts.json` and `hypotheses.json` parse as JSON and keep raw facts separate
   from derived facts;
 - derive, lint, repair, and init scripts run on the target machine;
+- memory lookup guidance preserves meta-first retrieval and uses hybrid
+  matching only as an enhancement over bounded fact/hypothesis candidates;
+- durable fact or hypothesis writes are context-complete and avoid orphan
+  fragments before derived reuse;
 - Windows consoles use UTF-8 output or the scripts avoid emoji status output;
 - normal-output and boundary-output examples demonstrate a meaningful behavior
   difference;

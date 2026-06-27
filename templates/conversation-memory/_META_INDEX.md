@@ -47,12 +47,35 @@ Conversation-derived claims normally start as `source_prior` or `bounded_claim`;
 
 When returning selected conversation memory to an agent, include these fields with the selected text: `source_tag` `derived_from` `belief_status` `confidence` `score_method`. Use `score_method: none` when no numeric retrieval score is computed.
 
+Memory content should preserve the original language. Keep structure fields in
+English, but do not translate Chinese or English source content only for
+normalization. Durable capsules should be context-complete and should not save
+isolated fragments as reusable guidance.
+
+After a candidate is selected, the route or decision layer should choose the
+smallest sufficient reading profile: `baseline`, `evidence_window`,
+`middle_safe`, or `full_audit`. Baseline reads identify the source shape before
+payload reading and prefer existing maps and indexes; when none exist, create a
+temporary micro-map from file name, size, heading/key/symbol/record anchors, and
+known evidence refs. Evidence reads return a compact source context header and
+note unread zones as verification debt when coverage is partial.
+
+For long sources, use middle-safe evidence layout. Keep an evidence inventory
+next to the original windows, write per-window conclusion cards before
+synthesis, keep multi-hop evidence adjacent, repeat a short key-evidence
+reminder near strong claims, and mark `position_risk` when sparse reading could
+hide middle-only facts. If head/tail anchors are insufficient for a strong
+claim, reread bounded middle windows around structural anchors before promoting
+the claim.
+
 ## Latest And Fuzzy Lookup
 
 Use `updated_at` as the cheap shortcut for "continue the previous conversation". If the user remembers only keywords, search index-level fields first:
 
 ```text
 title / summary / retrieval_terms / semantic_anchors / open_loops
+-> exact phrase / original-language keyword / Chinese character n-gram / English term match
+-> source-shape identification and bounded evidence window
 -> candidate summaries
 -> user choice when ambiguous
 -> matching payload records only

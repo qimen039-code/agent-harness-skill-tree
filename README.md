@@ -2,7 +2,7 @@
 
 Stop coding agents from calling weak evidence "validated." Claim Boundary Harness adds meta-first routing, project-scoped memory lanes, R0-R5 risk receipts, and deployment adapters for claim verification.
 
-Current version: `v0.16.0`
+Current version: `v0.17.0`
 
 It is not tied to one agent runtime. It is a neutral starting point that can be mapped into any agent that can read workspace instructions, run local scripts, use command or skill folders, or call hooks before tools.
 
@@ -60,6 +60,21 @@ those slices into one low-cost contract:
   rollup.
 - **Metadata-bearing retrieval:** returned context must carry these fields:
   `source_tag` `derived_from` `belief_status` `confidence` `score_method`.
+- **Source-preserving memory writes:** reusable capsules should contain
+  context-complete content in the original source language, with stable English
+  structure fields for machine parsing. The router exposes
+  `memory_write_profile` for durable writes so this remains a selected write
+  constraint, not an always-on rewrite job.
+- **Hybrid memory retrieval:** lookup is meta-first, lane-scoped, and
+  source-preserving; exact terms, original-language keywords, Chinese character
+  n-grams, English terms, and optional lexical ranking are bounded by indexes
+  before any payload is opened. The router exposes
+  `hybrid_retrieval_profile` only as an enhancement over the existing
+  meta-first chain, not as an independent replacement search stack.
+- **Bounded source reading:** after retrieval selects a candidate, identify the
+  source shape, read the smallest useful evidence window, add a source context
+  header, use middle-safe evidence layout only when routed, and report unread
+  zones or verification debt.
 - **Selective hard gates:** R5 actions, risky tools, unresolved memory links,
   and strong final claims can be blocked when the runtime calls the gate.
   Single-event R5 permits are hash-bound and recorded in a used-ledger after a
@@ -143,6 +158,20 @@ paragraph that "looks relevant." Required reusable-memory fields:
 If a retrieval backend has no numeric score, it should use `score_method: none`
 and omit `score`. This keeps source, provenance, belief state, and ranking
 separate.
+
+Memory writes also stay source-preserving. Durable capsules should not be
+isolated short notes; they should include enough subject, action, object, scope,
+time, provenance, and non-applicable boundary to remain clear after context
+compaction. The structure fields stay English for adapter stability, while
+memory content keeps its original language.
+
+Reading remains a separate step from retrieval. A retrieved snippet, ledger
+capsule, generated summary, or rank score can select a source, but it does not
+prove that the source has been read. The reading contract opens bounded
+evidence windows, records unread zones when coverage is partial, and can mark
+`position_risk` when head/tail reading is not enough to support a strong claim.
+The routing or decision layer should pick the smallest sufficient reading
+profile: `baseline`, `evidence_window`, `middle_safe`, or `full_audit`.
 
 The result is an interlinked memory system that can find related project or
 conversation context while still preventing default cross-project,
@@ -250,7 +279,10 @@ user request
 |   +-- integrations/
 |   +-- memory-meta-index-contract.md
 |   +-- source-monitoring-memory-schema.md
+|   +-- memory-write-granularity-contract.md
 |   +-- memory-routing-contract.md
+|   +-- hybrid-memory-retrieval-contract.md
+|   +-- content-reading-contract.md
 |   +-- common-error-corpus.md
 |   +-- common-issues-and-solutions.md
 |   +-- conversation-memory-lane.md
@@ -266,6 +298,8 @@ user request
 |   +-- workbuddy-python-runtime/
 +-- tests/
 |   +-- test_credits.py
+|   +-- test_codex_session_ledger.py
+|   +-- test_documentation_contracts.py
 |   +-- test_policy_authoring_toml.py
 |   +-- test_router_contract.py
 +-- examples/
@@ -401,6 +435,9 @@ The package includes synthetic examples that show the intended record shapes wit
 - [docs/memory-routing-contract.md](docs/memory-routing-contract.md): memory mode, memory lane, record intent, and projectization drift contract.
 - [docs/memory-meta-index-contract.md](docs/memory-meta-index-contract.md): multi-axis meta index contract for memory libraries.
 - [docs/source-monitoring-memory-schema.md](docs/source-monitoring-memory-schema.md): source tags, belief-status state, structured confidence, derived provenance, observation state, and belief-trace rules for capsules.
+- [docs/memory-write-granularity-contract.md](docs/memory-write-granularity-contract.md): context-complete memory write rules and original-language content preservation.
+- [docs/hybrid-memory-retrieval-contract.md](docs/hybrid-memory-retrieval-contract.md): meta-first, no-dependency hybrid retrieval with optional lexical ranking boundaries.
+- [docs/content-reading-contract.md](docs/content-reading-contract.md): source-shape identification, structure-map fallback, source context headers, bounded evidence windows, and verification-debt notes.
 - [docs/static-knowledge-layer.md](docs/static-knowledge-layer.md): optional wiki-style project manual layer with source-prior retrieval boundaries.
 - [docs/common-error-corpus.md](docs/common-error-corpus.md): lightweight common-error sample format.
 - [docs/common-issues-and-solutions.md](docs/common-issues-and-solutions.md): reusable issue classes and applied solutions from adaptation, release, and CI work.
@@ -410,7 +447,7 @@ The package includes synthetic examples that show the intended record shapes wit
 - [docs/conversation-memory-lane.md](docs/conversation-memory-lane.md): isolated memory lane for long-running projectless conversations.
 - [docs/conversation-ledger-contract.md](docs/conversation-ledger-contract.md): derived raw-session ledger with session, turn, segment, time-anchor, evidence-ref, and link records.
 - [docs/memory-linking-contract.md](docs/memory-linking-contract.md): stable memory IDs, timestamps, link-only continuation, explicit merge, and fuzzy lookup rules.
-- [docs/format-layering.md](docs/format-layering.md): when to use Markdown, JSON, JSONL, CSV/TSV, SQLite, or generated Markdown.
+- [docs/format-layering.md](docs/format-layering.md): when to use Markdown, JSON, JSONL, CSV/TSV, non-semantic operational indexes, or generated Markdown.
 - [docs/cost-control-contract.md](docs/cost-control-contract.md): routing field budgets, delta receipts, active-context ceilings, and action-relevant field rules.
 - [docs/archive-and-persona-boundaries.md](docs/archive-and-persona-boundaries.md): optional cold archive, move/copy archive defaults, summary capsule exceptions, and conversation-only persona boundaries.
 - [docs/deployment-risk-patterns.md](docs/deployment-risk-patterns.md): common deployment failures, concrete issue examples, and solution playbooks for WorkBuddy-like hooks, CLI agents, IDE agents, custom orchestrators, hosted agents, and wrapper-only setups.

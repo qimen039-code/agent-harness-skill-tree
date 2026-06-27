@@ -831,6 +831,22 @@ def intake_router(task_text: str = "", cwd: str | None = None, policy: dict[str,
         )
         required_gates.extend(str(gate) for gate in _as_list(policy.get("risk_gate_rules", {}).get("R3")))
 
+    hybrid_retrieval_profile = "none"
+    if memory_need != "none":
+        hybrid_retrieval_profile = "meta_first_hybrid_enhancement"
+    if memory_need in {"capsule_payload", "paired_err_sol", "common_error_corpus", "conversation_state"} or link_intent != "none":
+        hybrid_retrieval_profile = "meta_first_hybrid_required"
+
+    memory_write_profile = "none"
+    if memory_mode in {"write", "update"}:
+        memory_write_profile = "context_complete_required"
+    if record_intent in {
+        "explicit_user_request",
+        "explicit_conversation_memory_request",
+        "explicit_cross_conversation_update",
+    }:
+        memory_write_profile = "strict_capsule_required"
+
     if self_reflection_record_hits or common_error_hits:
         required_skills.append("troubleshooting-skill-matrix")
 
@@ -905,7 +921,9 @@ def intake_router(task_text: str = "", cwd: str | None = None, policy: dict[str,
         "semantic_ambiguity": semantic_ambiguity,
         "module_need": module_need,
         "memory_need": memory_need,
+        "hybrid_retrieval_profile": hybrid_retrieval_profile,
         "memory_mode": memory_mode,
+        "memory_write_profile": memory_write_profile,
         "memory_lane": memory_lane,
         "record_intent": record_intent,
         "external_need": external_need,
@@ -925,6 +943,8 @@ def intake_router(task_text: str = "", cwd: str | None = None, policy: dict[str,
         "risk_level": risk_level,
         "required_gates": required_gates_out,
         "memory_mode": memory_mode,
+        "hybrid_retrieval_profile": hybrid_retrieval_profile,
+        "memory_write_profile": memory_write_profile,
         "memory_lane": memory_lane,
         "conversation_memory_decision": conversation_memory_decision,
         "conversation_full_lane_triggered": conversation_full_lane_triggered,
@@ -950,7 +970,9 @@ def intake_router(task_text: str = "", cwd: str | None = None, policy: dict[str,
         "semantic_ambiguity": semantic_ambiguity,
         "module_need": module_need,
         "memory_need": memory_need,
+        "hybrid_retrieval_profile": hybrid_retrieval_profile,
         "memory_mode": memory_mode,
+        "memory_write_profile": memory_write_profile,
         "memory_lane": memory_lane,
         "record_intent": record_intent,
         "external_need": external_need,

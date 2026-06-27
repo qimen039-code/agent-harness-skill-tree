@@ -27,6 +27,9 @@ REQUIRED_FILES = [
     "docs/deployment-risk-patterns.md",
     "docs/reproduction.md",
     "docs/test-cases.md",
+    "docs/memory-write-granularity-contract.md",
+    "docs/hybrid-memory-retrieval-contract.md",
+    "docs/content-reading-contract.md",
     "skills/embedded-harness/embedded_harness_policy.authoring.toml",
     "skills/embedded-harness/embedded_harness_policy.json",
     "skills/embedded-harness/compile_policy_from_toml.py",
@@ -37,6 +40,8 @@ REQUIRED_FILES = [
     "skills/embedded-harness/bash/harness_intake_router.sh",
     "skills/embedded-harness/bash/validate_policy.sh",
     "tests/test_credits.py",
+    "tests/test_codex_session_ledger.py",
+    "tests/test_documentation_contracts.py",
     "tests/test_router_contract.py",
 ]
 

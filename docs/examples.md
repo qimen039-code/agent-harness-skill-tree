@@ -183,7 +183,7 @@ README explanation -> Markdown
 router facts -> JSON
 decisions/open loops/errors/references -> JSONL
 large matrices -> CSV or generated Markdown
-queryable state -> SQLite or another local database
+non-semantic operational indexes -> JSON/JSONL/CSV or explicitly approved local store
 ```
 
 ## Example 15: Cold Archive Operation

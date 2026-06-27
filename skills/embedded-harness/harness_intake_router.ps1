@@ -746,6 +746,22 @@ if (
   }
 }
 
+$hybridRetrievalProfile = "none"
+if ($memoryNeed -ne "none") {
+  $hybridRetrievalProfile = "meta_first_hybrid_enhancement"
+}
+if (($memoryNeed -in @("capsule_payload", "paired_err_sol", "common_error_corpus", "conversation_state")) -or ($linkIntent -ne "none")) {
+  $hybridRetrievalProfile = "meta_first_hybrid_required"
+}
+
+$memoryWriteProfile = "none"
+if ($memoryMode -in @("write", "update")) {
+  $memoryWriteProfile = "context_complete_required"
+}
+if ($recordIntent -in @("explicit_user_request", "explicit_conversation_memory_request", "explicit_cross_conversation_update")) {
+  $memoryWriteProfile = "strict_capsule_required"
+}
+
 if (($selfReflectionRecordHits.Count -gt 0) -or ($commonErrorHits.Count -gt 0)) {
   $requiredSkills += "troubleshooting-skill-matrix"
 }
@@ -819,7 +835,9 @@ $routingReceipt = [ordered]@{
   semantic_ambiguity = @($semanticAmbiguity)
   module_need = @($moduleNeed)
   memory_need = $memoryNeed
+  hybrid_retrieval_profile = $hybridRetrievalProfile
   memory_mode = $memoryMode
+  memory_write_profile = $memoryWriteProfile
   memory_lane = $memoryLane
   record_intent = $recordIntent
   external_need = @($externalNeed)
@@ -840,6 +858,8 @@ $compactReceipt = [ordered]@{
   risk_level = $risk
   required_gates = @($requiredGates | Select-Object -Unique)
   memory_mode = $memoryMode
+  hybrid_retrieval_profile = $hybridRetrievalProfile
+  memory_write_profile = $memoryWriteProfile
   memory_lane = $memoryLane
   conversation_memory_decision = $conversationMemoryDecision
   conversation_full_lane_triggered = [bool]$conversationFullLaneTriggered
@@ -865,7 +885,9 @@ $result = [ordered]@{
   semantic_ambiguity = @($semanticAmbiguity)
   module_need = @($moduleNeed)
   memory_need = $memoryNeed
+  hybrid_retrieval_profile = $hybridRetrievalProfile
   memory_mode = $memoryMode
+  memory_write_profile = $memoryWriteProfile
   memory_lane = $memoryLane
   record_intent = $recordIntent
   external_need = @($externalNeed)
@@ -899,5 +921,4 @@ if ($OutputPath) {
   Set-Content -LiteralPath $OutputPath -Value $json -Encoding UTF8
 }
 $json
-
 

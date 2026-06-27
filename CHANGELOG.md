@@ -6,6 +6,18 @@ This project uses `vMAJOR.MINOR.PATCH` version labels while the framework is sti
 
 ## Unreleased
 
+- No public changes yet.
+
+## v0.17.0 - 2026-06-27
+
+- Added source-preserving memory write granularity rules so durable capsules stay context-complete instead of becoming isolated short fragments.
+- Added a no-dependency hybrid memory retrieval contract: meta-first filtering, original-language lexical channels, optional lexical ranking, and explicit non-adoption of database/vector semantic-memory cores.
+- Added routed `hybrid_retrieval_profile` and `memory_write_profile` fields across the PowerShell router, WorkBuddy Python adapter, policy contract, templates, and regression tests so these capabilities are executable route decisions rather than only documentation.
+- Added a bounded content-reading contract for source-shape identification, structure-map fallback, source context headers, progressive evidence windows, and unread-zone verification debt.
+- Added middle-safe evidence layout rules for evidence inventories, original-window dual anchors, segment-level conclusion cards, adjacent multi-hop evidence clusters, key-evidence reminders, position-risk markers, and bounded middle rereads when head/tail anchors cannot support a strong claim.
+- Added reading trigger profiles so the routing or decision layer can select baseline, evidence-window, middle-safe, or full-audit reading instead of enabling every strategy on every source read.
+- Connected the new memory-writing, hybrid-retrieval, and content-reading contracts into the architecture overview, cost-control guidance, README layout, doctor required-file checks, acceptance cases, and pytest documentation-contract coverage.
+- Added release-preparation routing coverage so publish/release readiness, release audit, and 发布前/发布准备/发布整理 tasks route as R3 governance/docs work while submit/commit/push wording remains only an R5 candidate unless an actual git action is requested.
 - Extended the WorkBuddy adapter manifest and documentation for optional quality-reference, domain source-tier, claim-artifact, and external-model JSON-filler surfaces. These remain default-off, advisory/source-prior, and unverified until a host version tests them.
 - Added attribution for the Doubao built-in finance and market-analysis skill artifacts that informed those optional contract-boundary patterns, with an explicit no-code/no-template/no-proprietary-schema copying boundary.
 - Added transferable Doubao client adaptation notes covering soft and semi-hard deployment, downgraded enforcement surfaces, script-chain checks, UTF-8 console requirements, and attribution boundaries.
@@ -241,7 +253,7 @@ This project uses `vMAJOR.MINOR.PATCH` version labels while the framework is sti
 
 - Added Conversation Memory Lane for long-running projectless conversations, with isolated per-conversation memory, explicit cross-conversation write rules, and mandatory meta-first retrieval.
 - Added a blank conversation-memory template with `_META_INDEX.md`, human state summary, machine index, and JSONL record families for decisions, open loops, errors/solutions, and references.
-- Added a format-layering strategy that separates human-facing Markdown from machine-owned JSON/JSONL/CSV/SQLite-style records to reduce fragile Markdown table and long-line patching.
+- Added a format-layering strategy that separates human-facing Markdown from machine-owned JSON/JSONL/CSV and non-semantic operational records to reduce fragile Markdown table and long-line patching.
 - Added a cost-control contract with routing field budgets, action-relevant field rules, delta receipts, and active-context ceilings.
 - Added archive and persona boundaries: optional global archive stays cold and defaults to move/copy operations, while persona state is conversation-only and cannot affect factual or work decisions.
 - Added blank global-memory-archive and conversation-only persona templates.

@@ -32,6 +32,8 @@ Every project, conversation, or skill memory library should expose a compact met
 | `record_type` | Capsule, decision, error point, solution point, source ledger, progress state, rule, or template. |
 | `status` | Active, superseded, deprecated, template, draft, or blocked. |
 | `retrieval_terms` | Short bilingual or domain-specific terms that should route here. |
+| `domain_tags` | Optional domain or event labels used before opening payloads. |
+| `content_language` | Optional original content language, such as `zh-CN`, `en`, or `mixed`; do not infer truth from this field. |
 | `applies_when` | Positive trigger surface. |
 | `does_not_apply_when` | Explicit non-applicable boundary. |
 | `linked_modules` | Project router, semantic anchor file, skill, gate, or script that should be opened next. |
@@ -78,6 +80,8 @@ Important boundaries:
 - Static knowledge retrieval results should use `derived_from.type` =
   `static_knowledge_page` when the selected snippet came from a static manual
   page.
+- Reusable memory content should be context-complete and preserve the original
+  source language. See [memory-write-granularity-contract.md](memory-write-granularity-contract.md).
 
 ## Retrieval Result Minimum
 
@@ -111,9 +115,16 @@ Rules:
 
 - Returned reusable memories or static knowledge notes require these fields: `source_tag` `belief_status` `confidence` `derived_from` `score_method`.
 - If no numeric retrieval score is returned, use `score_method: none` and omit `score`.
-- If `score` is returned, `score_method` must name the method, such as `bm25`, `vector_cosine`, `graph_rank`, `rrf`, or an adopted local method.
+- If `score` is returned, `score_method` must name the method, such as
+  `lexical_rank_adapter`, `bm25_adapter`, `rrf`, or an adopted local method.
 - Retrieval scores rank candidate relevance. They do not replace `belief_status` or `confidence.basis`.
 - Raw observations can be returned as evidence, but the result must say they are `raw_observation` or equivalent so the agent does not treat them as current guidance.
+
+Hybrid retrieval should be meta-first and source-preserving. Use lane,
+category, domain, lifecycle, source, and status filters before exact phrase,
+retrieval-term, Chinese character n-gram, English term, or optional lexical
+rank matching. SQL, SQLite, vector stores, and embedding databases are not
+default semantic-memory retrieval cores.
 
 ## Link And Timestamp Rules
 

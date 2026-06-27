@@ -15,8 +15,38 @@
   "retrieval_order": [
     "_LEDGER_INDEX.md",
     "domain_index.json",
+    "lane/domain/time/source/status filters",
+    "meta_first_hybrid_enhancement over retrieval_terms/exact phrase/original-language keyword matching",
+    "source-shape identification before payload reading",
     "segments.jsonl",
     "evidence_refs.jsonl",
     "raw session snippet only when needed"
-  ]
+  ],
+  "content_reading_policy": {
+    "profile_selected_by": "routing_or_decision_layer",
+    "default_profile": "baseline",
+    "available_profiles": [
+      "baseline",
+      "evidence_window",
+      "middle_safe",
+      "full_audit"
+    ],
+    "source_shape": "conversation_ledger_jsonl",
+    "evidence_window": "selected_record_or_raw_line_window",
+    "source_context_header": true,
+    "unread_zone_policy": "report_as_verification_debt",
+    "conditional_triggers": {
+      "evidence_window": "selected_record_supports_or_limits_claim",
+      "source_context_header": "ledger_window_may_support_claim",
+      "middle_safe_layout": "long_raw_session_multi_window_multi_hop_or_strong_claim",
+      "full_audit": "explicit_full_ledger_audit_or_backfill"
+    },
+    "middle_safe_layout": {
+      "evidence_inventory": true,
+      "segment_then_synthesize": true,
+      "multi_hop_cluster_policy": "keep_adjacent",
+      "position_risk_marker": true,
+      "head_tail_middle_reread_gate": "bounded_middle_reread_when_sparse_windows_cannot_support_strong_claim"
+    }
+  }
 }

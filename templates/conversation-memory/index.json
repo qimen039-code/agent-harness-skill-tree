@@ -13,6 +13,13 @@
     "lifecycle",
     "belief_trace_summary"
   ],
+  "content_plane": {
+    "structure_language": "en",
+    "content_language_policy": "preserve_original_language",
+    "write_granularity_rule": "context_complete_no_orphan_fragments",
+    "memory_write_profile_default": "context_complete_required",
+    "strict_profile_for_explicit_reusable_memory": "strict_capsule_required"
+  },
   "retrieval_result_required_fields": [
     "source_tag",
     "belief_status",
@@ -20,6 +27,61 @@
     "derived_from",
     "score_method"
   ],
+  "hybrid_retrieval_channels": [
+    "meta_first",
+    "lane_and_category_filter",
+    "domain_tags",
+    "retrieval_terms",
+    "exact_phrase",
+    "original_language_keyword",
+    "zh_char_ngram",
+    "en_term_match",
+    "optional_lexical_rank_adapter"
+  ],
+  "hybrid_retrieval_profile_default": "meta_first_hybrid_required",
+  "hybrid_retrieval_profile_rule": "augment_meta_first_only_never_replace_lane_category_filtering",
+  "content_reading_policy": {
+    "profile_selected_by": "routing_or_decision_layer",
+    "default_profile": "baseline",
+    "available_profiles": [
+      "baseline",
+      "evidence_window",
+      "middle_safe",
+      "full_audit"
+    ],
+    "always_on_baseline": [
+      "source_shape_first",
+      "retrieval_reading_boundary",
+      "native_reading_unit",
+      "structure_map_first_when_available"
+    ],
+    "source_shape_first": true,
+    "structure_map_first": true,
+    "no_map_fallback": "temporary_micro_map",
+    "source_context_header": true,
+    "evidence_window": "bounded_progressive",
+    "unread_zone_policy": "report_as_verification_debt",
+    "conditional_triggers": {
+      "source_context_header": "window_may_support_claim",
+      "progressive_evidence_window": "source_content_supports_or_limits_claim",
+      "unread_zone_policy": "partial_read_could_affect_claim",
+      "middle_safe_layout": "multi_window_or_long_source_or_multi_hop_or_strong_claim",
+      "full_audit": "explicit_full_audit_migration_cleanup_backfill_or_exhaustive_verification"
+    },
+    "middle_safe_layout": {
+      "evidence_inventory": true,
+      "dual_anchor": "inventory_plus_original_window",
+      "segment_then_synthesize": true,
+      "key_evidence_reminder": "near_strong_claim",
+      "multi_hop_cluster_policy": "keep_adjacent",
+      "position_risk_marker": true,
+      "head_tail_middle_reread_gate": {
+        "enabled": true,
+        "trigger": "head_tail_or_sparse_windows_insufficient_for_strong_claim",
+        "action": "bounded_middle_reread_around_structural_anchors"
+      }
+    }
+  },
   "scope": "one isolated long-running conversation or thread",
   "title": "Replace with a short title",
   "summary": "Synthetic template only. No real conversation history is included.",
@@ -39,6 +101,9 @@
   "retrieval_order": [
     "_META_INDEX.md",
     "conversation_state.md or index.json",
+    "lane/domain/time/source/status filters",
+    "retrieval_terms/exact phrase/original-language keyword matching",
+    "source-shape identification before payload reading",
     "memory_links.jsonl when continuation/merge/reference is involved",
     "matching records only"
   ],

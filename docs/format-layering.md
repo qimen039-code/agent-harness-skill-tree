@@ -12,7 +12,7 @@ Markdown is good for human-facing explanations, but Markdown tables and long lin
 | Policy and routing facts | JSON, TOML, or YAML | Risk rules, trigger lists, adapter config, route contracts. |
 | Append-only event records | JSONL | Decisions, errors, solutions, logs, checkpoints, source ledgers. |
 | Simple tabular data | CSV or TSV | Large matrices, comparison rows, import/export data. |
-| Queryable local state | SQLite | Larger memory libraries, indexed state, cross-record queries. |
+| Non-semantic operational index | JSON, JSONL, CSV/TSV, or explicitly approved local store | Large routing indexes, compatibility matrices, and operational bookkeeping that do not replace semantic memory. |
 | Hybrid human/machine record | Markdown with fenced JSON/YAML | Small capsules that need both explanation and structured fields. |
 | Public presentation | Generated Markdown | README tables or docs generated from structured source. |
 
@@ -72,6 +72,11 @@ index.json
 ```
 
 This gives agents a robust edit surface while keeping the repository easy for humans to inspect.
+
+Semantic-memory retrieval should not default to SQL, SQLite, vector stores, or
+embedding databases. If an adopter adds a local store for operational indexing,
+that store must preserve lane isolation, original-language content, provenance
+fields, and the meta-first retrieval boundary.
 
 ## Archive Rule
 

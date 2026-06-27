@@ -19,6 +19,38 @@ Use it for project memory capsules, conversation memory capsules, source-grounde
 
 Keep the active capsule small. Raw transcripts, long traces, test logs, and source excerpts belong in raw logs, source ledgers, or archive payloads.
 
+## Content Plane And Write Granularity
+
+The schema fields are stable machine-facing structure. They should normally use
+English keys and enumerated values. The memory content itself should preserve
+the original source language. Do not translate Chinese memory content into
+English, or English code/API content into Chinese, only to make the capsule look
+uniform.
+
+Reusable semantic memory should be context-complete. A promoted capsule should
+state the actor or source, action/claim/decision, object and scope, time or
+version when relevant, evidence boundary, and non-applicable boundary when
+needed. Isolated fragments are allowed in scratch notes, but not in durable
+capsules.
+
+Recommended content-plane shape:
+
+```json
+{
+  "content": {
+    "language": "zh-CN",
+    "original_text": "Source-language memory text or bounded restatement.",
+    "context_complete_summary": "Self-contained capsule summary with enough subject, action, object, scope, time, and boundary to survive compaction.",
+    "key_terms": ["original-language term", "domain term"],
+    "non_applicable_boundary": "Where this memory must not be applied."
+  }
+}
+```
+
+Ledger capsules and route summaries may remain shorter because they are
+navigation records. When promoted into reusable semantic memory, rewrite them
+according to the full granularity rule and preserve `derived_from`.
+
 ## `source_tag`
 
 Recommended values:

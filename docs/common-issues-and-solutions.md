@@ -22,6 +22,7 @@ requested as a full incident.
 | `CE-PUBLIC-2026-06-25-07` | `git_repo_action_error` | A one-time user confirmation for a high-risk action is reused or described ambiguously. | The confirmation was treated as a general permission rather than an exact event permit. | Use the established term `single-event R5 permit`: one exact task/tool event, hash-bound, recorded after use, and not replayable. | Runtime and WorkBuddy adapter tests cover replayed permit denial. |
 | `CE-PUBLIC-2026-06-25-08` | `powershell_encoding_path_error` | Local commands print shell-profile or version-manager startup errors while the requested command still exits successfully. | A user shell profile or tool manager failed during process startup; the repository command itself did not fail. | Separate shell startup noise from command exit status. Use `-NoProfile` for automation when appropriate, and repair the profile outside the repository only with explicit local-environment approval. | The affected GitHub, git, and test commands completed with exit code `0`; no repository patch was required. |
 | `CE-PUBLIC-2026-06-25-09` | `field_schema_error` | A quality score or linter prefers a less careful response over a claim-boundary response. | The checker measures surface format or style, not truth, provenance, or validation strength. | Treat advisory scores as schema or style smoke only. Never use them as the fact source for a final claim. | Final claim promotion still requires claim schema, source boundary, and local validation evidence. |
+| `CE-PUBLIC-2026-06-26-01` | `semantic_routing_error` | Release-preparation wording such as "prepare release", "发布前", "发布准备", or "发布整理" routes too low as read-only review while nearby submit/commit wording is only a non-promoted R5 candidate. | The router treated ambiguous release wording as semantic ambiguity or read-only inspection instead of governance/docs readiness work, and relied on later human/model reassessment to recover the R3 boundary. | Add release-preparation and release-audit phrases to R3 routing triggers; keep submit/commit/push as R5 candidates unless an actual git/release action is requested; add a regression case for release prep with submit/push explicitly not executed. | `TC-005d` covers release-preparation audit as R3 with non-promoted submit/push R5 candidate. |
 
 ## Retrieval Terms
 
@@ -37,6 +38,7 @@ conversation ledger summary evidence refs raw session
 single-event R5 permit replay denial
 shell profile startup noise no-profile
 advisory score linter not fact source
+release prep publish preparation 发布前 发布准备 发布整理 route R3 submit push not executed
 ```
 
 ## Upgrade Boundary

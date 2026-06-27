@@ -36,6 +36,7 @@ Expose the smallest necessary explanation only when the classification changes o
 - cost or context expansion;
 - permission or human confirmation;
 - memory read/write/link/merge/archive behavior;
+- hybrid retrieval or memory write granularity profile;
 - external search or current-fact verification;
 - claim schema or evidence boundary.
 
@@ -116,6 +117,31 @@ root microkernel
 ```
 
 Broader scans require an explicit audit, migration, cleanup, or debug reason.
+
+Hybrid retrieval does not add a new broad scan by itself. It may only run after
+the selected meta/index layer has bounded the lane and category. The profile
+changes the matching channels inside that bounded set; it does not authorize
+opening all memory payloads.
+
+Memory write granularity also should not increase ordinary-token cost. It is
+checked only when `memory_mode` is `write` or `update`, and it rejects short
+orphan fragments instead of expanding the route into full-history rewriting.
+
+## Reading Profile Budget
+
+Content reading should use the smallest profile that can support the next
+action:
+
+| Profile | Use when | Default budget |
+| --- | --- | --- |
+| `baseline` | Any nontrivial selected source read. | Source shape, existing map or micro-map, native reading unit, and retrieval/reading boundary only. |
+| `evidence_window` | The opened source supports or limits a claim, patch, memory, report, or decision. | One bounded evidence window plus targeted expansion for missing context. |
+| `middle_safe` | Long source, multiple windows, multi-hop evidence, public-facing claim, memory promotion, release note, R4/R5 decision, or strong final claim. | Evidence inventory, original-window anchors, per-window conclusion cards, adjacent evidence clusters, key-evidence reminder, and position-risk marker. |
+| `full_audit` | Explicit full audit, migration, cleanup, backfill, or exhaustive verification. | Broader reading is allowed, but source headers, skipped-zone notes, and claim limits still apply. |
+
+Do not enable `middle_safe` or `full_audit` merely because the source is
+interesting. They are escalation profiles selected by the route or decision
+layer.
 
 ## Non-Goals
 

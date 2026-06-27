@@ -154,6 +154,12 @@ Capsules are not a new source of truth. They are a compact retrieval view over
 existing ledger records, intended for "what happened in this event/domain"
 questions without opening the raw transcript.
 
+Ledger capsules are navigation records, not full semantic-memory capsules. If a
+ledger capsule is promoted into reusable memory, rewrite it with
+context-complete content according to
+[memory-write-granularity-contract.md](memory-write-granularity-contract.md)
+and preserve its `derived_from` evidence refs.
+
 Minimum capsule record:
 
 ```json
@@ -234,6 +240,7 @@ evidence pointers. The raw session remains canonical.
 ```text
 _LEDGER_INDEX.md
 -> domain_index.json, capsules.jsonl, or sessions.jsonl
+-> retrieval_terms, exact phrase, original-language keyword, Chinese character n-gram, or English term match over the narrowed candidate set
 -> matching segment records
 -> evidence_refs.jsonl for selected refs
 -> raw JSONL line window or artifact/test path only when exact details matter
@@ -262,7 +269,9 @@ Recommended modes:
   or raw file stats indicate staleness.
 - `resolve`: read only the selected evidence reference line window from the
   raw session, with bounded context and display truncation. Hash verification
-  must use the full raw line, not the truncated display text.
+  must use the full raw line, not the truncated display text. If the selected
+  line window lacks subject, scope, time, or evidence context, expand only the
+  missing adjacent boundary and record any unread zone as verification debt.
 
 Do not place full ledger refresh on every tool call. Tool-level hooks should
 only invoke ledger checks for critical events such as memory writes, strong
@@ -291,7 +300,7 @@ produce the same ledger files from their own event streams.
 
 Phase 1 does not require:
 
-- SQLite or another database;
+- SQL, SQLite, vector stores, or another database as a semantic-memory core;
 - local small LLMs or classifiers;
 - external memory providers;
 - autonomous memory writing without router gates;

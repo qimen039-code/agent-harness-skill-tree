@@ -8,7 +8,9 @@ Add these fields to the routing receipt:
 
 ```text
 memory_need
+hybrid_retrieval_profile
 memory_mode
+memory_write_profile
 memory_lane
 record_intent
 projectization_decision
@@ -25,7 +27,9 @@ Meanings:
 | Field | Values | Purpose |
 | --- | --- | --- |
 | `memory_need` | `none`, `meta_only`, `index_only`, `capsule_payload`, `paired_err_sol`, `common_error_corpus` | How deep memory lookup should go. |
+| `hybrid_retrieval_profile` | `none`, `meta_first_hybrid_enhancement`, `meta_first_hybrid_required` | Whether to augment meta-first lookup with bounded lexical, original-language, Chinese n-gram, English term, and optional lexical-rank signals. |
 | `memory_mode` | `none`, `read`, `write`, `update` | Whether the task should skip, read, write, or update memory. |
+| `memory_write_profile` | `none`, `context_complete_required`, `strict_capsule_required` | Whether a selected write/update must satisfy context-complete or strict reusable-capsule shape. |
 | `memory_lane` | `none`, `current_project`, `current_conversation`, `referenced_conversation`, `emergent_project_candidate`, `common_error_corpus`, `self_reflection_matrix`, `global_inbox` | Where the memory action belongs. |
 | `record_intent` | `no_record`, `explicit_user_request`, `inferred_reusable_error`, `projectization_review`, `conversation_checkpoint`, `explicit_conversation_memory_request` | Why a record would be written. |
 | `projectization_decision` | `not_project`, `current_project`, `emergent_project_candidate` | Whether projectless work is becoming a durable project lane. |
@@ -68,6 +72,21 @@ When a new conversation continues an older one, default to `link_intent: continu
 When the user explicitly asks to merge conversations, use `link_intent: merge_memories_explicit`. Create a new merged memory and append `merged_into` links from the old memory IDs.
 
 When the route writes or updates a reusable memory capsule, apply the source-monitoring schema from [source-monitoring-memory-schema.md](source-monitoring-memory-schema.md). In particular, compressed or synthesized memory must preserve `derived_from`, and untested conversation or source-derived claims should remain `source_prior` or `bounded_claim`.
+
+When `memory_need` is not `none`, adapters may expose
+`hybrid_retrieval_profile: meta_first_hybrid_enhancement`. Tasks that read or
+write reusable capsules, ERR/SOL records, common-error records, conversation
+state, or memory links should expose `meta_first_hybrid_required`. This profile
+adds the channels from [hybrid-memory-retrieval-contract.md](hybrid-memory-retrieval-contract.md)
+after the meta/index layer has selected a bounded lane and category. It is not
+a separate retrieval backend and must not replace memory isolation,
+source-monitoring, or claim verification.
+
+When `memory_mode` is `write` or `update`, adapters should expose
+`memory_write_profile: context_complete_required`; explicit reusable memory,
+conversation-memory, or cross-conversation writes should use
+`strict_capsule_required`. These profiles decide the shape of the selected
+write; they do not by themselves grant permission to write memory.
 
 ## Explicit Memory Command Semantics
 
@@ -133,6 +152,8 @@ Memory writing is still subject to:
 - explicit cross-conversation reference or update rules;
 - user confirmation for high-risk or cross-project writes;
 - meta-first retrieval before payload reads;
+- hybrid retrieval only as a meta-first enhancement, never as a replacement for lane/category filtering;
+- context-complete write granularity when a durable memory write/update is selected;
 - stable `memory_id` and `updated_at` metadata;
 - append-only link records for continuation, merge, archive, or supersession.
 - static knowledge retrieval through `_STATIC_KNOWLEDGE_INDEX.md` before opening a manual page;
