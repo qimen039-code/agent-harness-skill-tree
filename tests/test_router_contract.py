@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import json
 import shutil
 import subprocess
@@ -14,11 +15,12 @@ ROOT = Path(__file__).resolve().parents[1]
 POWERSHELL = shutil.which("pwsh") or shutil.which("powershell")
 
 
-def run_json(args: list[str], *, allowed_exit_codes: set[int] | None = None) -> tuple[int, dict]:
+def run_json(args: list[str], *, allowed_exit_codes: set[int] | None = None, env: dict[str, str] | None = None) -> tuple[int, dict]:
     allowed = allowed_exit_codes or {0}
     result = subprocess.run(
         args,
         cwd=ROOT,
+        env=env,
         text=True,
         encoding="utf-8",
         errors="replace",
@@ -51,6 +53,27 @@ def run_router(task: str) -> dict:
             "-Cwd",
             str(ROOT / "path with spaces" / "project"),
         ]
+    )
+    return payload
+
+
+def run_router_with_cwd(task: str, cwd: Path, *, env: dict[str, str] | None = None) -> dict:
+    if not POWERSHELL:
+        pytest.skip("PowerShell is not available on PATH")
+    _, payload = run_json(
+        [
+            POWERSHELL,
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            "skills/embedded-harness/harness_intake_router.ps1",
+            "-TaskText",
+            task,
+            "-Cwd",
+            str(cwd),
+        ],
+        env=env,
     )
     return payload
 
@@ -116,6 +139,13 @@ ROUTER_CASES = [
         "risk": "R5",
         "context_surface": "actionable_R5",
         "promote_r5": True,
+    },
+    {
+        "id": "TC-004d",
+        "task": "只读检查 AI Lead Radar Memory Bank 已更新和长期记忆状态，不写入记忆",
+        "not_risk": "R5",
+        "context_surface": "documentation_or_discussion",
+        "candidate_r5": "长期记忆",
     },
     {
         "id": "TC-005",
@@ -190,6 +220,75 @@ ROUTER_CASES = [
         "risk": "R1",
         "gates": ["read_only_context_gate", "scope_reassessment_gate"],
     },
+    {
+        "id": "TC-009",
+        "task": "从 6 月 15 日以来整体上是否一直更稳定",
+        "gates": ["observation_scope_gate"],
+        "expect_contains": {
+            "semantic_ambiguity": "observation_scope_required",
+        },
+    },
+    {
+        "id": "TC-009a",
+        "task": "为这个同类错误加入记忆-预测-验证-校准反馈闭环，观察下次是否复发",
+        "gates": ["feedback_loop_gate"],
+        "expect": {
+            "memory_need": "index_only",
+        },
+        "expect_contains": {
+            "semantic_ambiguity": "feedback_loop_required",
+            "module_need": "memory_meta_index",
+        },
+    },
+    {
+        "id": "TC-009b",
+        "task": "查看 ERR-2026-06-29-01 / SOL-2026-06-29-01 这个同类错误的解决记录",
+        "gates": ["feedback_loop_gate"],
+        "expect": {
+            "memory_need": "paired_err_sol",
+        },
+        "expect_contains": {
+            "semantic_ambiguity": "feedback_loop_required",
+            "module_need": "memory_meta_index",
+        },
+        "expect_trigger_contains": {
+            "feedback_loop_memory": "解决记录",
+        },
+    },
+    {
+        "id": "TC-009c",
+        "task": "查看 common error 记录并按里面的预防规则继续排查",
+        "gates": ["feedback_loop_gate"],
+        "expect": {
+            "memory_need": "common_error_corpus",
+            "memory_mode": "read",
+            "record_intent": "no_record",
+        },
+        "expect_contains": {
+            "semantic_ambiguity": "feedback_loop_required",
+            "module_need": "memory_meta_index",
+        },
+        "expect_trigger_contains": {
+            "feedback_loop_common_error": "common error",
+        },
+    },
+    {
+        "id": "TC-009d",
+        "task": "record this error as a common error after the fix is verified",
+        "gates": ["feedback_loop_gate"],
+        "expect": {
+            "memory_need": "common_error_corpus",
+            "memory_mode": "write",
+            "record_intent": "inferred_reusable_error",
+        },
+        "expect_contains": {
+            "semantic_ambiguity": "feedback_loop_required",
+            "module_need": "memory_meta_index",
+        },
+        "expect_trigger_contains": {
+            "feedback_loop_common_error": "common error",
+        },
+    },
 ]
 
 
@@ -218,6 +317,62 @@ def test_router_contract_cases(case: dict) -> None:
         assert payload.get(field) in expected_values
     for field, expected_value in case.get("expect_contains", {}).items():
         assert contains(payload.get(field), expected_value)
+    for trigger_key, expected_value in case.get("expect_trigger_contains", {}).items():
+        assert contains(payload.get("matched_risk_triggers", {}).get(trigger_key), expected_value)
+
+
+def test_router_uses_local_project_lane_overlay(tmp_path: Path) -> None:
+    project = tmp_path / "AI_Lead_Radar"
+    memory_bank = project / "memory-bank"
+    memory_bank.mkdir(parents=True)
+    overlay = tmp_path / "project_lanes.local.json"
+    overlay.write_text(
+        json.dumps(
+            {
+                "schema": "cbh.project_lane_overlay.v1",
+                "project_lanes": {"AI_Lead_Radar": [str(project)]},
+                "memory_roots": {"AI_Lead_Radar": [str(memory_bank)]},
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    env = dict(os.environ)
+    env["CBH_PROJECT_LANES_FILE"] = str(overlay)
+
+    payload = run_router_with_cwd("只读检查 Memory Bank 已更新和长期记忆状态", project, env=env)
+
+    assert payload["project_lane"] == "AI_Lead_Radar"
+    assert payload["memory_lane"] == "current_project"
+    assert payload["risk_level"] != "R5"
+
+
+def test_router_marks_project_long_term_memory_write_as_write_mode(tmp_path: Path) -> None:
+    project = tmp_path / "AI_Lead_Radar"
+    memory_bank = project / "memory-bank"
+    memory_bank.mkdir(parents=True)
+    overlay = tmp_path / "project_lanes.local.json"
+    overlay.write_text(
+        json.dumps(
+            {
+                "schema": "cbh.project_lane_overlay.v1",
+                "project_lanes": {"AI_Lead_Radar": [str(project)]},
+                "memory_roots": {"AI_Lead_Radar": [str(memory_bank)]},
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    env = dict(os.environ)
+    env["CBH_PROJECT_LANES_FILE"] = str(overlay)
+
+    payload = run_router_with_cwd("写入记忆：记录这个长期记忆修复", project, env=env)
+
+    assert payload["project_lane"] == "AI_Lead_Radar"
+    assert payload["risk_level"] == "R5"
+    assert payload["memory_lane"] == "current_project"
+    assert payload["memory_mode"] == "write"
+    assert payload["record_intent"] == "explicit_user_request"
 
 
 def test_tool_proxy_blocks_high_risk_command() -> None:
@@ -489,6 +644,64 @@ def test_powershell_claim_schema_requires_ref_and_strong_evidence() -> None:
     )
     assert code == 2
     assert any(issue.startswith("insufficient_evidence_boundary_for_strong_phrase") for issue in payload["issues"])
+
+
+def test_powershell_claim_schema_blocks_causal_attribution_overclaim() -> None:
+    if not POWERSHELL:
+        pytest.skip("PowerShell is not available on PATH")
+    code, payload = run_json(
+        [
+            POWERSHELL,
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            "skills/embedded-harness/harness_claim_schema_verifier.ps1",
+            "-FinalText",
+            "CBH solved hallucination drift for all agents.",
+        ],
+        allowed_exit_codes={2},
+    )
+    assert code == 2
+    assert "causal_attribution_boundary_required:abstract_system_causal_global_effect" in payload["issues"]
+
+
+def test_powershell_claim_schema_allows_scoped_causal_hypothesis() -> None:
+    if not POWERSHELL:
+        pytest.skip("PowerShell is not available on PATH")
+    _, payload = run_json(
+        [
+            POWERSHELL,
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            "skills/embedded-harness/harness_claim_schema_verifier.ps1",
+            "-FinalText",
+            "In this local sample, this is a causal_hypothesis, not proof: memory anchors may have reduced this task's drift.",
+        ]
+    )
+    assert payload["status"] == "pass"
+
+
+def test_powershell_claim_schema_scope_limiter_is_sentence_local() -> None:
+    if not POWERSHELL:
+        pytest.skip("PowerShell is not available on PATH")
+    code, payload = run_json(
+        [
+            POWERSHELL,
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            "skills/embedded-harness/harness_claim_schema_verifier.ps1",
+            "-FinalText",
+            "In this local sample, this is a causal_hypothesis, not proof. CBH solved hallucination drift for all agents.",
+        ],
+        allowed_exit_codes={2},
+    )
+    assert code == 2
+    assert "causal_attribution_boundary_required:abstract_system_causal_global_effect" in payload["issues"]
 
 
 def test_cbh_doctor_runs_without_failures() -> None:

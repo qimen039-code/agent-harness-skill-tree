@@ -6,7 +6,19 @@ This project uses `vMAJOR.MINOR.PATCH` version labels while the framework is sti
 
 ## Unreleased
 
+No entries yet.
+
+## v0.18.0 - 2026-06-29
+
+- Repositioned the README around Claim Boundary Harness as an external cognition governance harness for agent workflows, with explicit non-goals for vector databases, model training, prompt-only guidance, and universal hard enforcement.
+- Added `README_zh.md` as an independent Chinese README and linked it from the English README using the standard `README.md` / `README_zh.md` pattern.
+- Added a machine-local project-lane overlay path through `embedded_harness_policy.local.json` or `CBH_PROJECT_LANES_FILE`, so private project roots can be used by the router without being committed to the public policy JSON.
+- Tightened R5 context routing for long-term-memory wording: read/status/documentation contexts stay non-R5 candidates, while real memory-write actions still require confirmation.
+- Added an observation-scope and causal-attribution gate pair: global or historical questions trigger scope review, while final text blocks high-risk causal/generalization/definition overclaims unless they are scoped as `mechanism_property`, `empirical_record`, `causal_hypothesis`, or `validated_causality`.
+- Linked causal-attribution review with the existing memory feedback-loop trial as two separate reasoning loops: experience deposition for future behavior, and causal-quality review for current explanations.
 - Added a concise correction-and-reflection usage guide that separates auto-recordable small CE lessons from human-reviewed router/policy changes, incident upgrades, public claims, and R5 actions.
+- Clarified that the memory feedback loop is internalized reusable-memory behavior: selected CE, ERR/SOL, capsule, or decision records can require memory -> prediction -> verification -> calibration without waiting for the user to explicitly request prediction.
+- Tightened common-error routing so reading or using CE records triggers corpus retrieval and feedback-loop review, while durable CE writes still require explicit record intent or a verified post-tool issue capture.
 - Added a skill lifecycle contract with `skill_lifecycle_profile`, active-frame loading, release-receipt handoff, and reactivation from current source files instead of stale compressed skill fragments.
 - Added common-issue records for ambiguous PR lookup scope and GitHub CLI/API query flag mistakes.
 - Added a lightweight memory feedback-loop trial for optional memory -> prediction -> verification -> calibration fields on reusable capsules, CE records, paired incidents, and decision records.

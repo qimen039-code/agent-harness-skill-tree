@@ -240,7 +240,11 @@ Invariant: `belief_trace_summary.current_status` must always equal `belief_statu
 ## `feedback_loop`
 
 `feedback_loop` is a lightweight trial field for memories that are expected to
-change future behavior. It should not appear on every capsule.
+change future behavior. It should not appear on every capsule. When a selected
+reusable memory already carries this field, the route or decision layer should
+treat the loop as part of memory reuse: prediction, verification, and calibration
+are internal checks, not a feature that depends on the operator explicitly
+asking for prediction each time.
 
 Recommended shape:
 
@@ -278,6 +282,10 @@ not_applicable
 Rules:
 
 - Treat `prediction` as `hypothesis` unless later evidence verifies it.
+- Use the loop automatically for selected reusable records that carry it, paired
+  ERR/SOL records, and common-error prevention records.
+- Keep it off ordinary notes, raw observations, static knowledge pages, and
+  one-off task state.
 - Use the loop only for reusable, repeated, high-impact, or user-requested
   learning records.
 - Do not create a separate task-consumption ledger just to support the loop.

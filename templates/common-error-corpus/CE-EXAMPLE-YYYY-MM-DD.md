@@ -37,7 +37,9 @@ Synthetic or adopter-owned evidence only. Do not include private records in the 
 ## Feedback Loop
 
 Optional. Use only when this CE record should predict and check future
-behavior.
+behavior. When this record is selected for recurrence prevention, the route or
+decision layer should apply the loop without waiting for a separate user request
+to predict.
 
 ```yaml
 feedback_loop:

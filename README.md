@@ -1,14 +1,39 @@
+[中文版](./README_zh.md) | English
+
 # Claim Boundary Harness
 
-Stop coding agents from calling weak evidence "validated." Claim Boundary Harness adds meta-first routing, project-scoped memory lanes, R0-R5 risk receipts, and deployment adapters for claim verification.
+Claim Boundary Harness (CBH) is an external cognition governance harness for
+agent workflows. It provides claim verification, memory continuity, risk
+routing, correction accumulation, and adapter contracts as structural
+enforcement, not advisory prompts.
 
-Current version: `v0.17.0`
+Current version: `v0.18.0`
 
-It is not tied to one agent runtime. It is a neutral starting point that can be mapped into any agent that can read workspace instructions, run local scripts, use command or skill folders, or call hooks before tools.
+The project exists to make capable agents more reliable without replacing the
+model, training a new model, or forcing every task through a heavy memory
+backend. CBH keeps the leverage small: route first, open only the needed memory
+or evidence window, preserve source boundaries, and stop high-risk actions or
+strong claims only when the adopting runtime exposes a real interception point.
+
+It is not tied to one agent runtime. It is a neutral starting point that can be
+mapped into any agent that can read workspace instructions, run local scripts,
+use command or skill folders, or call hooks before tools.
+
+CBH is not:
+
+- a vector database or semantic-memory backend;
+- a replacement for the host model's reasoning ability;
+- a broad safety sandbox;
+- a prompt-only style guide;
+- a guarantee that every client can hard-block tools.
+
+The public package is a framework and reference implementation. Actual
+enforcement strength depends on the host runtime, hook surface, local project
+lane configuration, and verification tests run by the adopter.
 
 ## At A Glance
 
-Claim Boundary Harness is a small governance package for coding agents:
+Claim Boundary Harness is a small external cognition layer for coding agents:
 
 - routes tasks before work starts;
 - keeps project, conversation, and static knowledge context isolated;
@@ -267,6 +292,7 @@ user request
 +-- CREDITS.toml
 +-- CHANGELOG.md
 +-- PROJECT_SKILL_MATRIX_REGISTRY.md
++-- README_zh.md
 +-- VERSION
 +-- .github/
 |   +-- workflows/
@@ -319,6 +345,7 @@ user request
 |   |   +-- bash/
 |   |   +-- embedded_harness_policy.authoring.toml
 |   |   +-- embedded_harness_policy.json
+|   |   +-- embedded_harness_policy.local.example.json
 |   |   +-- compile_policy_from_toml.py
 |   |   +-- validate_policy.ps1
 |   |   +-- harness_runtime_enforcer.ps1
@@ -394,9 +421,11 @@ The runtime rules live in `AGENTS.md` and the detailed contracts under `docs/`. 
 - **Route first:** nontrivial work starts with a lightweight receipt that decides risk, active lane, memory mode, external-source need, claim risk, and required gates.
 - **Expand only on triggers:** re-evaluate after new evidence, missing files, tool errors, scope changes, user corrections, current/version claims, GitHub/open-source intake, R5 actions, strong claims, or memory writes.
 - **Search as a routed workflow:** current facts, explicit uncertainty, external mechanisms, and repository claims use official/authority search, GitHub inspection, general cross-check, source-grounded intake, or local validation as separate paths.
+- **Separate observation from causality:** global trends, historical comparisons, and mechanism-effect claims require observation-scope review; high-risk causal or generalizing final text is downgraded unless it is a scoped empirical record, explicit causal hypothesis, mechanism property, or validated causality.
 - **Read memory meta-first:** start from `_META_INDEX`, a router manifest, or another meta layer; then open one category index; then open only the selected capsule or paired record.
 - **Keep memory lane-scoped:** project, conversation, common-error, and archive memories should not write into each other unless the user explicitly asks for a cross-lane action.
 - **Let small fixes become lessons:** fixed, reusable, low-risk mistakes can become lane-scoped `CE-*` common-error records; router/policy changes, high-impact incidents, public claims, and R5 actions still need human review.
+- **Keep two reasoning loops separate:** feedback loops store memory -> prediction -> verification -> calibration lessons; causal-attribution review prevents empirical records, cases, or hypotheses from becoming causal proof.
 - **Bound final claims:** do not turn source-prior notes, retrieved snippets, mocks, partial runs, or single smoke tests into `validated` claims.
 - **Hard-stop only critical paths:** R5 actions, high-risk tools, low-confidence routes, long-term memory writes, and strong final claims can be blocked when the adopting runtime actually calls the hook, wrapper, or tool proxy.
 
@@ -477,11 +506,11 @@ The package includes synthetic examples that show the intended record shapes wit
 1. Copy this package into a new workspace.
 2. Open `AGENTS.md` and keep only the rules that match your workflow.
 3. Edit `skills/embedded-harness/embedded_harness_policy.authoring.toml` for high-churn trigger sections, then keep `embedded_harness_policy.json` in sync for runtime use.
-4. Replace `EXAMPLE_PROJECT` and `C:\\path\\to\\project` with your project lane and memory roots.
+4. For private machine-local project lanes, copy `skills/embedded-harness/embedded_harness_policy.local.example.json` to `embedded_harness_policy.local.json`, or point `CBH_PROJECT_LANES_FILE` at a private overlay file. Do not commit private local project roots into the public policy JSON.
 5. Optionally fill `templates/static-knowledge-layer/` with a project map,
    entry points, conventions, and interface notes.
 6. Register the skill folders using whatever skill or command mechanism your agent supports.
-6. Run the intake router before nontrivial work.
+7. Run the intake router before nontrivial work.
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\skills\embedded-harness\harness_intake_router.ps1 -TaskText "fix the script and run benchmark" -Cwd "C:\path\to\project"

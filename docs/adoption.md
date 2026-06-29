@@ -14,8 +14,11 @@ Use two policy editing surfaces:
 
 - edit `skills/embedded-harness/embedded_harness_policy.authoring.toml` for
   high-churn trigger, R5 context, full-lane threshold, and permit sections;
-- edit `skills/embedded-harness/embedded_harness_policy.json` directly for
-  project lanes, memory roots, and other sections not yet covered by TOML.
+- keep public `skills/embedded-harness/embedded_harness_policy.json` free of
+  private machine-local project roots;
+- put private project lanes and memory roots in
+  `skills/embedded-harness/embedded_harness_policy.local.json`, or point
+  `CBH_PROJECT_LANES_FILE` at a private overlay file.
 
 ```bash
 python skills/embedded-harness/compile_policy_from_toml.py --check
@@ -210,6 +213,28 @@ The whiteboard core should not contain private project content. Add project rule
 
 Use the public demo records as shape examples only. They are synthetic and are not claims about your environment.
 
+For local routing, use a private project-lane overlay:
+
+```json
+{
+  "schema": "cbh.project_lane_overlay.v1",
+  "project_lanes": {
+    "YOUR_PROJECT": ["C:\\path\\to\\your-project"]
+  },
+  "memory_roots": {
+    "YOUR_PROJECT": [
+      "C:\\path\\to\\your-project\\.agent-memory",
+      "C:\\path\\to\\your-project\\memory-bank"
+    ]
+  }
+}
+```
+
+Store it as `skills/embedded-harness/embedded_harness_policy.local.json` for a
+single checkout, or set `CBH_PROJECT_LANES_FILE` to a private path. This lets
+the router preserve concrete cwd project evidence without committing local
+paths into the public package.
+
 ## Step 6: Keep Versions In Sync
 
 When publishing changes to an adopted copy or fork, update the version metadata in the same change:
@@ -222,7 +247,8 @@ Use `vMAJOR.MINOR.PATCH` labels. For early framework work, keep `MAJOR` at `0` u
 
 ## Project Lane Isolation
 
-For multi-project use, create one lane per project in the harness policy and one registry entry per project in `PROJECT_SKILL_MATRIX_REGISTRY.md`.
+For multi-project use, create one lane per project through the local overlay
+and one registry entry per project in `PROJECT_SKILL_MATRIX_REGISTRY.md`.
 
 Each lane should have its own:
 

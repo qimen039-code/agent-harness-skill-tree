@@ -149,6 +149,68 @@ must not load a full raw transcript by default.
 
 If the receipt is obvious from the current request, it can stay implicit. Keep R0-R5 labels internal by default. If the classification changes execution path, cost, permission, memory, external search, or claim wording, expose only that minimal boundary. If the user asks for debug or audit, expose the complete debug receipt.
 
+## Observation Scope And Causal Attribution
+
+`observation_scope_gate` is an input-side gate. It expands the observation
+range when the task asks for framework definitions, global or cross-project
+behavior, long-term trends, historical comparisons, model-change claims, or
+phrases such as "always" / "since June 15" / "整体上" / "长期". It prevents the
+agent from answering a global or historical question from only the current
+chat window. It does not decide the causal label by itself.
+
+`causal_attribution_gate` is an output-side or draft-final gate. It reviews
+high-risk assertion patterns before display:
+
+- abstract system/framework/mechanism subject + causal predicate + global effect;
+- time range + stability assertion;
+- single sample, case, or local observation wording + generalization;
+- origin or formation-path wording mixed into a mechanism definition.
+
+It should not fire on ordinary local reasoning merely because the text contains
+"because", "therefore", "导致", "说明", or "所以". Scoped local statements such
+as "in this task's third turn, missing memory anchors caused this output drift"
+should pass unless they omit needed scope or hypothesis language.
+
+The attribution levels are intentionally small:
+
+| Level | Meaning | Boundary |
+| --- | --- | --- |
+| `mechanism_property` | Structural property of the mechanism, independent of local origin. | May be used as a formal mechanism statement when grounded in the design itself. |
+| `empirical_record` | Local observation, formation path, or case/example record. | Must keep scope and sample boundaries; it is not proof. |
+| `causal_hypothesis` | Directional causal explanation without sufficient controls. | Must be marked as a hypothesis. |
+| `validated_causality` | Causal claim supported by controls, repeatable evidence, or a concrete validation chain. | May be stated as causality only with evidence boundaries. |
+
+Information visibility is not part of this gate. Public/private export,
+privacy, and local-only release decisions remain in the separate
+public/private boundary gate.
+
+The feedback loop is a separate experience-deposition loop:
+
+```text
+memory -> prediction -> verification -> calibration
+```
+
+Use `feedback_loop_gate` when the task or selected memory record is meant to
+prevent repeated mistakes, guide future route decisions, or verify whether a
+previous prediction matched later behavior. This is primarily an internal memory
+reuse requirement: if a selected reusable capsule, CE record, ERR/SOL pair, or
+decision record has a `feedback_loop` or recurrence-prevention role, the agent
+should apply the loop without waiting for the user to request prediction. User
+corrections and explicit requests still force the same gate.
+
+For common-error records, distinguish retrieval from write intent. A phrase such
+as "read/check/use the common error record" should select
+`memory_need: common_error_corpus`, `memory_mode: read`, and
+`feedback_loop_gate`. It must not become a durable CE write unless the task also
+has explicit record/write intent or a later post-tool capture has a fixed,
+verified issue to store.
+
+Do not trigger it for ordinary chat, one-off notes, static manuals, or task
+states that are not meant to shape future behavior. The feedback loop and the
+causal attribution gate can both apply to one event, but they do not authorize
+each other. A feedback prediction remains a hypothesis until verified; a causal
+hypothesis remains a hypothesis until controlled evidence supports it.
+
 ## R5 Candidate And Context Rule
 
 R5 trigger terms are a recall layer, not the final decision. Terms such as

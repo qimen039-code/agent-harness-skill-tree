@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1",
   "manifest_type": "agent_memory_lane_compatibility_manifest",
-  "harness_version": "v0.17.0",
+  "harness_version": "v0.18.0",
   "adapter": {
     "name": "example-adapter",
     "version": "unverified",
@@ -83,6 +83,9 @@
     "supported": "unverified",
     "default_enabled": false,
     "advisory_only": true,
+    "router_decision_gate_supported": "unverified",
+    "host_hard_stop_gate": false,
+    "internalized_on_reusable_memory_selection": true,
     "field_name": "feedback_loop",
     "prediction_is_hypothesis_until_verified": true,
     "requires_evidence_ref_for_verification": true,
@@ -150,6 +153,20 @@
   "claim_payloads": {
     "nested_json_shell_safe": "unverified",
     "recommended_handoff": "claim_file_or_json_file_path"
+  },
+  "observation_and_causal_attribution": {
+    "observation_scope_gate_supported": "unverified",
+    "causal_attribution_gate_supported": "unverified",
+    "default_enabled": true,
+    "causal_gate_runs_on_final_text": "unverified",
+    "blocks_ordinary_local_causal_reasoning": false,
+    "attribution_levels": [
+      "mechanism_property",
+      "empirical_record",
+      "causal_hypothesis",
+      "validated_causality"
+    ],
+    "public_private_boundary_is_separate": true
   },
   "quality_reference": {
     "supported": "unverified",

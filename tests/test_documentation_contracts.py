@@ -37,6 +37,22 @@ def test_new_memory_and_reading_contracts_are_indexed() -> None:
     assert "TC-036" in test_cases
 
 
+def test_bilingual_readme_and_local_overlay_template_are_present() -> None:
+    readme = read_text("README.md")
+    readme_zh = read_text("README_zh.md")
+    overlay = json.loads(read_text("skills/embedded-harness/embedded_harness_policy.local.example.json"))
+    policy = json.loads(read_text("skills/embedded-harness/embedded_harness_policy.json"))
+
+    assert "[中文版](./README_zh.md) | English" in readme
+    assert "[English](./README.md) | 中文" in readme_zh
+    assert "v0.18.0" in readme
+    assert "v0.18.0" in readme_zh
+    assert overlay["schema"] == "cbh.project_lane_overlay.v1"
+    assert policy["local_project_lane_overlay"]["default_filename"] == "embedded_harness_policy.local.json"
+    assert "embedded_harness_policy.local.json" in readme
+    assert "CBH_PROJECT_LANES_FILE" in readme_zh
+
+
 def test_memory_feedback_loop_trial_is_optional_and_template_visible() -> None:
     trial = read_text("docs/memory-feedback-loop-trial.md")
     schema = read_text("docs/source-monitoring-memory-schema.md")
@@ -51,13 +67,19 @@ def test_memory_feedback_loop_trial_is_optional_and_template_visible() -> None:
         assert "feedback_loop" in text
 
     assert "not a task-cost ledger" in trial
-    assert "not a per-task token ledger" in read_text("docs/architecture.md")
+    assert "per-task token ledger" in read_text("docs/architecture.md")
     assert "status: pending" in common_error_template
     assert manifest["memory_feedback_loop"]["field_name"] == "feedback_loop"
     assert manifest["memory_feedback_loop"]["advisory_only"] is True
+    assert manifest["memory_feedback_loop"]["host_hard_stop_gate"] is False
+    assert manifest["memory_feedback_loop"]["internalized_on_reusable_memory_selection"] is True
     assert manifest["memory_feedback_loop"]["does_not_create_task_cost_ledger"] is True
+    assert manifest["observation_and_causal_attribution"]["public_private_boundary_is_separate"] is True
+    assert manifest["observation_and_causal_attribution"]["blocks_ordinary_local_causal_reasoning"] is False
     assert "feedback_loop" in workbuddy_doc
     assert "feedback_loop" in doubao_doc
+    assert "causal-attribution" in trial
+    assert "does not prove causality" in trial
 
 
 def test_conversation_templates_expose_reading_profiles() -> None:
@@ -115,6 +137,12 @@ def test_memory_profiles_are_routed_and_template_visible() -> None:
     assert manifest["skill_lifecycle"]["receipt_schema"] == "cbh.skill_release_receipt.v1"
     assert manifest["skill_lifecycle"]["reactivation_reads_current_source_files"] is True
     assert manifest["memory_feedback_loop"]["prediction_is_hypothesis_until_verified"] is True
+    assert manifest["observation_and_causal_attribution"]["attribution_levels"] == [
+        "mechanism_property",
+        "empirical_record",
+        "causal_hypothesis",
+        "validated_causality",
+    ]
     assert manifest["memory_retrieval_result"]["hybrid_retrieval_is_meta_first_enhancement"] is True
     assert manifest["memory_write_granularity"]["strict_capsules_reject_orphan_fragments"] is True
 

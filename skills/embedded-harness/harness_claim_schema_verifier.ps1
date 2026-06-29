@@ -27,6 +27,57 @@ function Normalize-ContractToken([string]$value) {
   return (([string]$value).Trim().ToLowerInvariant() -replace '[\s-]+', '_')
 }
 
+function Get-TextTriggerHits([string]$Text, $Terms) {
+  $hits = @()
+  foreach ($term in (ConvertTo-Array $Terms)) {
+    $value = [string]$term
+    if ([string]::IsNullOrWhiteSpace($value)) { continue }
+    if ($Text -match [regex]::Escape($value)) {
+      $hits += $value
+    }
+  }
+  return @($hits | Select-Object -Unique)
+}
+
+function Get-CausalAttributionIssues([string]$Text) {
+  $router = $policy.router_decision_contract
+  if ($null -eq $router) { return @() }
+  $groups = $router.causal_attribution_triggers
+  if ($null -eq $groups) { return @() }
+
+  $issues = @()
+  $segments = @($Text -split '(?<=[\.\!\?。！？；;])\s+|[\r\n]+')
+  foreach ($segment in $segments) {
+    if ([string]::IsNullOrWhiteSpace($segment)) { continue }
+    $abstractSubjectHits = Get-TextTriggerHits $segment $groups.abstract_subject_terms
+    $causalPredicateHits = Get-TextTriggerHits $segment $groups.causal_predicate_terms
+    $globalEffectHits = Get-TextTriggerHits $segment $groups.global_effect_terms
+    $timeRangeHits = Get-TextTriggerHits $segment $groups.time_range_terms
+    $stabilityHits = Get-TextTriggerHits $segment $groups.stability_assertion_terms
+    $sampleHits = Get-TextTriggerHits $segment $groups.sample_terms
+    $generalizationHits = Get-TextTriggerHits $segment $groups.generalization_terms
+    $originPathHits = Get-TextTriggerHits $segment $groups.origin_path_terms
+    $definitionHits = Get-TextTriggerHits $segment $groups.definition_terms
+    $scopeLimiterHits = Get-TextTriggerHits $segment $groups.scope_limiter_terms
+
+    if ($scopeLimiterHits.Count -gt 0) { continue }
+    if (($abstractSubjectHits.Count -gt 0) -and ($causalPredicateHits.Count -gt 0) -and ($globalEffectHits.Count -gt 0)) {
+      $issues += "causal_attribution_boundary_required:abstract_system_causal_global_effect"
+    }
+    if (($timeRangeHits.Count -gt 0) -and ($stabilityHits.Count -gt 0)) {
+      $issues += "causal_attribution_boundary_required:time_range_stability_assertion"
+    }
+    if (($sampleHits.Count -gt 0) -and ($generalizationHits.Count -gt 0)) {
+      $issues += "causal_attribution_boundary_required:single_sample_generalization"
+    }
+    if (($abstractSubjectHits.Count -gt 0) -and ($originPathHits.Count -gt 0) -and ($definitionHits.Count -gt 0)) {
+      $issues += "causal_attribution_boundary_required:origin_path_as_mechanism_definition"
+    }
+  }
+
+  return @($issues | Select-Object -Unique)
+}
+
 if ($ClaimFile) {
   $ClaimJson = Get-Content -LiteralPath $ClaimFile -Raw
 }
@@ -91,6 +142,7 @@ if ($FinalText) {
       }
     }
   }
+  $issues += Get-CausalAttributionIssues $FinalText
 }
 
 $status = if ($issues.Count -gt 0) { "blocked" } else { "pass" }
@@ -100,7 +152,7 @@ $result = [ordered]@{
   status = $status
   claims_checked = $claims.Count
   issues = @($issues | Select-Object -Unique)
-  rule = "schema enum and evidence-boundary check only; no extra LLM judgment"
+  rule = "schema enum, evidence-boundary, and high-risk causal attribution pattern check only; no extra LLM judgment"
 }
 
 $json = $result | ConvertTo-Json -Depth 20

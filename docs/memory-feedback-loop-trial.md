@@ -4,8 +4,24 @@ This trial adds an optional memory feedback loop to existing memory capsules,
 common error records, and paired incident records. It is not a new memory
 backend, not a task-cost ledger, and not a requirement for every turn.
 
-Use it only when a memory is expected to prevent repeated mistakes, guide a
-future route decision, or change future validation behavior.
+Its primary role is internalized reusable-memory use: when the framework selects
+a reusable capsule, CE record, ERR/SOL pair, or decision record, the agent should
+quietly ask what that memory predicts for the current task, verify whether the
+expected behavior is happening, and calibrate the record if the prediction fails.
+The operator can still explicitly request or correct this loop, but the design
+does not depend on the operator saying "please predict" each time.
+
+Use it only when a selected or newly written memory is expected to prevent
+repeated mistakes, guide a future route decision, or change future validation
+behavior.
+
+This loop is separate from the causal-attribution loop in
+[router-decision-contract.md](router-decision-contract.md). The feedback loop
+asks "what should happen next time, and did it happen?" The causal-attribution
+gate asks "is this explanation overclaiming mechanism, effect, or causality?"
+They may both apply to the same event, but neither one upgrades the other: a
+matched feedback prediction does not prove causality, and a causal hypothesis
+does not write memory unless the memory route separately authorizes it.
 
 ## Loop Shape
 
@@ -17,12 +33,31 @@ memory
 ```
 
 - `memory`: the capsule, CE record, ERR/SOL pair, or decision record being used.
-- `prediction`: what should happen the next time the same pattern appears.
-- `verification`: what actually happened when the pattern reappeared.
+- `prediction`: what this memory expects the agent or route to do when the same
+  pattern appears.
+- `verification`: what actually happened in the current or later matching task.
 - `calibration`: how the rule, confidence, trigger, or boundary changed.
 
-The loop is optional. Omit it when the record is a one-off note, a raw
-observation, an ordinary task state, or a static manual page.
+The loop is optional at the schema level but mandatory in decision behavior when
+the route selects a reusable record that already carries a `feedback_loop`, a
+paired ERR/SOL memory, or a common-error prevention record. Omit it when the
+record is a one-off note, a raw observation, an ordinary task state, or a static
+manual page.
+
+Route or decision layers should require feedback-loop review for:
+
+- explicit user requests to run the memory/prediction/verification/calibration
+  loop;
+- selected reusable memory, CE, ERR/SOL, or decision records that already carry
+  `feedback_loop`;
+- common-error or paired incident records being used to prevent recurrence;
+- new reusable records whose purpose is future prevention, routing, or
+  validation behavior.
+
+Ordinary discussion and normal task execution should not pay this cost.
+Reading a common-error record is not the same as writing a new one. Common-error
+terms can select the corpus and feedback loop for reuse, but durable CE writes
+still need explicit record intent or a verified post-tool issue capture.
 
 ## Field Shape
 
@@ -74,6 +109,9 @@ conflicted
   fixed. Keep it as `hypothesis` until later task evidence verifies it.
 - Do not add a feedback loop to every small record. The loop is for reusable,
   repeated, high-impact, or explicitly user-requested learning records.
+- Do not wait for the operator to request prediction when a selected reusable
+  memory already includes a feedback loop or recurrence-prevention role. Treat
+  that as part of competent memory reuse.
 - Do not create a separate consumption ledger only to support the loop.
 - Do not use the loop to promote a claim beyond its `belief_status`.
 - Verification must point to evidence refs, raw session records, tool outputs,

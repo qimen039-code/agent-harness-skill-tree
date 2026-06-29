@@ -1,0 +1,15 @@
+{
+  "schema": "cbh.project_lane_overlay.v1",
+  "project_lanes": {
+    "YOUR_PROJECT": [
+      "C:\\path\\to\\your-project"
+    ]
+  },
+  "memory_roots": {
+    "YOUR_PROJECT": [
+      "C:\\path\\to\\your-project\\.agent-memory",
+      "C:\\path\\to\\your-project\\memory-bank"
+    ]
+  },
+  "rule": "Copy to embedded_harness_policy.local.json or point CBH_PROJECT_LANES_FILE at a private file. Keep machine-local project roots out of public commits."
+}

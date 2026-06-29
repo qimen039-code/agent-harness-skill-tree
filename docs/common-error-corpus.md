@@ -31,6 +31,8 @@ When the adopting runtime allows lane-scoped maintenance writes, the agent may
 auto-record a small `CE-*` lesson after it fixes and verifies the issue. This
 does not authorize public documentation changes, router-policy changes,
 trigger-list edits, cross-lane memory writes, or high-risk incident records.
+Mentioning or reading a common-error record only selects this corpus for reuse;
+it does not by itself authorize a durable CE write.
 
 For the full human/agent split, see
 [correction-and-reflection-guide.md](correction-and-reflection-guide.md).

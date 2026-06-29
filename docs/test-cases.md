@@ -19,12 +19,17 @@ remain acceptance checks for the adopting runtime.
 | TC-004a | "trigger list contains commit push 删除 提交" | R5 terms are recorded as candidates, but documentation/example context does not promote to R5. |
 | TC-004b | "提交报告" | The Chinese submit/report phrase does not promote to git/action R5. |
 | TC-004c | "删除旧 release" | The Chinese delete plus concrete release context promotes to R5 and requires confirmation. |
+| TC-004d | "只读检查 AI Lead Radar Memory Bank 已更新和长期记忆状态，不写入记忆" | Long-term-memory wording in read/status context remains an R5 candidate but does not promote to R5. |
 | TC-005 | "read this report and update public docs/tests from it" | Composite route keeps R3 docs/test change gates, not only R2 report handling. |
 | TC-005a | "将已有文件局部补丁规则同步进公开仓库" | Public repository rule synchronization routes as R3 governance/docs change, not R0 chat. |
 | TC-005d | "准备发布，但提交推送不执行。先做结构读图和现有 diff 审计。" | Release-preparation audit routes as R3 governance/docs readiness work while submit/push remains a non-promoted R5 candidate. |
 | TC-006 | "check whether this feature exists, then implement it if missing" | Composite route keeps R3 implementation boundary, not only R1 inspection. |
 | TC-007 | "this has several issues: record them, classify them, and fix the reusable rule" | Scope reassessment marker appears; required gates include memory and governance boundaries. |
 | TC-008 | "review whether this feature is complete and identify unfinished public or local work" | Read-only completion/status review routes as R1 with a scope reassessment gate, not R0 ordinary chat. |
+| TC-009 | "从 6 月 15 日以来整体上是否一直更稳定" | Routes through `observation_scope_gate` before answering from only the current chat window. |
+| TC-009a | "为这个同类错误加入记忆-预测-验证-校准反馈闭环，观察下次是否复发" | Explicit loop request routes through `feedback_loop_gate`; prediction remains a hypothesis until verified. |
+| TC-009b | "查看 ERR-2026-06-29-01 / SOL-2026-06-29-01 这个同类错误的解决记录" | Selected paired incident memory routes through `paired_err_sol` and `feedback_loop_gate` even when the user does not explicitly ask for prediction. |
+| TC-009c | "查看 common error 记录并按里面的预防规则继续排查" | Selected common-error prevention memory routes through `common_error_corpus` and `feedback_loop_gate`. |
 
 ## Claim Boundary
 
@@ -33,6 +38,8 @@ remain acceptance checks for the adopting runtime.
 | TC-010 | Single smoke test result | May be reported as smoke-tested only; must not become broadly validated. |
 | TC-011 | Retrieved memory snippet without provenance | Treat as unbounded context, not validated memory. |
 | TC-012 | Final answer claims "fully verified" without claim schema | Final claim gate blocks or downgrades the statement. |
+| TC-013 | Final answer claims "CBH solved hallucination drift for all agents" without scope or causal evidence | Causal attribution gate blocks or downgrades the global causal claim. |
+| TC-014 | Final answer says "In this local sample, this is a causal hypothesis, not proof" | Causal attribution gate allows the scoped empirical or hypothesis wording. |
 
 ## Memory Lanes
 
@@ -52,6 +59,7 @@ remain acceptance checks for the adopting runtime.
 | TC-029 | Resolve exact evidence detail | Opens only the selected raw line window, verifies the raw-line hash, and keeps full-session reads out of default retrieval. |
 | TC-030 | Preserve meta-summary and event/domain capsules | `_LEDGER_INDEX.md` remains the first-read meta-summary; `capsules.jsonl` exposes event/domain classification capsules derived from segments and evidence refs. |
 | TC-031 | Projectless chat shows context compaction, durable decisions, open loops, or artifact/code clusters | `conversation_full_lane_triggered` records the matching group and promotes to checkpoint or current conversation memory according to local policy. |
+| TC-031a | Cwd is inside a project defined by `embedded_harness_policy.local.json` or `CBH_PROJECT_LANES_FILE` | Router preserves the concrete project lane and uses `current_project` memory instead of falling back to `PROJECTLESS`. |
 
 ## Content Reading
 

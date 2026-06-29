@@ -34,6 +34,7 @@ Design boundaries:
 - These scripts cannot stop a caller that bypasses the runtime entry scripts.
 - A wrapper is truly mandatory only if it is the agent's only command execution path for the protected action. If another command path bypasses the wrapper, this layer is advisory for that path.
 - Most gates are advisory by design: they return structured decisions that the caller must actively honor. Only paths configured to run through `harness_task_wrapper.ps1`, `harness_tool_proxy.ps1`, or an equivalent hook before execution become real interception points.
+- Machine-local project roots should be loaded from `embedded_harness_policy.local.json` or `CBH_PROJECT_LANES_FILE`, not committed into the public runtime policy.
 
 Mandatory advisory control plane:
 
@@ -176,7 +177,7 @@ unambiguous one-action confirmation surface. Prefer the permit shape when the
 adapter needs to carry confirmation across prompt and pre-tool hooks without
 accidentally allowing later R5 actions.
 
-Configure `embedded_harness_policy.authoring.toml` for high-churn trigger and threshold sections, then keep `embedded_harness_policy.json` synchronized for runtime use. Project lanes, memory roots, and sections not yet covered by TOML still live directly in JSON. Promote trigger terms only for recurring routing classes that change gates or boundaries; keep one-off task wording out of long-lived policy.
+Configure `embedded_harness_policy.authoring.toml` for high-churn trigger and threshold sections, then keep `embedded_harness_policy.json` synchronized for runtime use. Machine-local project lanes and memory roots should live in a private `embedded_harness_policy.local.json` overlay or the path named by `CBH_PROJECT_LANES_FILE`; use `embedded_harness_policy.local.example.json` as the shape. Promote trigger terms only for recurring routing classes that change gates or boundaries; keep one-off task wording out of long-lived policy.
 
 ## Limitations
 

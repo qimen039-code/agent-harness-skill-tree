@@ -34,9 +34,11 @@ Use receipt profiles to keep runtime cost low: risk classification is always int
 
 Use the action-relevant rule: if a field will not change the next action, do not emit it in the default receipt and do not display the R0-R5 label to the user. Keep it in documentation, archive meta, debug receipt, or audit logs instead. After the first receipt, use delta receipts with changed fields only unless full debug is requested.
 
-Re-evaluation is required after trigger events: new evidence, missing files, tool errors, scope changes, user corrections, cross-project terminology, currentness/version claims, GitHub/open-source mechanism intake, risk/cost escalation, strong claims, R5 actions, or memory writes.
+Re-evaluation is required after trigger events: new evidence, missing files, tool errors, scope changes, user corrections, cross-project terminology, currentness/version claims, GitHub/open-source mechanism intake, risk/cost escalation, broad observation-scope claims, strong claims, R5 actions, or memory writes.
 
-Final boundary check must verify claim scope, memory scope, unresolved verification debt, and whether version metadata or paired ERR/SOL records need updates.
+Final boundary check must verify claim scope, causal-attribution scope, memory scope, unresolved verification debt, and whether version metadata or paired ERR/SOL records need updates.
+
+Use the causal attribution gate during final or draft-final review when text makes high-risk causal, stability, definition, or generalization assertions. This gate is not triggered by ordinary local reasoning with words such as because/therefore. It fires only for stronger assertion patterns such as abstract system/framework/mechanism subject plus causal predicate plus global effect, time-range plus stability assertion, single-sample/case wording plus generalization, or origin/path wording mixed into a mechanism definition. Classify such statements as one of four epistemic levels: `mechanism_property`, `empirical_record`, `causal_hypothesis`, or `validated_causality`. `empirical_record` must keep scope and sample boundaries; `causal_hypothesis` must be marked as a hypothesis; `validated_causality` requires controls or repeatable evidence. Information visibility and release eligibility stay in the public/private boundary gate, not in the causal attribution gate.
 
 Composite requests must be classified by sub-intent, not by the first or
 narrowest phrase. If a request asks to read a report and also update public

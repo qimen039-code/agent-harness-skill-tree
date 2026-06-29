@@ -57,10 +57,11 @@ claims, and `position_risk` markers. If head/tail anchors are insufficient for
 a strong claim, reread bounded middle windows around structural anchors before
 promoting the claim.
 
-When a selected record includes `feedback_loop`, treat its prediction as a
-hypothesis until verified by later evidence. Index rows may expose only compact
-states such as `feedback_loop: pending`, `matched`, or `failed`; calibration
-details belong in the payload.
+When a selected record includes `feedback_loop`, apply the loop as part of
+memory reuse without waiting for the operator to ask for prediction, and treat
+its prediction as a hypothesis until verified by later evidence. Index rows may
+expose only compact states such as `feedback_loop: pending`, `matched`, or
+`failed`; calibration details belong in the payload.
 
 Status values:
 

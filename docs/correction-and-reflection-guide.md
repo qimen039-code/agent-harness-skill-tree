@@ -72,7 +72,11 @@ paired `ERR-*` / `SOL-*`, a router regression, or a policy change when:
 ## Feedback Loop Use
 
 Use `feedback_loop` only for records that should predict and check future
-behavior.
+behavior. It is not a user-facing "always predict" feature. It is the internal
+habit of using reusable memory well: when a selected CE record, ERR/SOL pair,
+capsule, or decision record exists to prevent recurrence, the agent should check
+what the record expects, verify the current behavior against that expectation,
+and calibrate if the expectation fails.
 
 ```text
 prediction: what should happen next time
@@ -81,6 +85,9 @@ calibration: whether to keep, weaken, strengthen, or upgrade the rule
 ```
 
 A prediction is a hypothesis. It is not evidence that the behavior is fixed.
+The operator may explicitly ask to run the loop or correct its result, but
+ordinary task execution should not expose prediction scaffolding unless it
+changes the action, risk, memory, or claim boundary.
 
 ## Human Work In This Framework
 

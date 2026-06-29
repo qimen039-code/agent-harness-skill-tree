@@ -32,6 +32,10 @@ R5_CONTEXT_FIELDS = [
 TRACKED_PATHS: list[tuple[str, ...]] = [
     ("risk_trigger_rules", "R5"),
     ("r5_context_decision_rules",),
+    ("router_decision_contract", "observation_scope_triggers"),
+    ("router_decision_contract", "feedback_loop_triggers"),
+    ("router_decision_contract", "causal_attribution_contract"),
+    ("router_decision_contract", "causal_attribution_triggers"),
     ("router_decision_contract", "conversation_memory_full_lane_triggers"),
     ("runtime_enforcement", "human_confirmation_permit"),
 ]
@@ -138,6 +142,61 @@ def _normal_full_lane(authoring: dict[str, Any]) -> dict[str, Any] | None:
     return {"decision_rule": decision_rule, "threshold_groups": normalized_groups}
 
 
+def _normal_causal_attribution_contract(authoring: dict[str, Any]) -> dict[str, Any] | None:
+    router = authoring.get("router_decision_contract", {})
+    if not isinstance(router, dict):
+        raise ValueError("router_decision_contract must be a table")
+    contract = router.get("causal_attribution_contract")
+    if contract is None:
+        return None
+    if not isinstance(contract, dict):
+        raise ValueError("causal_attribution_contract must be a table")
+    return {
+        "purpose": str(contract.get("purpose") or ""),
+        "required_distinctions": _string_list(
+            contract.get("required_distinctions"), "causal_attribution_contract.required_distinctions"
+        ),
+        "default_status": str(contract.get("default_status") or "causal_hypothesis"),
+        "rule": str(contract.get("rule") or ""),
+        "exclusion": str(contract.get("exclusion") or ""),
+    }
+
+
+def _normal_observation_scope_triggers(authoring: dict[str, Any]) -> list[str] | None:
+    router = authoring.get("router_decision_contract", {})
+    if not isinstance(router, dict):
+        raise ValueError("router_decision_contract must be a table")
+    triggers = router.get("observation_scope_triggers")
+    if triggers is None:
+        return None
+    return _string_list(triggers, "router_decision_contract.observation_scope_triggers")
+
+
+def _normal_feedback_loop_triggers(authoring: dict[str, Any]) -> list[str] | None:
+    router = authoring.get("router_decision_contract", {})
+    if not isinstance(router, dict):
+        raise ValueError("router_decision_contract must be a table")
+    triggers = router.get("feedback_loop_triggers")
+    if triggers is None:
+        return None
+    return _string_list(triggers, "router_decision_contract.feedback_loop_triggers")
+
+
+def _normal_causal_attribution_triggers(authoring: dict[str, Any]) -> dict[str, Any] | None:
+    router = authoring.get("router_decision_contract", {})
+    if not isinstance(router, dict):
+        raise ValueError("router_decision_contract must be a table")
+    triggers = router.get("causal_attribution_triggers")
+    if triggers is None:
+        return None
+    if not isinstance(triggers, dict) or not triggers:
+        raise ValueError("causal_attribution_triggers must be a non-empty table")
+    return {
+        str(name): _string_list(items, f"causal_attribution_triggers.{name}")
+        for name, items in triggers.items()
+    }
+
+
 def _normal_permit(authoring: dict[str, Any]) -> dict[str, Any] | None:
     runtime = authoring.get("runtime_enforcement", {})
     if not isinstance(runtime, dict):
@@ -177,6 +236,22 @@ def compile_policy(base_policy: dict[str, Any], authoring: dict[str, Any]) -> di
     r5_context = _normal_r5_context(authoring)
     if r5_context is not None:
         _set_path(compiled, ("r5_context_decision_rules",), r5_context)
+
+    observation_scope_triggers = _normal_observation_scope_triggers(authoring)
+    if observation_scope_triggers is not None:
+        _set_path(compiled, ("router_decision_contract", "observation_scope_triggers"), observation_scope_triggers)
+
+    feedback_loop_triggers = _normal_feedback_loop_triggers(authoring)
+    if feedback_loop_triggers is not None:
+        _set_path(compiled, ("router_decision_contract", "feedback_loop_triggers"), feedback_loop_triggers)
+
+    causal_contract = _normal_causal_attribution_contract(authoring)
+    if causal_contract is not None:
+        _set_path(compiled, ("router_decision_contract", "causal_attribution_contract"), causal_contract)
+
+    causal_triggers = _normal_causal_attribution_triggers(authoring)
+    if causal_triggers is not None:
+        _set_path(compiled, ("router_decision_contract", "causal_attribution_triggers"), causal_triggers)
 
     full_lane = _normal_full_lane(authoring)
     if full_lane is not None:

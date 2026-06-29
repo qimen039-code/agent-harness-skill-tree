@@ -14,6 +14,7 @@ from .policy import load_policy
 
 
 NEGATION_RE = re.compile(r"(?i)(\bdo\s+not\b|\bdon't\b|\bnever\b|\bnot\b|\bno\b)[\s\w'-]{0,128}$")
+CHINESE_NEGATION_RE = re.compile(r"(不需要|无需|不要|别|禁止|不)\s*$")
 RISK_LABEL_RE = re.compile(r"^R[0-5]$")
 DEFAULT_LOG_FILENAME = "workbuddy_harness_events.jsonl"
 SURROGATE_RE = re.compile(r"[\ud800-\udfff]")
@@ -147,7 +148,8 @@ def _trigger_regex(text: str) -> re.Pattern[str]:
 
 def _is_negated(source: str, index: int) -> bool:
     start = max(0, index - 256)
-    return bool(NEGATION_RE.search(source[start:index]))
+    prefix = source[start:index]
+    return bool(NEGATION_RE.search(prefix) or CHINESE_NEGATION_RE.search(prefix[-32:]))
 
 
 def _trigger_matches(source: str, triggers: Any) -> dict[str, list[str]]:
@@ -176,6 +178,70 @@ def _first_matching_rule(source: str, rules: dict[str, Any], order: list[str]) -
 
 def _matching_triggers(source: str, triggers: Any) -> list[str]:
     return _trigger_matches(source, triggers)["positive"]
+
+
+def _source_matched_terms(source: str, terms: Any) -> list[str]:
+    hits: list[str] = []
+    for term in _flatten_triggers(terms):
+        if term.strip() and _trigger_regex(term).search(source):
+            hits.append(term)
+    return _unique(hits)
+
+
+def _term_intersection(left_terms: Any, right_terms: Any) -> list[str]:
+    right = {str(term).lower() for term in _flatten_triggers(right_terms) if str(term).strip()}
+    return _unique([str(term) for term in _flatten_triggers(left_terms) if str(term).lower() in right])
+
+
+def _r5_context_decision(*, source_text: str, positive_terms: list[str], negated_terms: list[str], policy: dict[str, Any]) -> dict[str, Any]:
+    candidate_terms = _unique([str(item) for item in positive_terms])
+    negated = _unique([str(item) for item in negated_terms])
+    if not candidate_terms:
+        return {
+            "decision": "none",
+            "action_surface": "none",
+            "promote_to_risk": False,
+            "candidate_terms": [],
+            "negated_terms": negated,
+            "reason": "no_R5_candidate",
+        }
+
+    rules = policy.get("r5_context_decision_rules", {})
+    direct_action_hits = _source_matched_terms(source_text, rules.get("direct_action_terms", []))
+    action_context_hits = _source_matched_terms(source_text, rules.get("action_context_terms", []))
+    documentation_context_hits = _source_matched_terms(source_text, rules.get("documentation_context_terms", []))
+    non_action_context_hits = _source_matched_terms(source_text, rules.get("non_action_context_terms", []))
+    context_required_hits = _term_intersection(candidate_terms, rules.get("context_required_candidate_terms", []))
+    always_action_hits = _term_intersection(candidate_terms, rules.get("always_action_candidate_terms", []))
+
+    if direct_action_hits or (always_action_hits and not documentation_context_hits) or (
+        context_required_hits and action_context_hits and not non_action_context_hits
+    ):
+        return {
+            "decision": "requires_confirmation",
+            "action_surface": "actionable_R5",
+            "promote_to_risk": True,
+            "candidate_terms": candidate_terms,
+            "negated_terms": negated,
+            "reason": "action_context_detected",
+        }
+    if documentation_context_hits or non_action_context_hits:
+        return {
+            "decision": "contextual_review",
+            "action_surface": "documentation_or_discussion",
+            "promote_to_risk": False,
+            "candidate_terms": candidate_terms,
+            "negated_terms": negated,
+            "reason": "R5_terms_are_context_not_action",
+        }
+    return {
+        "decision": "contextual_review",
+        "action_surface": "ambiguous_R5_candidate",
+        "promote_to_risk": False,
+        "candidate_terms": candidate_terms,
+        "negated_terms": negated,
+        "reason": "R5_candidate_needs_context_review",
+    }
 
 
 def _conversation_full_lane_groups(task_text: str, contract: dict[str, Any]) -> tuple[dict[str, dict[str, Any]], bool]:
@@ -584,22 +650,96 @@ def _conversation_link_required(route: dict[str, Any], policy: dict[str, Any]) -
     return str(route.get("link_intent", "none")) in required_intents
 
 
+def causal_attribution_gate(*, final_text: str, policy: dict[str, Any] | None = None) -> dict[str, Any]:
+    policy = policy or load_policy()
+    contract = policy.get("router_decision_contract", {})
+    groups = contract.get("causal_attribution_triggers", {})
+    issues: list[str] = []
+    if not final_text or not isinstance(groups, dict):
+        return {
+            "ts": _now(),
+            "phase": "causal_attribution_gate",
+            "status": "pass",
+            "patterns": [],
+            "issues": [],
+            "rule": "High-risk causal attribution review only; scoped local causal reasoning is not blocked.",
+        }
+
+    patterns: list[str] = []
+    segments = [segment for segment in re.split(r"(?<=[.!?。！？；;])\s+|[\r\n]+", final_text) if segment.strip()]
+    for segment in segments:
+        hits = {
+            name: _matching_triggers(segment, groups.get(name, []))
+            for name in (
+                "abstract_subject_terms",
+                "causal_predicate_terms",
+                "global_effect_terms",
+                "time_range_terms",
+                "stability_assertion_terms",
+                "sample_terms",
+                "generalization_terms",
+                "origin_path_terms",
+                "definition_terms",
+                "scope_limiter_terms",
+            )
+        }
+        if hits["scope_limiter_terms"]:
+            continue
+        if hits["abstract_subject_terms"] and hits["causal_predicate_terms"] and hits["global_effect_terms"]:
+            patterns.append("abstract_system_causal_global_effect")
+        if hits["time_range_terms"] and hits["stability_assertion_terms"]:
+            patterns.append("time_range_stability_assertion")
+        if hits["sample_terms"] and hits["generalization_terms"]:
+            patterns.append("single_sample_generalization")
+        if hits["abstract_subject_terms"] and hits["origin_path_terms"] and hits["definition_terms"]:
+            patterns.append("origin_path_as_mechanism_definition")
+
+    issues.extend(f"causal_attribution_boundary_required:{pattern}" for pattern in _unique(patterns))
+
+    return {
+        "ts": _now(),
+        "phase": "causal_attribution_gate",
+        "status": "blocked" if issues else "pass",
+        "patterns": _unique(patterns),
+        "issues": sorted(set(issues)),
+        "rule": "High-risk causal attribution review only; scoped local causal reasoning is not blocked.",
+    }
+
+
 def intake_router(task_text: str = "", cwd: str | None = None, policy: dict[str, Any] | None = None) -> dict[str, Any]:
     policy = policy or load_policy()
     cwd = cwd or os.getcwd()
     risk_rules = policy.get("risk_trigger_rules") or policy.get("risk_keyword_rules") or {}
     matched_risk_triggers: dict[str, list[str]] = {}
     negated_risk_triggers: dict[str, list[str]] = {}
+    risk_candidates: dict[str, list[str]] = {}
+    risk_context_decisions: dict[str, dict[str, Any]] = {}
     triggered_risks: list[str] = []
     required_gates = ["microkernel"]
     approval_required: list[str] = []
     required_skills: list[str] = []
+    classification_confidence = "high"
+    fallback_recommended = False
 
     for risk_name in _as_list(policy.get("risk_order_high_to_low")):
         name = str(risk_name)
         match_set = _trigger_matches(task_text, risk_rules.get(name, {}))
         if match_set["negated"]:
             negated_risk_triggers[name] = match_set["negated"]
+        if name == "R5" and match_set["positive"]:
+            r5_decision = _r5_context_decision(
+                source_text=task_text,
+                positive_terms=match_set["positive"],
+                negated_terms=match_set["negated"],
+                policy=policy,
+            )
+            risk_candidates["R5"] = match_set["positive"]
+            risk_context_decisions["R5"] = r5_decision
+            if not r5_decision.get("promote_to_risk"):
+                if r5_decision.get("action_surface") == "ambiguous_R5_candidate":
+                    classification_confidence = "low"
+                    required_gates.append("risk_context_review_gate")
+                continue
         if match_set["positive"]:
             triggered_risks.append(name)
             matched_risk_triggers[name] = match_set["positive"]
@@ -612,8 +752,6 @@ def intake_router(task_text: str = "", cwd: str | None = None, policy: dict[str,
             risk_level = str(risk_name)
             break
 
-    classification_confidence = "high"
-    fallback_recommended = False
     if not triggered_risks:
         fallback_match = _trigger_matches(task_text, policy.get("fallback_boundary_triggers", []))
         contract = policy.get("router_decision_contract", {})
@@ -669,6 +807,16 @@ def intake_router(task_text: str = "", cwd: str | None = None, policy: dict[str,
     if scope_reassessment_hits:
         semantic_ambiguity.append("composite_or_scope_reassessment")
         required_gates.append("scope_reassessment_gate")
+    observation_scope_hits = _matching_triggers(task_text, contract.get("observation_scope_triggers", []))
+    if observation_scope_hits:
+        semantic_ambiguity.append("observation_scope_required")
+        required_gates.append("observation_scope_gate")
+        matched_risk_triggers["observation_scope"] = observation_scope_hits
+    feedback_loop_hits = _matching_triggers(task_text, contract.get("feedback_loop_triggers", []))
+    if feedback_loop_hits:
+        semantic_ambiguity.append("feedback_loop_required")
+        required_gates.append("feedback_loop_gate")
+        matched_risk_triggers["feedback_loop"] = feedback_loop_hits
     if "R3" in triggered_risks:
         semantic_ambiguity.append("governance_or_change_surface")
     semantic_ambiguity = _unique(semantic_ambiguity)
@@ -688,15 +836,34 @@ def intake_router(task_text: str = "", cwd: str | None = None, policy: dict[str,
     static_knowledge_hits = _matching_triggers(task_text, contract.get("static_knowledge_triggers", []))
     if paired_memory_hits:
         memory_need = "paired_err_sol"
-    elif memory_hits or static_knowledge_hits:
+    elif memory_hits or static_knowledge_hits or feedback_loop_hits:
         memory_need = "index_only"
     else:
         memory_need = "none"
+    if paired_memory_hits:
+        semantic_ambiguity.append("feedback_loop_required")
+        required_gates.append("feedback_loop_gate")
+        matched_risk_triggers["feedback_loop_memory"] = paired_memory_hits
     if static_knowledge_hits:
         required_gates.append("static_knowledge_index_gate")
 
     explicit_record_hits = _matching_triggers(task_text, contract.get("explicit_record_triggers", []))
     common_error_hits = _matching_triggers(task_text, contract.get("common_error_triggers", []))
+    common_error_write_intent = bool(common_error_hits and explicit_record_hits)
+    r5_decision_for_memory_intent = risk_context_decisions.get("R5", {})
+    r5_candidates_for_memory_intent = (
+        _as_list(r5_decision_for_memory_intent.get("candidate_terms"))
+        if r5_decision_for_memory_intent.get("promote_to_risk") is True
+        else []
+    )
+    explicit_long_term_memory_write_intent = bool(
+        {str(item) for item in r5_candidates_for_memory_intent}.intersection({"write memory", "写入记忆"})
+    )
+    if common_error_hits:
+        semantic_ambiguity.append("feedback_loop_required")
+        required_gates.append("feedback_loop_gate")
+        matched_risk_triggers["feedback_loop_common_error"] = common_error_hits
+    semantic_ambiguity = _unique(semantic_ambiguity)
     projectization_signals = _matching_triggers(task_text, contract.get("projectization_signals", []))
     projectization_threshold = int(contract.get("projectization_threshold", 5))
 
@@ -716,10 +883,10 @@ def intake_router(task_text: str = "", cwd: str | None = None, policy: dict[str,
     read_only_audit_hits = _matching_triggers(task_text, contract.get("read_only_memory_audit_triggers", []))
     active_conversation_write_intent_hits = _matching_triggers(task_text, contract.get("active_conversation_write_intent_triggers", []))
     read_only_memory_audit_intent = bool(read_only_audit_hits) and not (
-        active_conversation_write_intent_hits or explicit_record_hits or common_error_hits
+        active_conversation_write_intent_hits or explicit_record_hits or common_error_write_intent
     )
     active_conversation_write_intent = bool(
-        active_conversation_write_intent_hits or explicit_record_hits or common_error_hits
+        active_conversation_write_intent_hits or explicit_record_hits or common_error_write_intent
     )
     active_conversation_memory_durable_signal = has_active_conversation_memory_lane and not read_only_memory_audit_intent and (
         active_conversation_write_intent
@@ -754,8 +921,10 @@ def intake_router(task_text: str = "", cwd: str | None = None, policy: dict[str,
         memory_need = "common_error_corpus"
     elif self_reflection_record_hits and memory_need == "none":
         memory_need = "paired_err_sol"
+    elif explicit_long_term_memory_write_intent and memory_need == "none":
+        memory_need = "index_only"
 
-    if common_error_hits:
+    if common_error_write_intent:
         record_intent = "inferred_reusable_error"
     elif conversation_memory_decision == "create_or_update_current_conversation":
         if conversation_explicit_hits:
@@ -763,6 +932,8 @@ def intake_router(task_text: str = "", cwd: str | None = None, policy: dict[str,
         else:
             record_intent = "conversation_checkpoint"
     elif self_reflection_record_hits:
+        record_intent = "explicit_user_request"
+    elif explicit_long_term_memory_write_intent:
         record_intent = "explicit_user_request"
     elif conversation_memory_decision == "checkpoint_candidate":
         record_intent = "conversation_checkpoint"
@@ -792,6 +963,10 @@ def intake_router(task_text: str = "", cwd: str | None = None, policy: dict[str,
         memory_lane = "current_conversation"
     elif link_intent != "none":
         memory_lane = "referenced_conversation"
+    elif explicit_long_term_memory_write_intent and has_active_conversation_memory_lane:
+        memory_lane = "current_conversation"
+    elif explicit_long_term_memory_write_intent:
+        memory_lane = "global_inbox"
     elif conversation_memory_decision != "none" and (has_active_conversation_memory_lane or conversation_explicit_hits):
         memory_lane = "current_conversation"
     elif self_reflection_record_hits:
@@ -1030,6 +1205,8 @@ def intake_router(task_text: str = "", cwd: str | None = None, policy: dict[str,
         "triggered_risks": sorted(set(triggered_risks), key=triggered_risks.index),
         "matched_risk_triggers": matched_risk_triggers,
         "negated_risk_triggers": negated_risk_triggers,
+        "risk_candidates": risk_candidates,
+        "risk_context_decisions": risk_context_decisions,
         "classification_confidence": classification_confidence,
         "required_gates": required_gates_out,
         "required_skills": _unique(required_skills),
@@ -1132,6 +1309,9 @@ def claim_schema_verifier(
                     if isinstance(claim, dict)
                 ):
                     issues.append(f"insufficient_evidence_boundary_for_strong_phrase:{phrase}")
+        causal_result = causal_attribution_gate(final_text=final_text, policy=policy)
+        if causal_result["status"] != "pass":
+            issues.extend(str(issue) for issue in causal_result["issues"])
 
     return {
         "ts": _now(),
@@ -1139,7 +1319,7 @@ def claim_schema_verifier(
         "status": "blocked" if issues else "pass",
         "claims_checked": len(claims),
         "issues": sorted(set(issues)),
-        "rule": "schema enum and evidence-boundary check only; no extra LLM judgment",
+        "rule": "schema enum, evidence-boundary, and high-risk causal attribution pattern check only; no extra LLM judgment",
     }
 
 

@@ -89,10 +89,11 @@ enforcement and what has actually been tested.
 | Skill lifecycle profile | Instruction/script convention for listing-only, active-frame, release-receipt, and reactivation behavior | Partial; large rendered skill cleanup depends on host context management support |
 | Hybrid retrieval profile | Instruction/script convention that can require meta-first plus bounded original-language matching before reading facts or hypotheses | Partial; no tested automatic route field unless the local adapter adds it |
 | Memory write granularity profile | Schema/lint convention requiring context-complete facts and hypotheses before durable reuse | Partial; post-run or workflow-level unless wired before memory writes |
-| Memory feedback loop | Optional `feedback_loop` field inside fact, hypothesis, CE, or decision records for memory -> prediction -> verification -> calibration | Partial; advisory payload convention only, not a host hard gate |
+| Memory feedback loop | Route/decision convention plus optional `feedback_loop` field inside fact, hypothesis, CE, or decision records for memory -> prediction -> verification -> calibration | Partial; can be workflow-enforced by local scripts or instructions, but is not a host hard gate |
 | Raw session ledger | Not implemented in the reviewed demo | Missing |
 | R5 single-event permit | Doubao user confirmation may block or allow some destructive commands | Host-owned confirmation exists for the tested delete path; no replay-protected Claim Boundary Harness permit |
 | External research gate | Evidence-tier labels and output contract | Partial; no automatic authority/GitHub search trigger |
+| Observation-scope / causal-attribution gates | Instruction plus lint/review convention for global trend, historical comparison, and causal-overclaim wording | Partial; output-side unless a local adapter wires pre-display review |
 | Claim-artifact renderer/checker | Init/derive/lint/repair scripts | Partial; no render payload verifier |
 | Domain quality rubric | Not implemented as a generic layer | Future optional surface |
 
@@ -147,17 +148,23 @@ unsupported certainty language.
    meta-first retrieval and write-shape selectors, not as proof that claims are
    true.
 8. If reusable memory records are meant to prevent repeated mistakes, preserve
-   optional `feedback_loop` fields. Treat predictions as hypotheses until later
+   optional `feedback_loop` fields and have the local workflow apply them when
+   those records are selected. Treat predictions as hypotheses until later
    evidence verifies them, and do not create a per-task token ledger for this
    field.
-9. Run lint after important outputs and before publishing strong claims. Treat
+9. Add an output-side causal-attribution review for global trend, historical
+   comparison, single-case generalization, and mechanism-effect claims. It
+   should classify statements as mechanism property, empirical record, causal
+   hypothesis, or validated causality; privacy and release decisions remain a
+   separate boundary.
+10. Run lint after important outputs and before publishing strong claims. Treat
    warnings as review debt, not as a validated pass.
-10. Test the host's own hard guard with a harmless disposable file before relying
+11. Test the host's own hard guard with a harmless disposable file before relying
    on it. Record whether the client requires `interaction.warn`, whether user
    refusal stops execution, and which command classes are covered.
-11. Record unsupported or host-owned hard-gate surfaces in the compatibility
+12. Record unsupported or host-owned hard-gate surfaces in the compatibility
    manifest as advisory, partial, host-owned, or unverified.
-12. Keep attribution and source boundaries explicit when the adaptation was
+13. Keep attribution and source boundaries explicit when the adaptation was
    inspired by local client artifacts or other non-GitHub sources.
 
 ## Acceptance Checklist
@@ -175,8 +182,9 @@ Before calling a Doubao-style deployment successful, verify:
   matching only as an enhancement over bounded fact/hypothesis candidates;
 - durable fact or hypothesis writes are context-complete and avoid orphan
   fragments before derived reuse;
-- optional `feedback_loop` predictions remain hypotheses until later evidence
-  verifies them;
+- selected reusable records with `feedback_loop` apply the memory -> prediction
+  -> verification -> calibration loop, while predictions remain hypotheses
+  until later evidence verifies them;
 - Windows consoles use UTF-8 output or the scripts avoid emoji status output;
 - normal-output and boundary-output examples demonstrate a meaningful behavior
   difference;

@@ -11,6 +11,7 @@ import unittest
 import uuid
 from contextlib import contextmanager, redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -101,6 +102,17 @@ class HarnessGateTests(unittest.TestCase):
         self.assertTrue(claim_artifacts["requires_original_evidence_refs"])
         self.assertTrue(claim_artifacts["summaries_are_not_fact_sources"])
 
+        causal = manifest["observation_and_causal_attribution"]
+        self.assertTrue(causal["default_enabled"])
+        self.assertFalse(causal["blocks_ordinary_local_causal_reasoning"])
+        self.assertTrue(causal["public_private_boundary_is_separate"])
+        self.assertIn("empirical_record", causal["attribution_levels"])
+
+        feedback = manifest["memory_feedback_loop"]
+        self.assertEqual(feedback["router_decision_gate_supported"], "unverified")
+        self.assertFalse(feedback["host_hard_stop_gate"])
+        self.assertTrue(feedback["internalized_on_reusable_memory_selection"])
+
         external_delivery = manifest["external_model_delivery"]
         self.assertEqual(external_delivery["structured_json_filler_mode_supported"], "unverified")
         self.assertFalse(external_delivery["advisory_issues_trigger_repair"])
@@ -132,6 +144,64 @@ class HarnessGateTests(unittest.TestCase):
         self.assertIn("R1", route["triggered_risks"])
         self.assertIn("delete", route["negated_risk_triggers"].get("R5", []))
 
+    def test_router_demotes_memory_status_wording_from_r5(self) -> None:
+        route = self._route("只读检查 AI Lead Radar Memory Bank 已更新和长期记忆状态，不写入记忆", policy=self.policy)
+        self.assertNotEqual(route["risk_level"], "R5")
+        self.assertIn("长期记忆", route["risk_candidates"].get("R5", []))
+        self.assertEqual(route["risk_context_decisions"]["R5"]["action_surface"], "documentation_or_discussion")
+
+    def test_router_uses_local_project_lane_overlay(self) -> None:
+        with writable_test_dir() as root_text:
+            root = Path(root_text)
+            project = root / "AI_Lead_Radar"
+            memory_bank = project / "memory-bank"
+            memory_bank.mkdir(parents=True)
+            overlay = root / "project_lanes.local.json"
+            overlay.write_text(
+                json.dumps(
+                    {
+                        "schema": "cbh.project_lane_overlay.v1",
+                        "project_lanes": {"AI_Lead_Radar": [str(project)]},
+                        "memory_roots": {"AI_Lead_Radar": [str(memory_bank)]},
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+            with patch.dict(os.environ, {"CBH_PROJECT_LANES_FILE": str(overlay)}):
+                policy = load_policy()
+            route = self._route("只读检查 Memory Bank 已更新和长期记忆状态", cwd=str(project), policy=policy)
+        self.assertEqual(route["project_lane"], "AI_Lead_Radar")
+        self.assertEqual(route["memory_lane"], "current_project")
+        self.assertNotEqual(route["risk_level"], "R5")
+
+    def test_router_marks_project_long_term_memory_write_as_write_mode(self) -> None:
+        with writable_test_dir() as root_text:
+            root = Path(root_text)
+            project = root / "AI_Lead_Radar"
+            memory_bank = project / "memory-bank"
+            memory_bank.mkdir(parents=True)
+            overlay = root / "project_lanes.local.json"
+            overlay.write_text(
+                json.dumps(
+                    {
+                        "schema": "cbh.project_lane_overlay.v1",
+                        "project_lanes": {"AI_Lead_Radar": [str(project)]},
+                        "memory_roots": {"AI_Lead_Radar": [str(memory_bank)]},
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+            with patch.dict(os.environ, {"CBH_PROJECT_LANES_FILE": str(overlay)}):
+                policy = load_policy()
+            route = self._route("写入记忆：记录这个长期记忆修复", cwd=str(project), policy=policy)
+        self.assertEqual(route["project_lane"], "AI_Lead_Radar")
+        self.assertEqual(route["risk_level"], "R5")
+        self.assertEqual(route["memory_lane"], "current_project")
+        self.assertEqual(route["memory_mode"], "write")
+        self.assertEqual(route["record_intent"], "explicit_user_request")
+
     def test_router_detects_completion_review_as_read_only_scope_check(self) -> None:
         route = self._route(
             "review whether the memory layer absorption is complete and identify unfinished public or local work",
@@ -147,6 +217,42 @@ class HarnessGateTests(unittest.TestCase):
         self.assertIn("R1", route["triggered_risks"])
         self.assertIn("scope_reassessment_gate", route["required_gates"])
         self.assertIn("composite_or_scope_reassessment", route["semantic_ambiguity"])
+
+    def test_router_detects_observation_scope_gate(self) -> None:
+        route = self._route("从 6 月 15 日以来整体上是否一直更稳定", policy=self.policy)
+        self.assertIn("observation_scope_gate", route["required_gates"])
+        self.assertIn("observation_scope_required", route["semantic_ambiguity"])
+        self.assertIn("observation_scope", route["matched_risk_triggers"])
+
+    def test_router_detects_feedback_loop_gate(self) -> None:
+        route = self._route("为这个同类错误加入记忆-预测-验证-校准反馈闭环，观察下次是否复发", policy=self.policy)
+        self.assertIn("feedback_loop_gate", route["required_gates"])
+        self.assertIn("feedback_loop_required", route["semantic_ambiguity"])
+        self.assertIn("feedback_loop", route["matched_risk_triggers"])
+        self.assertEqual(route["memory_need"], "index_only")
+
+    def test_router_uses_feedback_loop_for_paired_memory(self) -> None:
+        route = self._route("查看 ERR-2026-06-29-01 / SOL-2026-06-29-01 这个同类错误的解决记录")
+        self.assertIn("feedback_loop_gate", route["required_gates"])
+        self.assertIn("feedback_loop_required", route["semantic_ambiguity"])
+        self.assertEqual(route["memory_need"], "paired_err_sol")
+        self.assertIn("feedback_loop_memory", route["matched_risk_triggers"])
+
+    def test_router_uses_feedback_loop_for_common_error_memory(self) -> None:
+        route = self._route("查看 common error 记录并按里面的预防规则继续排查")
+        self.assertIn("feedback_loop_gate", route["required_gates"])
+        self.assertIn("feedback_loop_required", route["semantic_ambiguity"])
+        self.assertEqual(route["memory_need"], "common_error_corpus")
+        self.assertEqual(route["memory_mode"], "read")
+        self.assertEqual(route["record_intent"], "no_record")
+        self.assertIn("feedback_loop_common_error", route["matched_risk_triggers"])
+
+    def test_router_writes_common_error_only_with_record_intent(self) -> None:
+        route = self._route("record this error as a common error after the fix is verified")
+        self.assertIn("feedback_loop_gate", route["required_gates"])
+        self.assertEqual(route["memory_need"], "common_error_corpus")
+        self.assertEqual(route["memory_mode"], "write")
+        self.assertEqual(route["record_intent"], "inferred_reusable_error")
 
     def test_router_detects_static_knowledge_layer_lookup(self) -> None:
         route = self._route("read the project manual and module map before editing", policy=self.policy)
@@ -298,6 +404,41 @@ class HarnessGateTests(unittest.TestCase):
         )
         self.assertEqual(result["status"], "blocked")
         self.assertIn("missing_source_ref_for_external_retrieval", result["issues"])
+
+    def test_claim_schema_blocks_causal_attribution_overclaim(self) -> None:
+        result = claim_schema_verifier(
+            final_text="CBH solved hallucination drift for all agents.",
+            policy=self.policy,
+        )
+        self.assertEqual(result["status"], "blocked")
+        self.assertIn(
+            "causal_attribution_boundary_required:abstract_system_causal_global_effect",
+            result["issues"],
+        )
+
+    def test_claim_schema_allows_scoped_causal_hypothesis(self) -> None:
+        result = claim_schema_verifier(
+            final_text=(
+                "In this local sample, this is a causal_hypothesis, not proof: "
+                "memory anchors may have reduced this task's drift."
+            ),
+            policy=self.policy,
+        )
+        self.assertEqual(result["status"], "pass")
+
+    def test_claim_schema_scope_limiter_is_sentence_local(self) -> None:
+        result = claim_schema_verifier(
+            final_text=(
+                "In this local sample, this is a causal_hypothesis, not proof. "
+                "CBH solved hallucination drift for all agents."
+            ),
+            policy=self.policy,
+        )
+        self.assertEqual(result["status"], "blocked")
+        self.assertIn(
+            "causal_attribution_boundary_required:abstract_system_causal_global_effect",
+            result["issues"],
+        )
 
     def test_runtime_blocks_hard_tool_without_confirmation(self) -> None:
         decision = runtime_enforcer(

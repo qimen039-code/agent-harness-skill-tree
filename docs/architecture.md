@@ -26,6 +26,11 @@ The microkernel should stay short. Put project details elsewhere.
 
 The intake router classifies work into R0-R5 internally and returns required gates. User-facing surfaces stay silent by default unless the classification changes execution path, cost, permission, memory, search, or claim boundaries.
 
+Machine-local project lane roots are loaded through a private overlay file:
+`embedded_harness_policy.local.json` beside the runtime policy, or the path in
+`CBH_PROJECT_LANES_FILE`. This keeps concrete cwd project evidence available to
+the router without publishing private local paths in the shared policy JSON.
+
 The repository also includes adapter examples outside the core skill folder, such as `integrations/workbuddy-python-runtime`. These adapters should be treated as host-specific references. They can reuse the same `embedded_harness_policy.json`, but they do not change the core framework contract unless the adopting runtime actually calls them at the right execution boundary.
 
 The mandatory advisory control plane sits around the router:
@@ -175,8 +180,9 @@ context-complete or strict-capsule as needed.
 Reusable records that are meant to prevent repeated mistakes can optionally
 carry a lightweight feedback loop: memory -> prediction -> verification ->
 calibration. This is a trial field inside existing capsules, CE records,
-ERR/SOL pairs, or decision records. It is not a per-task token ledger and does
-not promote predictions into validated facts.
+ERR/SOL pairs, or decision records, and it becomes a decision-layer requirement
+when such a reusable record is selected for recurrence prevention. It is not a
+per-task token ledger and does not promote predictions into validated facts.
 
 Reading is a separate routed step after retrieval. The route or decision layer
 chooses `baseline`, `evidence_window`, `middle_safe`, or `full_audit` reading.

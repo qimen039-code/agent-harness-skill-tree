@@ -76,6 +76,75 @@ function Get-ObjectPropertyValue($object, [string]$name) {
   return $prop.Value
 }
 
+function Set-ObjectProperty($object, [string]$name, $value) {
+  if ($null -eq $object) { return }
+  if ($object.PSObject.Properties.Name -contains $name) {
+    $object.$name = $value
+  } else {
+    $object | Add-Member -MemberType NoteProperty -Name $name -Value $value -Force
+  }
+}
+
+function Merge-StringListMapProperty($target, $overlay, [string]$name) {
+  if ($null -eq $target -or $null -eq $overlay) { return }
+  $incoming = Get-ObjectPropertyValue $overlay $name
+  if ($null -eq $incoming) { return }
+  $current = Get-ObjectPropertyValue $target $name
+  if ($null -eq $current) {
+    $current = [pscustomobject]@{}
+    Set-ObjectProperty $target $name $current
+  }
+  foreach ($prop in $incoming.PSObject.Properties) {
+    $existing = @(ConvertTo-Array (Get-ObjectPropertyValue $current $prop.Name))
+    $addition = @(ConvertTo-Array $prop.Value)
+    $merged = @($existing + $addition | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) } | Select-Object -Unique)
+    Set-ObjectProperty $current $prop.Name $merged
+  }
+}
+
+function Import-LocalProjectLaneOverlay {
+  $config = Get-ObjectPropertyValue $policy "local_project_lane_overlay"
+  if (($null -ne $config) -and ((Get-ObjectPropertyValue $config "enabled") -eq $false)) {
+    return
+  }
+  $envVar = "CBH_PROJECT_LANES_FILE"
+  $configuredEnvVar = Get-ObjectPropertyValue $config "env_var"
+  if (-not [string]::IsNullOrWhiteSpace([string]$configuredEnvVar)) {
+    $envVar = [string]$configuredEnvVar
+  }
+  $defaultFilename = "embedded_harness_policy.local.json"
+  $configuredFilename = Get-ObjectPropertyValue $config "default_filename"
+  if (-not [string]::IsNullOrWhiteSpace([string]$configuredFilename)) {
+    $defaultFilename = [string]$configuredFilename
+  }
+  $candidates = @()
+  $envPath = [Environment]::GetEnvironmentVariable($envVar)
+  if (-not [string]::IsNullOrWhiteSpace($envPath)) {
+    $candidates += $envPath
+  }
+  $candidates += (Join-Path $PSScriptRoot $defaultFilename)
+  foreach ($candidate in $candidates) {
+    if ([string]::IsNullOrWhiteSpace([string]$candidate)) { continue }
+    if (-not (Test-Path -LiteralPath $candidate)) { continue }
+    $overlay = Get-Content -LiteralPath $candidate -Raw -Encoding UTF8 | ConvertFrom-Json
+    $expectedSchema = Get-ObjectPropertyValue $config "schema"
+    $actualSchema = Get-ObjectPropertyValue $overlay "schema"
+    if ((-not [string]::IsNullOrWhiteSpace([string]$expectedSchema)) -and
+        (-not [string]::IsNullOrWhiteSpace([string]$actualSchema)) -and
+        ([string]$actualSchema -ne [string]$expectedSchema)) {
+      continue
+    }
+    Merge-StringListMapProperty $policy $overlay "project_lanes"
+    Merge-StringListMapProperty $policy $overlay "memory_roots"
+    Set-ObjectProperty $policy "_local_project_lane_overlay" ([pscustomobject]@{
+      loaded = $true
+      path = [string]$candidate
+      rule = "machine-local project lane overlay; do not publish private roots"
+    })
+    break
+  }
+}
+
 function Test-EnglishTrigger([string]$text) {
   return (($text -match '^[\x20-\x7E]+$') -and ($text -match '[A-Za-z0-9]'))
 }
@@ -91,7 +160,12 @@ function New-TriggerRegex([string]$text) {
 function Test-NegatedMatch([string]$source, [int]$index) {
   $start = [Math]::Max(0, $index - 256)
   $prefix = $source.Substring($start, $index - $start)
-  return ($prefix -match "(?i)(\bdo\s+not\b|\bdon't\b|\bnever\b|\bnot\b|\bno\b)[\s\w'-]{0,128}$")
+  if ($prefix -match "(?i)(\bdo\s+not\b|\bdon't\b|\bnever\b|\bnot\b|\bno\b)[\s\w'-]{0,128}$") {
+    return $true
+  }
+  $shortStart = [Math]::Max(0, $index - 32)
+  $shortPrefix = $source.Substring($shortStart, $index - $shortStart)
+  return ($shortPrefix -match "(不需要|无需|不要|别|禁止|不)\s*$")
 }
 
 function Get-TriggerMatchSet($triggers) {
@@ -330,6 +404,8 @@ function Find-ActiveConversationMemoryLane([string]$path) {
   return ""
 }
 
+Import-LocalProjectLaneOverlay
+
 $projectLane = Get-ProjectLane $Cwd
 $activeConversationMemoryLanePath = Find-ActiveConversationMemoryLane $Cwd
 $hasActiveConversationMemoryLane = -not [string]::IsNullOrWhiteSpace($activeConversationMemoryLanePath)
@@ -466,6 +542,20 @@ if ($scopeReassessmentHits.Count -gt 0) {
   $semanticAmbiguity += @("composite_or_scope_reassessment")
   $requiredGates += "scope_reassessment_gate"
 }
+$observationScopeTriggers = $policy.router_decision_contract.observation_scope_triggers
+$observationScopeHits = Get-MatchedTriggers $observationScopeTriggers
+if ($observationScopeHits.Count -gt 0) {
+  $semanticAmbiguity += @("observation_scope_required")
+  $requiredGates += "observation_scope_gate"
+  $matchedRiskTriggers["observation_scope"] = @($observationScopeHits)
+}
+$feedbackLoopTriggers = $policy.router_decision_contract.feedback_loop_triggers
+$feedbackLoopHits = Get-MatchedTriggers $feedbackLoopTriggers
+if ($feedbackLoopHits.Count -gt 0) {
+  $semanticAmbiguity += @("feedback_loop_required")
+  $requiredGates += "feedback_loop_gate"
+  $matchedRiskTriggers["feedback_loop"] = @($feedbackLoopHits)
+}
 if ($triggeredRisks -contains "R3") {
   $semanticAmbiguity += @("governance_or_change_surface")
 }
@@ -501,17 +591,23 @@ if ($null -eq $pairedMemoryTriggers) {
   $pairedMemoryTriggers = @("ERR-", "SOL-", "error memory", "solution memory", "self-reflection")
 }
 $explicitMemoryNeed = (Get-MatchedTriggers $memoryNeedTriggers).Count -gt 0
+$pairedMemoryHits = Get-MatchedTriggers $pairedMemoryTriggers
 $staticKnowledgeTriggers = $policy.router_decision_contract.static_knowledge_triggers
 if ($null -eq $staticKnowledgeTriggers) {
   $staticKnowledgeTriggers = @("static knowledge", "project manual", "repository manual", "module map", "project map")
 }
 $staticKnowledgeHits = Get-MatchedTriggers $staticKnowledgeTriggers
-if ((Get-MatchedTriggers $pairedMemoryTriggers).Count -gt 0) {
+if ($pairedMemoryHits.Count -gt 0) {
   $memoryNeed = "paired_err_sol"
-} elseif (($explicitMemoryNeed) -or ($staticKnowledgeHits.Count -gt 0)) {
+} elseif (($explicitMemoryNeed) -or ($staticKnowledgeHits.Count -gt 0) -or ($feedbackLoopHits.Count -gt 0)) {
   $memoryNeed = "index_only"
 } else {
   $memoryNeed = "none"
+}
+if ($pairedMemoryHits.Count -gt 0) {
+  $semanticAmbiguity += @("feedback_loop_required")
+  $requiredGates += "feedback_loop_gate"
+  $matchedRiskTriggers["feedback_loop_memory"] = @($pairedMemoryHits)
 }
 if ($staticKnowledgeHits.Count -gt 0) {
   $requiredGates += "static_knowledge_index_gate"
@@ -531,6 +627,22 @@ if ($null -eq $projectizationTriggers) {
 }
 $explicitRecordHits = Get-MatchedTriggers $explicitRecordTriggers
 $commonErrorHits = Get-MatchedTriggers $commonErrorTriggers
+$commonErrorWriteIntent = (($commonErrorHits.Count -gt 0) -and ($explicitRecordHits.Count -gt 0))
+$r5DecisionForMemoryIntent = $null
+if ($risk_context_decisions.Contains("R5")) {
+  $r5DecisionForMemoryIntent = $risk_context_decisions["R5"]
+}
+$r5CandidatesForMemoryIntent = @()
+if (($null -ne $r5DecisionForMemoryIntent) -and ((Get-ObjectPropertyValue $r5DecisionForMemoryIntent "promote_to_risk") -eq $true)) {
+  $r5CandidatesForMemoryIntent = @(ConvertTo-Array (Get-ObjectPropertyValue $r5DecisionForMemoryIntent "candidate_terms"))
+}
+$explicitLongTermMemoryWriteIntent = (($r5CandidatesForMemoryIntent | Where-Object { ([string]$_) -in @("write memory", "写入记忆") }).Count -gt 0)
+if ($commonErrorHits.Count -gt 0) {
+  $semanticAmbiguity += @("feedback_loop_required")
+  $requiredGates += "feedback_loop_gate"
+  $matchedRiskTriggers["feedback_loop_common_error"] = @($commonErrorHits)
+}
+$semanticAmbiguity = @($semanticAmbiguity | Select-Object -Unique)
 $conversationExplicitTriggers = $policy.router_decision_contract.conversation_memory_explicit_triggers
 if ($null -eq $conversationExplicitTriggers) {
   $conversationExplicitTriggers = @("remember this conversation", "checkpoint this conversation", "continue this conversation later", "conversation memory", "thread memory")
@@ -602,12 +714,12 @@ $readOnlyMemoryAuditIntent = (
   ($readOnlyAuditHits.Count -gt 0) -and
   ($activeConversationWriteIntentHits.Count -eq 0) -and
   ($explicitRecordHits.Count -eq 0) -and
-  ($commonErrorHits.Count -eq 0)
+  (-not $commonErrorWriteIntent)
 )
 $activeConversationWriteIntent = (
   ($activeConversationWriteIntentHits.Count -gt 0) -or
   ($explicitRecordHits.Count -gt 0) -or
-  ($commonErrorHits.Count -gt 0)
+  $commonErrorWriteIntent
 )
 $activeConversationMemoryDurableSignal = (
   $hasActiveConversationMemoryLane -and
@@ -660,10 +772,12 @@ if ($commonErrorHits.Count -gt 0) {
   $memoryNeed = "common_error_corpus"
 } elseif (($selfReflectionRecordHits.Count -gt 0) -and ($memoryNeed -eq "none")) {
   $memoryNeed = "paired_err_sol"
+} elseif ($explicitLongTermMemoryWriteIntent -and ($memoryNeed -eq "none")) {
+  $memoryNeed = "index_only"
 }
 
 $recordIntent = "no_record"
-if ($commonErrorHits.Count -gt 0) {
+if ($commonErrorWriteIntent) {
   $recordIntent = "inferred_reusable_error"
 } elseif ($conversationMemoryDecision -eq "create_or_update_current_conversation") {
   if ($conversationExplicitHits.Count -gt 0) {
@@ -672,6 +786,8 @@ if ($commonErrorHits.Count -gt 0) {
     $recordIntent = "conversation_checkpoint"
   }
 } elseif ($selfReflectionRecordHits.Count -gt 0) {
+  $recordIntent = "explicit_user_request"
+} elseif ($explicitLongTermMemoryWriteIntent) {
   $recordIntent = "explicit_user_request"
 } elseif ($conversationMemoryDecision -eq "checkpoint_candidate") {
   $recordIntent = "conversation_checkpoint"
@@ -703,6 +819,10 @@ if ($commonErrorHits.Count -gt 0) {
   $memoryLane = "current_conversation"
 } elseif ($linkIntent -ne "none") {
   $memoryLane = "referenced_conversation"
+} elseif ($explicitLongTermMemoryWriteIntent -and $hasActiveConversationMemoryLane) {
+  $memoryLane = "current_conversation"
+} elseif ($explicitLongTermMemoryWriteIntent) {
+  $memoryLane = "global_inbox"
 } elseif (($conversationMemoryDecision -ne "none") -and ($hasActiveConversationMemoryLane -or ($conversationExplicitHits.Count -gt 0))) {
   $memoryLane = "current_conversation"
 } elseif ($selfReflectionRecordHits.Count -gt 0) {

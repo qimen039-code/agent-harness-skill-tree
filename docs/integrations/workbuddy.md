@@ -204,13 +204,14 @@ payloads or writing capsules. If the host only injects route context but does
 not own memory reads/writes, record those fields as advisory in the compatibility
 manifest.
 
-`feedback_loop` is a memory payload convention, not a runtime gate. If a
-WorkBuddy-compatible loop writes CE records, memory capsules, paired incidents,
-or decision records, it can preserve optional memory -> prediction ->
-verification -> calibration fields. Predictions remain hypotheses until later
-evidence verifies them, and failed predictions should calibrate the record or
-promote it to a paired incident. Do not create a per-task token or consumption
-ledger only to support this field.
+`feedback_loop` is a router/decision gate plus memory payload convention, not a
+host hard-stop gate. If a WorkBuddy-compatible loop selects or writes CE records,
+memory capsules, paired incidents, or decision records, it can preserve optional
+memory -> prediction -> verification -> calibration fields and require the loop
+when those reusable records are used for recurrence prevention. Predictions
+remain hypotheses until later evidence verifies them, and failed predictions
+should calibrate the record or promote it to a paired incident. Do not create a
+per-task token or consumption ledger only to support this field.
 
 `skill_lifecycle_profile` is also a decision field. A WorkBuddy-compatible loop
 can use it to keep idle skills listing-only, open an active frame for selected
@@ -275,9 +276,9 @@ check these surfaces in order:
 
 ## Stop Hook And Final Claims
 
-Wire a `Stop` or final-answer hook when the host exposes the final response before display. The hook runner calls `runtime_enforcer(stage="final", final_text=...)`; strong phrases such as broad validation or verification claims must have a claim schema or the final hook returns a blocked result.
+Wire a `Stop` or final-answer hook when the host exposes the final response before display. The hook runner calls `runtime_enforcer(stage="final", final_text=...)`; strong phrases such as broad validation or verification claims must have a claim schema or the final hook returns a blocked result. The same final path also checks high-risk causal attribution patterns, such as broad mechanism-effect claims, time-range stability assertions, single-sample generalizations, or origin-path wording used as a mechanism definition.
 
-If your WorkBuddy build does not let hooks inspect or block final text, keep final-claim enforcement as a self-downgrade rule in the root instruction file and mark that final surface as advisory in the compatibility manifest.
+If your WorkBuddy build does not let hooks inspect or block final text, keep final-claim and causal-attribution enforcement as self-downgrade rules in the root instruction file and mark that final surface as advisory in the compatibility manifest.
 
 ## Smoke Test
 
