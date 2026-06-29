@@ -25,6 +25,16 @@ Do not use it for:
 
 Those should become paired `ERR-*` / `SOL-*` records.
 
+## Auto-Record Boundary
+
+When the adopting runtime allows lane-scoped maintenance writes, the agent may
+auto-record a small `CE-*` lesson after it fixes and verifies the issue. This
+does not authorize public documentation changes, router-policy changes,
+trigger-list edits, cross-lane memory writes, or high-risk incident records.
+
+For the full human/agent split, see
+[correction-and-reflection-guide.md](correction-and-reflection-guide.md).
+
 ## CE Record Shape
 
 ```text
