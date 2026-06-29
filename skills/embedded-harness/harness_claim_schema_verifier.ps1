@@ -46,7 +46,9 @@ function Get-CausalAttributionIssues([string]$Text) {
   if ($null -eq $groups) { return @() }
 
   $issues = @()
-  $segments = @($Text -split '(?<=[\.\!\?。！？；;])\s+|[\r\n]+')
+  $cjkSentenceStops = -join @([char]0x3002, [char]0xFF01, [char]0xFF1F, [char]0xFF1B)
+  $sentenceBoundaryPattern = "(?<=[\.\!\?$cjkSentenceStops;])\s+|[\r\n]+"
+  $segments = @($Text -split $sentenceBoundaryPattern)
   foreach ($segment in $segments) {
     if ([string]::IsNullOrWhiteSpace($segment)) { continue }
     $abstractSubjectHits = Get-TextTriggerHits $segment $groups.abstract_subject_terms
