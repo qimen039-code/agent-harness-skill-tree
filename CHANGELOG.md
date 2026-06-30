@@ -12,6 +12,7 @@ No entries yet.
 
 - Repositioned the README around Claim Boundary Harness as an external cognition governance harness for agent workflows, with explicit non-goals for vector databases, model training, prompt-only guidance, and universal hard enforcement.
 - Added `README_zh.md` as an independent Chinese README and linked it from the English README using the standard `README.md` / `README_zh.md` pattern.
+- Added README capability maps and CI status badges so external readers can see implemented entry points, current evidence boundaries, and first commands without reading every contract document.
 - Added a machine-local project-lane overlay path through `embedded_harness_policy.local.json` or `CBH_PROJECT_LANES_FILE`, so private project roots can be used by the router without being committed to the public policy JSON.
 - Tightened R5 context routing for long-term-memory wording: read/status/documentation contexts stay non-R5 candidates, while real memory-write actions still require confirmation.
 - Added an observation-scope and causal-attribution gate pair: global or historical questions trigger scope review, while final text blocks high-risk causal/generalization/definition overclaims unless they are scoped as `mechanism_property`, `empirical_record`, `causal_hypothesis`, or `validated_causality`.

@@ -2,6 +2,8 @@
 
 # Claim Boundary Harness
 
+[![Smoke checks](https://github.com/qimen039-code/claim-boundary-harness/actions/workflows/smoke.yml/badge.svg?branch=main)](https://github.com/qimen039-code/claim-boundary-harness/actions/workflows/smoke.yml)
+
 Claim Boundary Harness (CBH) is an external cognition governance harness for
 agent workflows. It provides claim verification, memory continuity, risk
 routing, correction accumulation, and adapter contracts as structural
@@ -50,6 +52,19 @@ Fast paths:
 | Install or adapt | [Quick Start](#quick-start), [docs/adoption.md](docs/adoption.md) |
 | Validate behavior | [docs/test-cases.md](docs/test-cases.md), [docs/reproduction.md](docs/reproduction.md) |
 | Runtime troubleshooting | [docs/deployment-risk-patterns.md](docs/deployment-risk-patterns.md), [docs/integrations](docs/integrations) |
+
+## Capability Map
+
+| Capability | Primary entry point | Current public status |
+| --- | --- | --- |
+| Routing and claim gates | `harness_intake_router.ps1`, `harness_claim_schema_verifier.ps1` | Tested script contracts |
+| Runtime hard stops | `harness_runtime_enforcer.ps1`, `harness_tool_proxy.ps1`, `harness_task_wrapper.ps1` | Hard only on host-called paths |
+| Policy and adoption checks | `compile_policy_from_toml.py`, `validate_policy.ps1`, `tools/cbh_doctor.py` | Drift and preflight checks |
+| WorkBuddy adapter | `integrations/workbuddy-python-runtime/` | Unit-tested; one local hook deployment observation |
+| Memory lanes and ledgers | `templates/project/memory-library/`, `templates/conversation-memory/`, `codex_session_ledger.py` | Templates and evidence indexes |
+| Retrieval and reading | `docs/hybrid-memory-retrieval-contract.md`, `docs/content-reading-contract.md` | Meta-first, source-preserving, bounded windows |
+| Skill lifecycle | `docs/skill-lifecycle-contract.md`, `templates/skill-lifecycle/` | Active-frame plus release receipt |
+| Feedback and causal review | `docs/memory-feedback-loop-trial.md`, `docs/router-decision-contract.md` | CE reuse plus overclaim boundary |
 
 ## Architecture At A Glance
 
@@ -100,6 +115,9 @@ those slices into one low-cost contract:
   source shape, read the smallest useful evidence window, add a source context
   header, use middle-safe evidence layout only when routed, and report unread
   zones or verification debt.
+- **Causal attribution boundary:** observation-scope routing and draft-final
+  review keep local observations, case examples, hypotheses, mechanism
+  properties, and validated causality from being silently mixed.
 - **Skill lifecycle control:** idle skills stay at name/meta-summary level;
   active skill phases load only needed bodies and support files; completed
   phases leave a compact `skill_release_receipt` for audit and reactivation

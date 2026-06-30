@@ -2,6 +2,8 @@
 
 # Claim Boundary Harness
 
+[![Smoke checks](https://github.com/qimen039-code/claim-boundary-harness/actions/workflows/smoke.yml/badge.svg?branch=main)](https://github.com/qimen039-code/claim-boundary-harness/actions/workflows/smoke.yml)
+
 Claim Boundary Harness（CBH）是一套面向 agent 工作流的外部认知治理
 harness。它把声明验证、记忆连续性、风险路由、纠错沉淀和客户端适配契约
 组合成结构性约束，而不是再写一段普通提示词。
@@ -47,6 +49,21 @@ CBH 给编码 agent 增加一个低成本外部认知层：
 | 安装或迁移 | [快速开始](#快速开始)、[docs/adoption.md](docs/adoption.md) |
 | 验证行为 | [docs/test-cases.md](docs/test-cases.md)、[docs/reproduction.md](docs/reproduction.md) |
 | 客户端适配 | [docs/integrations](docs/integrations) |
+
+## 能力索引
+
+本文件偏快速理解和迁移操作；完整目录、示例和复现命令见英文 README 与下方关键文档。
+
+| 能力 | 主要入口 | 当前公开状态 |
+| --- | --- | --- |
+| 路由与声明 gate | `harness_intake_router.ps1`、`harness_claim_schema_verifier.ps1` | 脚本契约和测试覆盖 |
+| runtime 硬阻断 | `harness_runtime_enforcer.ps1`、`harness_tool_proxy.ps1`、`harness_task_wrapper.ps1` | 只有宿主调用时才硬阻断 |
+| 策略与适配预检 | `compile_policy_from_toml.py`、`validate_policy.ps1`、`tools/cbh_doctor.py` | 漂移和预检工具 |
+| WorkBuddy adapter | `integrations/workbuddy-python-runtime/` | 单元测试覆盖；一次本地 hook 部署观察 |
+| 记忆 lane 与账本 | `templates/project/memory-library/`、`templates/conversation-memory/`、`codex_session_ledger.py` | 模板和证据索引 |
+| 检索与读取 | `docs/hybrid-memory-retrieval-contract.md`、`docs/content-reading-contract.md` | meta-first、保留来源、有界窗口 |
+| skill 生命周期 | `docs/skill-lifecycle-contract.md`、`templates/skill-lifecycle/` | active-frame 与 release receipt |
+| 反馈与因果复核 | `docs/memory-feedback-loop-trial.md`、`docs/router-decision-contract.md` | CE 复用与过度归因边界 |
 
 ## 架构概览
 
