@@ -6,6 +6,14 @@ This project uses `vMAJOR.MINOR.PATCH` version labels while the framework is sti
 
 ## Unreleased
 
+## v0.18.2 - 2026-07-01
+
+- Refined the English and Chinese README first-pass positioning so external readers and agents can see what CBH implements, what is only a runtime contract, and where execution rules actually live.
+- Clarified that CBH is designed to improve through bounded records, tests, and small policy updates rather than uncontrolled skill, prompt, or summary pileup.
+- Added public wording for hallucination drift control as a claim-boundary and evidence-routing effect, without claiming hallucination removal.
+- Compressed the long implementation list into surface-based groups that separate public orientation, agent control plane, runtime interception, memory continuity, verification, and improvement loops.
+- Linked the Chinese README to attribution and reproduction docs so Chinese readers can reach source influences and evidence boundaries without relying on translation plugins.
+
 ## v0.18.1 - 2026-07-01
 
 - Added memory integrity rules for conflict resolution, source-validity dependency cascade, and frozen/read-only lane states.

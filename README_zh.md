@@ -8,12 +8,16 @@ Claim Boundary Harness（CBH）是一套面向 agent 工作流的外部认知治
 harness。它把声明验证、记忆连续性、风险路由、纠错沉淀和客户端适配契约
 组合成结构性约束，而不是再写一段普通提示词。
 
-当前版本：`v0.18.1`
+当前版本：`v0.18.2`
 
 CBH 的目标不是替换大模型、训练新模型，或把所有任务都塞进沉重的记忆后端。
 它的设计杠杆很小：先路由，再只打开必要的记忆、证据窗口或工具边界；保留
 来源、证据和项目 lane；在宿主运行时支持时，才把高风险动作和强事实声明变成
 可拦截的执行边界。
+
+它也不是一次写死的提示词包。真实使用中暴露出来的路由误判、适配漂移、记忆污染、
+重复小错误和技术债，应该被沉淀成有边界的记录、测试或小型策略更新，而不是不断堆
+active skill、长提示词和压缩摘要，最后把上下文污染到让模型变钝。
 
 CBH 不是：
 
@@ -28,17 +32,18 @@ CBH 不是：
 
 ## 快速理解
 
-CBH 给编码 agent 增加一个低成本外部认知层：
+CBH 给编码 agent 增加一个低成本外部认知层。这个仓库已经包含：
 
-- 工作开始前先判断任务风险、项目 lane、记忆需求、外部证据需求和声明风险；
-- 项目记忆、长对话记忆、common-error 语料、静态知识和归档默认隔离；
-- 检索结果必须带 `source_tag`、`derived_from`、`belief_status`、`confidence`、
-  `score_method`；
-- 记忆写入必须保留原语言内容和足够主谓宾上下文，避免写成孤立短句；
-- 强事实声明不能把 source prior、单次 smoke、mock、局部运行写成 validated；
-- R5 动作、危险工具、强声明、跨 lane 写入等边界，在宿主实际调用 gate 时可以
-  被阻断；
-- 普通任务保持便宜，只使用 compact receipt 和 meta-first 查找。
+- 工作开始前的 routing receipt 和 R0-R5 风险处理；
+- 项目、长对话、common-error、归档和静态知识的 lane 边界；
+- source-preserving 记忆胶囊、对话账本和 link-only 接续记录；
+- claim、因果归因、外部检索、读取、反馈闭环、债务清理和 skill 生命周期契约；
+- PowerShell 参考 gate，以及 Bash、WorkBuddy、豆包、Codex 适配说明；
+- 可自动检查的测试、smoke、示例、引用来源和复现记录。
+
+这个 README 是给人和“快速扫 README 的 agent”看的公开概览。真正影响 agent 执行的
+内容在 `AGENTS.md`、embedded policy、gate 脚本、adapter contract、templates 和
+`docs/` 下的细分契约里。
 
 常用入口：
 
@@ -52,7 +57,8 @@ CBH 给编码 agent 增加一个低成本外部认知层：
 
 ## 能力索引
 
-本文件偏快速理解和迁移操作；完整目录、示例和复现命令见英文 README 与下方关键文档。
+本文件提供中文快速理解、核心能力和迁移入口；英文 README 保留完整目录树和更长的
+复现清单。引用来源、测试边界和细分契约见下方关键文档。
 
 | 能力 | 主要入口 | 当前公开状态 |
 | --- | --- | --- |
@@ -128,6 +134,12 @@ CBH 用一套低成本结构把这些点连起来。
   并记录未读区或验证债。
 - **skill 生命周期**：未选中的 skill 只保留名称和元摘要；执行阶段才加载正文；阶段结束
   写 `skill_release_receipt`，避免长任务依赖压缩后的旧正文。
+- **持续改进不是堆叠 skill**：重复错误可以进入 `CE-*`、`ERR-*` / `SOL-*`、反馈闭环
+  校准或 SkillOpt-style 候选修改，但每条路径都要保留范围、验证和拒绝边界。目标是让
+  agent 越用越熟练，而不是让上下文越堆越重。
+- **抑制幻觉漂移，不声称消灭幻觉**：带来源的记忆、有界原文窗口、外部证据路由、
+  因果归因复核和最终声明边界，目标是降低错误声明跨轮次、跨对话累积放大的概率；
+  这不是“模型不会幻觉”的证明。
 - **清理不等于清零债务**：出现记忆污染、目标污染、脏树债或技术债堆积时，
   先清查分组，只清当前必须清理项，并把可暂存项标为 `candidate_technical_debt`。
 - **纠错沉淀**：小而可复用的问题进入 `CE-*` common-error 记录；严重、重复或高影响问题
@@ -255,6 +267,8 @@ python -m unittest discover -s integrations/workbuddy-python-runtime/tests
 - [docs/common-error-corpus.md](docs/common-error-corpus.md)
 - [docs/common-issues-and-solutions.md](docs/common-issues-and-solutions.md)
 - [docs/deployment-risk-patterns.md](docs/deployment-risk-patterns.md)
+- [docs/influences-and-attribution.md](docs/influences-and-attribution.md)
+- [docs/reproduction.md](docs/reproduction.md)
 - [docs/integrations/codex.md](docs/integrations/codex.md)
 - [docs/integrations/workbuddy.md](docs/integrations/workbuddy.md)
 - [docs/integrations/doubao.md](docs/integrations/doubao.md)

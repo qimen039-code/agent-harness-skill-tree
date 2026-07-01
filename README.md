@@ -9,13 +9,18 @@ agent workflows. It provides claim verification, memory continuity, risk
 routing, correction accumulation, and adapter contracts as structural
 enforcement, not advisory prompts.
 
-Current version: `v0.18.1`
+Current version: `v0.18.2`
 
 The project exists to make capable agents more reliable without replacing the
 model, training a new model, or forcing every task through a heavy memory
 backend. CBH keeps the leverage small: route first, open only the needed memory
 or evidence window, preserve source boundaries, and stop high-risk actions or
 strong claims only when the adopting runtime exposes a real interception point.
+
+It is designed to improve with real use. Repeated mistakes, adapter drift,
+memory pollution, and routing gaps should become bounded records, tests, or
+small policy updates. They should not become an uncontrolled pile of active
+skills, prompts, or summaries that slowly pollute the model context.
 
 It is not tied to one agent runtime. It is a neutral starting point that can be
 mapped into any agent that can read workspace instructions, run local scripts,
@@ -35,13 +40,20 @@ lane configuration, and verification tests run by the adopter.
 
 ## At A Glance
 
-Claim Boundary Harness is a small external cognition layer for coding agents:
+Claim Boundary Harness is a small external cognition layer for coding agents.
+This repository already contains:
 
-- routes tasks before work starts;
-- keeps project, conversation, and static knowledge context isolated;
-- forces retrieved context to carry source, provenance, belief state, and confidence;
-- blocks or downgrades risky actions and strong claims when the adopting runtime calls the gates;
-- keeps ordinary tasks cheap by using compact receipts and meta-first lookup.
+- routing receipts and R0-R5 risk handling before work starts;
+- project, conversation, common-error, archive, and static-knowledge lane boundaries;
+- source-preserving memory capsules, conversation ledgers, and link-only continuation records;
+- claim, causal-attribution, external-research, reading, feedback-loop, debt-hygiene, and skill-lifecycle contracts;
+- PowerShell reference gates plus Bash, WorkBuddy, Doubao, and Codex-oriented adaptation notes;
+- tests, smoke checks, examples, credits, and reproduction notes for the parts that can be checked automatically.
+
+The README is the public orientation layer for people and for agents doing a
+quick first pass. Runtime behavior lives in `AGENTS.md`, the embedded policy,
+gate scripts, adapter contracts, templates, and the detailed files under
+`docs/`.
 
 Fast paths:
 
@@ -85,7 +97,7 @@ flowchart TD
     H --> E[Execution and final answer]
 ```
 
-## What Is Different
+## What CBH Adds
 
 Most agent memory or harness projects cover one slice: prompt rules, memory
 storage, hooks, retrieval, or test receipts. Claim Boundary Harness connects
@@ -122,12 +134,20 @@ those slices into one low-cost contract:
   active skill phases load only needed bodies and support files; completed
   phases leave a compact `skill_release_receipt` for audit and reactivation
   instead of relying on long-lived rendered skill text.
+- **Bounded improvement, not skill pileup:** recurring mistakes can become
+  `CE-*`, `ERR-*` / `SOL-*`, feedback-loop calibration, or candidate
+  SkillOpt-style edits, but each path keeps scope, validation, and rejection
+  boundaries. The goal is an agent that gets more practiced in the current
+  workflow, not a heavier context that degrades over time.
+- **Hallucination drift control, not hallucination removal:** source-tagged
+  memory, bounded reading windows, external-source routing, causal-attribution
+  review, and final claim checks are intended to reduce unchecked drift and
+  cross-conversation accumulation. They are not a claim that the model cannot
+  hallucinate.
 - **Selective hard gates:** R5 actions, risky tools, unresolved memory links,
   and strong final claims can be blocked when the runtime calls the gate.
   Single-event R5 permits are hash-bound and recorded in a used-ledger after a
   concrete tool event passes, so the same permit cannot be replayed.
-- **Slow improvement:** repeated failures can become paired records or
-  SkillOpt-style candidate edits without always-on self-rewriting.
 
 Some mechanisms are adapted from public projects and established engineering
 patterns. See [docs/influences-and-attribution.md](docs/influences-and-attribution.md)
@@ -267,40 +287,38 @@ user request
 
 ## What It Implements
 
-- **Root microkernel**: the small always-on rule set for language, evidence, risk, memory boundaries, and high-risk stops.
-- **Intake router**: deterministic R0-R5 task classification.
-- **Mandatory advisory control plane**: routing receipt, event-triggered dynamic review, and final boundary checks for skill/tool/plugin/search/memory/claim-gate decisions.
-- **Receipt profile selector**: `compact_runtime` for low-cost single-agent operation, `extended_governance` for public/framework/project-boundary work, and `debug_receipt` for router diagnosis.
-- **Router decision contract**: a stable low-cost receipt for target surface, audience, semantic ambiguity, module selection, memory route, external route, claim risk, and gates.
-- **Declarative governance contract**: a compact adapter contract for stages, decision vocabulary, denial semantics, payload safety, and cost boundaries.
-- **Version compatibility manifest**: a compact record of runtime/client version, hook schema, wrapper paths, tested denial behavior, bypass surfaces, and drift response.
-- **Hook capture matrix**: a deployment-neutral stage map for prompt intake, pre-tool enforcement, post-tool observation, pre-compaction checkpointing, and final claim checks.
-- **Lightweight CI smoke workflow**: a single GitHub Actions workflow for representative reproduction checks and WorkBuddy Python adapter tests, not a full compatibility matrix.
-- **cbh-doctor diagnostics**: a read-only adoption preflight that checks package files, policy shape, PowerShell routing, selective hard-gate blocking, and Bash/jq availability.
-- **Pytest contract checks**: parameterized tests for automatically verifiable `TC-xxx` routing and gate cases while keeping the Markdown contract readable for humans and agents.
-- **Governance/routing update handling**: framework-rule, trigger-term, routing-rule, decision-matrix, and dynamic-evaluation edits are treated as R3 changes even when they are documentation-only.
-- **Selective runtime enforcer scripts**: hook, wrapper, and tool-proxy entry points that return nonzero only at configured hard-stop boundaries when called by the adopting runtime. They are truly mandatory only when they are the sole execution path for the relevant agent action. The WorkBuddy Python adapter includes a hook runner for `UserPromptSubmit`, command-tool `PreToolUse`, and `Stop`/final checks.
-- **Search and learning decision matrix**: routes public facts, GitHub repository evidence, general web cross-checks, external mechanism intake, and local validation boundaries.
-- **Additive routing**: if a task matches more than one risk type, it keeps the highest risk label and returns the union of needed gates.
-- **Memory isolation gate**: prevents accidental cross-project memory use unless the user clearly asks for it.
-- **Conversation memory lane**: isolates durable state for long-running ordinary conversations that have no project lane yet.
-- **Conversation ledger contract**: links raw host sessions to project and
-  conversation memory through session, turn, segment, time-anchor, and evidence
-  reference ledgers without loading full transcripts by default.
-- **Memory linking contract**: connects project, conversation, common-error, and archive memory lanes through explicit links, continuation records, merge records, and supersession edges without copying payloads by default.
-- **Static knowledge layer**: optional wiki-style project manual pages for module maps, entry points, commands, conventions, and interfaces. Static notes are routed through an index and stay `source_prior` until locally checked.
-- **Cost control contract**: keeps default execution cheap through receipt profiles, action-relevant fields, delta receipts, and active-context ceilings.
-- **External research gate**: detects currentness, repository/open-source, explicit-uncertainty, and source-check signals so the agent does not keep detouring when internal context is insufficient.
-- **Claim schema verifier**: blocks strong claims unless the claim has enough source and evidence boundary metadata.
-- **Skill tree router**: routes semantic anchors, paired incident records, and project router manifests.
-- **SkillOpt-style external module**: a default-off executable module for periodic candidate skill/router edits, validation-gate reports, rejected-edit records, and slow-update proposals while leaving runtime routing authority with the existing matrix. It is independently implemented and inspired by public SkillOpt mechanisms; it does not vendor upstream SkillOpt code.
-- **Paired improvement records**: one error record plus one solution record for each solved recurring incident.
-- **Layered project memory library**: a meta index points to category indexes, and category indexes point to individual capsules.
-- **Memory meta index contract**: a multi-axis index shape for project memory libraries and skill point sets.
-- **Source monitoring memory schema**: provenance, lifecycle, and belief-state fields for memory capsules, including `source_tag` `belief_status` `confidence` `derived_from`, observation state, lifecycle stage, belief traces, and optional adapter score boundaries.
-- **Memory feedback-loop trial**: optional memory -> prediction -> verification -> calibration fields for reusable records that should prevent repeated mistakes, without adding a per-task consumption ledger.
-- **Common error corpus template**: lightweight CE records for small recurring field/schema, tool-call, semantic-routing, patch-context, PowerShell/path, and Git-boundary mistakes, including the applied solution and validation, before they become full paired incidents.
-- **Whiteboard templates**: empty project memory categories, project instructions, semantic anchors, and error/solution ledgers.
+The implementation is split by surface so adopters can use only the pieces
+their runtime can actually honor:
+
+- **Public orientation:** README files, examples, credits, reproduction notes,
+  and integration pages. These explain the framework; they are not the runtime
+  policy source.
+- **Agent control plane:** root microkernel, intake router, receipt profiles,
+  additive R0-R5 routing, governance contracts, and policy TOML/JSON. This is
+  mandatory as a decision chain, but cheap by default through compact and delta
+  receipts.
+- **Runtime interception:** PowerShell runtime enforcer, tool proxy, task
+  wrapper, Bash references, and WorkBuddy hook runner. These are hard only on
+  paths where the host actually calls and honors the gate.
+- **Memory continuity:** project memory library, conversation memory lane,
+  raw-session ledger, memory links, static knowledge layer, meta indexes, and
+  source-monitoring capsule schema. This gives lane-and-link continuity without
+  default cross-project or cross-conversation payload mixing.
+- **Reading and verification:** content-reading profiles, external-research
+  routing, claim schema verifier, causal-attribution review, test cases, and
+  `cbh_doctor`. Retrieved snippets and external reading remain evidence inputs
+  until local checks support stronger claims.
+- **Improvement loop:** common-error corpus, paired incident records,
+  feedback-loop trial fields, debt-hygiene routing, skill lifecycle receipts,
+  and a default-off SkillOpt-style candidate-edit runner. Improvement is
+  staged, scoped, reviewable, and rejectable; it is not always-on
+  self-rewriting.
+
+That split is deliberate. Human-facing docs describe what the package does and
+where to start. Agent-facing contracts decide what to load, what to verify,
+what to block, and what to record. Long-term improvement should happen through
+small validated changes, sealed records, and explicit links, not through
+unbounded context growth.
 
 ## Repository Layout
 

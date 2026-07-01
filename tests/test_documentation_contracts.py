@@ -45,8 +45,8 @@ def test_bilingual_readme_and_local_overlay_template_are_present() -> None:
 
     assert "[中文版](./README_zh.md) | English" in readme
     assert "[English](./README.md) | 中文" in readme_zh
-    assert "v0.18.1" in readme
-    assert "v0.18.1" in readme_zh
+    assert "v0.18.2" in readme
+    assert "v0.18.2" in readme_zh
     assert overlay["schema"] == "cbh.project_lane_overlay.v1"
     assert policy["local_project_lane_overlay"]["default_filename"] == "embedded_harness_policy.local.json"
     assert "embedded_harness_policy.local.json" in readme
