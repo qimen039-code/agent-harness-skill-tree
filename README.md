@@ -9,7 +9,7 @@ agent workflows. It provides claim verification, memory continuity, risk
 routing, correction accumulation, and adapter contracts as structural
 enforcement, not advisory prompts.
 
-Current version: `v0.18.2`
+Current version: `v0.18.3`
 
 The project exists to make capable agents more reliable without replacing the
 model, training a new model, or forcing every task through a heavy memory
@@ -490,7 +490,7 @@ Current client boundary:
 
 - **Codex**: extended private local use plus source/active harness smoke checks in a Windows Codex workflow.
 - **WorkBuddy**: local Python adapter tests plus one operator-confirmed local hook deployment path. This is still not a complete WorkBuddy version or platform certification.
-- **Doubao**: one operator-confirmed local client adaptation and deployment test, plus repository-side review of the generated adaptation report, script chain, JSON memory layout, and a host-owned `interaction.warn` hard-confirmation test for a destructive delete path.
+- **Doubao**: one operator-confirmed dated chat/workspace demo plus repository-side review of the generated report, script chain, JSON memory layout, and a host-owned `interaction.warn` confirmation test for one destructive delete path. The persistent client adaptation failed in the inspected desktop client: it did not expose a custom skill/tool registration path, a later new chat reported `not loaded`, and direct `.skills` copy was only a same-session/runtime smoke path.
 - **Other clients**: reference mappings only until the target client, instruction surface, hook or wrapper path, denial behavior, and bypass surfaces are tested in that client.
 
 The PowerShell, Bash, and WorkBuddy Python adapters are also not complete compatibility claims.
@@ -536,7 +536,7 @@ The package includes synthetic examples that show the intended record shapes wit
 - [docs/cost-control-contract.md](docs/cost-control-contract.md): routing field budgets, delta receipts, active-context ceilings, and action-relevant field rules.
 - [docs/archive-and-persona-boundaries.md](docs/archive-and-persona-boundaries.md): optional cold archive, move/copy archive defaults, summary capsule exceptions, and conversation-only persona boundaries.
 - [docs/deployment-risk-patterns.md](docs/deployment-risk-patterns.md): common deployment failures, concrete issue examples, and solution playbooks for WorkBuddy-like hooks, CLI agents, IDE agents, custom orchestrators, hosted agents, and wrapper-only setups.
-- [docs/integrations/doubao.md](docs/integrations/doubao.md): transferable notes from a local Doubao client adaptation, including downgraded surfaces, script checks, UTF-8 deployment requirements, and attribution boundaries.
+- [docs/integrations/doubao.md](docs/integrations/doubao.md): Doubao adaptation boundary notes. The inspected client did not support persistent custom-skill/tool registration; CBH is limited to dated chat/workspace demos or single-chat advisory guidance there.
 - [docs/examples.md](docs/examples.md): expected gate behavior and how to interpret examples.
 
 ## Quick Start
@@ -647,7 +647,7 @@ This is a foundation package, not a complete safety system.
 - The trigger lists are intentionally small and should be tuned.
 - The memory format is a template, not a database.
 - Different agents need different adapter files and launch methods.
-- Completed local adaptation/deployment testing currently covers Codex, WorkBuddy, and Doubao only, with the evidence boundaries described above.
+- Completed local adaptation/deployment testing currently covers Codex and WorkBuddy. Doubao has a reviewed chat/workspace demo and a prepared native skill package, but current evidence shows no persistent custom-skill load in a later new chat.
 - The Claude Code guide is a reference mapping and has not yet been fully deployment-validated in an installed Claude Code client.
 - The WorkBuddy Python adapter is experimental and is not a complete WorkBuddy compatibility guarantee.
 - Other clients, IDE agents, CLI agents, hosted agents, and custom orchestrators remain unverified reference paths until their exact runtime surfaces are tested.

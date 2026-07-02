@@ -1,17 +1,110 @@
-# Doubao Client Adaptation Notes
+# Doubao Client Adaptation Boundary
 
-These notes summarize a local Doubao client adaptation of Claim Boundary
-Harness observed on 2026-06-25. They are migration guidance for adopters, not an
+These notes document a failed persistent Doubao client adaptation attempt and
+the remaining limited-use path. They are migration guidance for adopters, not an
 official Doubao compatibility certification.
 
-The local adaptation was reported by the operator as deployed and tested
-successfully inside the Doubao client. Repository-side review checked the
+The dated chat/workspace demo was reported by the operator as deployed and
+tested successfully inside one Doubao chat. Repository-side review checked the
 generated adaptation report, file layout, JSON memory files, helper scripts, and
-an operator-provided hard-constraint test record. That review confirms the demo
-can operate as a soft plus semi-hard workflow layer, and that the tested Doubao
-client surfaced a platform-owned hard confirmation guard for a destructive file
-operation. It does not prove broad Doubao compatibility, complete hook coverage,
-or Claim Boundary Harness-owned hard enforcement inside Doubao.
+an operator-provided hard-constraint test record. That review confirms only that
+the demo can guide one workspace as a soft plus semi-hard workflow layer, and
+that the tested Doubao client surfaced a platform-owned hard confirmation guard
+for one destructive file operation.
+
+Current status for the inspected desktop client: persistent Claim Boundary
+Harness adaptation failed. A later new chat did not load
+`claim-boundary-harness`; the client did not expose a usable custom-skill
+registration tool; and direct `.skills` copying was removed by workspace
+refresh. At most, CBH can be supplied to Doubao as single-chat advisory
+instructions or requirements that the model may partly follow. This is not a
+complete native skill, hook, tool, or hard-gate adaptation.
+
+## Session Scope Boundary
+
+The reviewed demo was a chat/workspace-scoped deployment. A successful test in
+one dated Doubao chat directory does not imply that a later new chat has loaded
+the same instruction pack, memory files, scripts, or workflow rules. Treat each
+new chat as inactive until one of these activation paths is verified:
+
+- the instruction pack and demo files are copied or linked into the target chat
+  workspace;
+- the client exposes a real global skill or workspace-level loading surface and
+  that surface is configured for the current chat;
+- the current chat can explicitly cite the loaded boundary docs and follow the
+  mode/output contract before it performs nontrivial work.
+
+Activation checks should be target-chat specific. At minimum, ask the current
+chat to identify the loaded Claim Boundary Harness docs, confirm whether it can
+access the facts/hypotheses memory files, and state whether its current behavior
+is framework-guided or native-client behavior. If it cannot do that, the correct
+status is `not loaded in this chat`, even when an older chat contains a complete
+demo folder.
+
+## Native Skill Package
+
+A later local inspection found a native Agent Mode runtime skill surface at:
+
+```text
+AppData\Local\Doubao\User Data\Default\.doubao\agent_mode\workspace\.skills
+```
+
+The repository now includes a prepared native skill package at:
+
+```text
+integrations\doubao-native-skill\claim-boundary-harness
+```
+
+This package follows Doubao's observed built-in skill shape: `SKILL.md` with
+`name` and `description` frontmatter, one-level `references/`, `scripts/`, and
+`templates/` resources, plus optional `agents/openai.yaml` metadata for UI and
+implicit invocation. It intentionally does not include README, reports, old chat
+transcripts, or installation notes inside the skill folder.
+
+Directly copying the folder into `.skills` is not a durable install by itself.
+A restart test showed that the client can regenerate `.skills` and remove a
+manually copied custom folder. Use copy-only deployment as a same-session smoke
+check. For persistent registration, the current local evidence points to the
+host-owned `sync_skill_folder_to_cloud_disk` tool documented by
+`skill-creator-for-task`; call it from inside a Doubao Agent context with the
+complete repository skill folder path, then run the activation probe in
+`references/activation.md` from a new Doubao chat. Do not modify application
+binaries, Chromium profile databases, browser Preferences, cookies, Local
+Storage, IndexedDB, or the empty `.skill_meta_list.md` unless a verified
+client-owned API requires it.
+
+If the current Doubao Agent context does not expose
+`sync_skill_folder_to_cloud_disk`, the correct result is `runtime-expanded
+only`. The adapter may copy the package into `.skills` for a same-session
+activation probe, but must not call the deployment persistent or complete until
+a new chat still recognizes the skill after a workspace refresh or a host-owned
+registration path succeeds.
+
+A later new-chat activation probe reported `not loaded`: the runtime `.skills`
+list contained only system skills, `claim-boundary-harness` was absent, and
+`references/activation.md` was not visible. For the inspected client state, the
+native skill package is therefore a prepared deployment artifact, not a
+completed persistent Doubao install.
+
+The repository package is the canonical copy. If a client update refreshes or
+overwrites the native `.skills` workspace, resync from the repository package
+and verify activation again.
+
+Future-only Doubao-side registration prompt, for a client that exposes a
+supported custom-skill registration tool:
+
+```text
+使用 skill-creator-for-task，将这个完整 skill 文件夹注册/同步为豆包 Agent Mode skill：
+<absolute-repo-path>\integrations\doubao-native-skill\claim-boundary-harness
+
+要求：
+1. 不要重写 SKILL.md 或 references 内容。
+2. 先检查 SKILL.md 的 name/description 和目录结构。
+3. 如果 quick_validate.py 因本地 PyYAML 缺失失败，请说明依赖缺失；不要因此改写 skill 内容。
+4. 调用 sync_skill_folder_to_cloud_disk 保存完整 skill 文件夹。
+5. 如果当前环境没有暴露 sync_skill_folder_to_cloud_disk，不要声称持久安装成功；只能把直接复制标记为 runtime-expanded only。
+6. 同步完成后，或 copy-only smoke 完成后，在新会话中按 references/activation.md 做 activation probe，并明确结果是 persistent、runtime-expanded only，还是 not loaded。
+```
 
 ## Adaptation Shape
 
@@ -173,6 +266,8 @@ Before calling a Doubao-style deployment successful, verify:
 
 - the client actually loads the instruction pack in the target chat or agent
   workspace;
+- a later new chat has either been bootstrapped separately or is explicitly
+  covered by a tested global skill/workspace loading surface;
 - execution-mode answers show facts, hypotheses, unknowns, risks, and next
   steps when the task is nontrivial;
 - `facts.json` and `hypotheses.json` parse as JSON and keep raw facts separate

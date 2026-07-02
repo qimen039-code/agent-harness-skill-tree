@@ -6,6 +6,13 @@ This project uses `vMAJOR.MINOR.PATCH` version labels while the framework is sti
 
 ## Unreleased
 
+## v0.18.3 - 2026-07-02
+
+- Reclassified the Doubao client status: the inspected desktop client did not load the prepared `claim-boundary-harness` native skill in a later new chat, and did not expose the host-owned `sync_skill_folder_to_cloud_disk` registration path.
+- Clarified that Doubao currently supports only a dated chat/workspace demo or single-session advisory prompt guidance for CBH, not a completed persistent native-skill or hard-gate adaptation.
+- Added a repository canonical Doubao native skill package for future use if Doubao exposes a supported custom-skill registration path, with tests covering frontmatter, progressive disclosure, and the `runtime-expanded only` boundary.
+- Updated the README, Chinese README, Doubao integration notes, and common-issues playbook so external readers do not treat copy-only `.skills` deployment as persistent support.
+
 ## v0.18.2 - 2026-07-01
 
 - Refined the English and Chinese README first-pass positioning so external readers and agents can see what CBH implements, what is only a runtime contract, and where execution rules actually live.

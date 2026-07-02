@@ -8,7 +8,7 @@ Claim Boundary Harness（CBH）是一套面向 agent 工作流的外部认知治
 harness。它把声明验证、记忆连续性、风险路由、纠错沉淀和客户端适配契约
 组合成结构性约束，而不是再写一段普通提示词。
 
-当前版本：`v0.18.2`
+当前版本：`v0.18.3`
 
 CBH 的目标不是替换大模型、训练新模型，或把所有任务都塞进沉重的记忆后端。
 它的设计杠杆很小：先路由，再只打开必要的记忆、证据窗口或工具边界；保留
@@ -247,8 +247,10 @@ python -m unittest discover -s integrations/workbuddy-python-runtime/tests
 - **Codex**：Windows 本地扩展使用和本机 active harness smoke checks。
 - **WorkBuddy**：Python adapter 单元测试和一次本地 hook 部署路径确认；不是完整 WorkBuddy
   版本认证。
-- **豆包**：一次本地客户端适配和部署测试，包含脚本链、JSON memory 布局、UTF-8 输出要求，
-  以及宿主 `interaction.warn` 对一个破坏性删除路径的硬确认测试。
+- **豆包**：一次位于特定日期 chat/workspace 内的本地适配测试，包含脚本链、JSON memory
+  布局、UTF-8 输出要求，以及宿主 `interaction.warn` 对一个破坏性删除路径的硬确认测试。
+  仓库内已准备 native skill 包，但当前客户端未暴露持久自定义 skill / tool 注册入口，后续新会话复测结果为
+  `not loaded`。因此豆包当前适配判定为失败；最多只能在单次对话中用建议/要求形式让模型部分遵循 CBH。
 - **其他客户端**：只有参考映射，直到目标客户端的 instruction、hook、wrapper、denial、
   bypass surfaces 被实际测试。
 
